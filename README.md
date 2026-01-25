@@ -1,8 +1,11 @@
 # SlipStream GUI
 
+
+
 <div align="center">
-  <img src="intro.png" alt="SlipStream GUI" width="400">
+  <img src="screen.png" alt="SlipStream GUI Screenshot" width="800">
 </div>
+
 
 <div align="center">
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue?style=for-the-badge" alt="Platform">
@@ -22,7 +25,12 @@
   Provides secure, system-wide tunneling through an HTTP proxy interface
 </div>
 
+
 ---
+
+<div align="center">
+  <img src="intro.png" alt="SlipStream GUI" width="300">
+</div>
 
 ## 📥 Download & Install
 

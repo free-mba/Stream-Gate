@@ -57,6 +57,18 @@ jobs:
 
       - name: Build application
         run: npm run ${{ matrix.build-script }}
+        continue-on-error: false
+
+      - name: List build artifacts
+        shell: bash
+        run: |
+          echo "=== Build output directory ==="
+          ls -lh dist/ || echo "No dist directory found"
+          echo ""
+          echo "=== All files in dist ==="
+          find dist -type f -name "*.${{ matrix.platform == 'mac' && 'dmg' || 'exe' }}" || echo "No matching files found"
+          echo ""
+          echo "=== Platform: ${{ matrix.platform }}, Arch: ${{ matrix.arch }} ==="
 
       - name: Upload macOS ARM64 artifact
         if: matrix.platform == 'mac' && matrix.arch == 'arm64'
@@ -65,6 +77,7 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: dist/*.dmg
           retention-days: 30
+          if-no-files-found: error
 
       - name: Upload macOS Intel artifact
         if: matrix.platform == 'mac' && matrix.arch == 'x64'
@@ -73,22 +86,29 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: dist/*.dmg
           retention-days: 30
+          if-no-files-found: error
 
       - name: Upload Windows x64 artifact
         if: matrix.platform == 'win' && matrix.arch == 'x64'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/**/*.exe
           retention-days: 30
+          if-no-files-found: error
 
       - name: Upload Windows x86 artifact
         if: matrix.platform == 'win' && matrix.arch == 'ia32'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/**/*.exe
           retention-days: 30
+          if-no-files-found: error
 
   create-release:
     needs: build-and-release
@@ -105,24 +125,49 @@ jobs:
         with:
           name: SlipStream-GUI-macOS-ARM64
           path: release/macos
+        continue-on-error: true
 
       - name: Download macOS Intel artifact
         uses: actions/download-artifact@v4
         with:
           name: SlipStream-GUI-macOS-Intel
           path: release/macos
+        continue-on-error: true
 
       - name: Download Windows x64 artifact
         uses: actions/download-artifact@v4
         with:
           name: SlipStream-GUI-Windows-x64
-          path: release/windows
+          path: release/windows/x64
+        continue-on-error: true
 
       - name: Download Windows x86 artifact
         uses: actions/download-artifact@v4
         with:
           name: SlipStream-GUI-Windows-x86
-          path: release/windows
+          path: release/windows/x86
+        continue-on-error: true
+
+      - name: Move Windows artifacts to release folder
+        shell: bash
+        run: |
+          mkdir -p release/windows
+          if [ -d release/windows/x64 ]; then
+            mv release/windows/x64/* release/windows/ 2>/dev/null || true
+          fi
+          if [ -d release/windows/x86 ]; then
+            mv release/windows/x86/* release/windows/ 2>/dev/null || true
+          fi
+          rm -rf release/windows/x64 release/windows/x86 2>/dev/null || true
+
+      - name: List downloaded artifacts
+        shell: bash
+        run: |
+          echo "=== macOS artifacts ==="
+          ls -lh release/macos/ || echo "No macOS artifacts found"
+          echo ""
+          echo "=== Windows artifacts ==="
+          ls -lh release/windows/ || echo "No Windows artifacts found"
 
       - name: Extract version from tag or input
         id: get_version
