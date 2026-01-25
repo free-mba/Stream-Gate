@@ -10,7 +10,7 @@
 <div align="center">
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Version-1.0.5-orange?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.52--beta-orange?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
   <a href="https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest">
     <img src="https://img.shields.io/github/v/release/mirzaaghazadeh/SlipStreamGUI?style=for-the-badge&label=Latest%20Release" alt="Latest Release">
@@ -312,6 +312,9 @@ npm install
 ### Development
 
 ```bash
+# Download the latest SlipStream client binaries (recommended)
+npm run download:binaries
+
 # Run in development mode
 npm start
 ```
@@ -319,6 +322,9 @@ npm start
 ### Building
 
 ```bash
+# Download the latest SlipStream client binaries (recommended)
+npm run download:binaries
+
 # Build for macOS
 npm run build:mac
 
@@ -354,7 +360,7 @@ SlipStream VPN Server
 
 ### Architecture
 
-1. **SlipStream Client**: Runs the native binary (`slipstream-client-mac`, `slipstream-client-win.exe`, or `slipstream-client-linux`) that establishes a SOCKS5 proxy on port 5201
+1. **SlipStream Client**: Runs the native binary (`binaries/slipstream-client-mac-arm64` / `binaries/slipstream-client-mac-intel`, `binaries/slipstream-client-win.exe`, or `binaries/slipstream-client-linux`) that establishes a SOCKS5 proxy on port 5201
 2. **HTTP Proxy Server**: Node.js server listening on port 8080 that converts HTTP requests to SOCKS5
 3. **System Proxy**: Automatically configures system proxy settings to route all traffic through the VPN
 

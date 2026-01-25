@@ -26,8 +26,12 @@ SlipStream-GUI/
 ├── CONTRIBUTING.md             # Contribution guidelines
 ├── PROJECT_STRUCTURE.md         # This file
 ├── intro.png                   # Intro modal image
-├── slipstream-client-mac       # macOS SlipStream client binary (required for build)
-└── slipstream-client-win.exe   # Windows SlipStream client binary (required for build)
+├── binaries/                   # Native SlipStream client binaries (required for build)
+│   ├── slipstream-client-mac-arm64   # macOS (Apple Silicon)
+│   ├── slipstream-client-mac-intel   # macOS (Intel)
+│   ├── slipstream-client-linux       # Linux
+│   └── slipstream-client-win.exe     # Windows
+└── (other files)
 ```
 
 ## Key Files
@@ -68,8 +72,10 @@ SlipStream-GUI/
 
 ### Binaries
 
-- **slipstream-client-mac**: macOS SlipStream client (must be committed to repo)
-- **slipstream-client-win.exe**: Windows SlipStream client (must be committed to repo)
+- **binaries/slipstream-client-mac-arm64**: macOS SlipStream client (Apple Silicon)
+- **binaries/slipstream-client-mac-intel**: macOS SlipStream client (Intel)
+- **binaries/slipstream-client-linux**: Linux SlipStream client
+- **binaries/slipstream-client-win.exe**: Windows SlipStream client
 
 **Note**: These binaries are required for the build process and should be committed to the repository.
 
@@ -94,7 +100,7 @@ When building, the following directories are created:
 
 ## Important Notes
 
-1. **Binaries**: The `slipstream-client-mac` and `slipstream-client-win.exe` files must be in the repository root for the build to work.
+1. **Binaries**: The SlipStream client binaries must be in `binaries/` for the build to work.
 
 2. **Settings**: User settings are stored in `settings.json` (excluded from git via .gitignore).
 

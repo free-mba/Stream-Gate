@@ -1,19 +1,32 @@
 {
   "name": "slipstream-gui",
-  "version": "1.0.5",
+  "version": "1.0.52-beta",
   "description": "SlipStream GUI Client with HTTP Proxy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "download:binaries": "node scripts/download-binaries.js",
+    "clean:binaries": "node -e \"const fs=require('fs'); fs.rmSync('binaries',{recursive:true,force:true}); console.log('✅ Removed ./binaries');\"",
+    "verify:binaries": "node scripts/verify-binaries.js --platform all",
+    "prebuild:mac": "node scripts/verify-binaries.js --platform mac",
     "build:mac": "electron-builder --mac --publish never",
+    "prebuild:mac:arm64": "node scripts/verify-binaries.js --platform mac --arch arm64",
     "build:mac:arm64": "electron-builder --mac --arm64 --publish never",
+    "prebuild:mac:x64": "node scripts/verify-binaries.js --platform mac --arch x64",
     "build:mac:x64": "electron-builder --mac --x64 --publish never",
+    "prebuild:win": "node scripts/verify-binaries.js --platform win",
     "build:win": "electron-builder --win --publish never",
+    "prebuild:win:x64": "node scripts/verify-binaries.js --platform win",
     "build:win:x64": "electron-builder --win --x64 --publish never",
+    "prebuild:win:ia32": "node scripts/verify-binaries.js --platform win",
     "build:win:ia32": "electron-builder --win --ia32 --publish never",
+    "prebuild:linux": "node scripts/verify-binaries.js --platform linux",
     "build:linux": "electron-builder --linux --publish never",
+    "prebuild:linux:x64": "node scripts/verify-binaries.js --platform linux",
     "build:linux:x64": "electron-builder --linux --x64 --publish never",
+    "prebuild:linux:arm64": "node scripts/verify-binaries.js --platform linux",
     "build:linux:arm64": "electron-builder --linux --arm64 --publish never",
+    "prebuild:all": "node scripts/verify-binaries.js --platform all",
     "build:all": "electron-builder --mac --win --linux --publish never"
   },
   "keywords": [
@@ -62,8 +75,15 @@
     "mac": {
       "extraResources": [
         {
-          "from": "slipstream-client-mac",
-          "to": "slipstream-client-mac",
+          "from": "binaries/slipstream-client-mac-arm64",
+          "to": "binaries/slipstream-client-mac-arm64",
+          "filter": [
+            "**/*"
+          ]
+        },
+        {
+          "from": "binaries/slipstream-client-mac-intel",
+          "to": "binaries/slipstream-client-mac-intel",
           "filter": [
             "**/*"
           ]
@@ -83,8 +103,8 @@
       "icon": "assets/icon.png",
       "extraResources": [
         {
-          "from": "slipstream-client-win.exe",
-          "to": "slipstream-client-win.exe",
+          "from": "binaries/slipstream-client-win.exe",
+          "to": "binaries/slipstream-client-win.exe",
           "filter": [
             "**/*"
           ]
@@ -101,8 +121,8 @@
       "maintainer": "SlipStream GUI Contributors <noreply@github.com>",
       "extraResources": [
         {
-          "from": "slipstream-client-linux",
-          "to": "slipstream-client-linux",
+          "from": "binaries/slipstream-client-linux",
+          "to": "binaries/slipstream-client-linux",
           "filter": [
             "**/*"
           ]

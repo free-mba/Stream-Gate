@@ -63,7 +63,7 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 4. ✅ **Everything works automatically - no manual actions needed!**
 
 **What's Hidden from Users:**
-- ✅ `slipstream-client-mac` / `slipstream-client-win.exe` are bundled inside the app
+- ✅ `binaries/slipstream-client-mac-arm64` / `binaries/slipstream-client-mac-intel` / `binaries/slipstream-client-win.exe` are bundled inside the app
 - ✅ Users never see these files
 - ✅ No terminal commands needed
 - ✅ No chmod or permission setup needed
@@ -73,13 +73,16 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 
 ### Build fails with permission errors
 - The app automatically sets execute permissions on first run
-- For development: `chmod +x slipstream-client-mac` (only needed during development)
+- For development: `chmod +x binaries/slipstream-client-mac-arm64` (or `binaries/slipstream-client-mac-intel`)
 
 ### Missing dependencies
 - Run `npm install` again
 - Check that all dependencies in `package.json` are installed
 
 ### App doesn't find slipstream client
-- Make sure both `slipstream-client-mac` and `slipstream-client-win.exe` are in the project root
+- Make sure the binaries are present under `binaries/`:
+  - `binaries/slipstream-client-mac-arm64`
+  - `binaries/slipstream-client-mac-intel`
+  - `binaries/slipstream-client-win.exe`
 - Check the build logs to see if files were copied correctly
 - The app automatically finds binaries in the Resources folder when packaged

@@ -98,7 +98,7 @@ If you need to create a release manually:
 
 ### Build fails in GitHub Actions
 
-- Check that `slipstream-client-mac` has execute permissions
+- Check that `binaries/slipstream-client-mac-arm64` or `binaries/slipstream-client-mac-intel` has execute permissions
 - Verify all required files are committed
 - Check the Actions logs for specific errors
 

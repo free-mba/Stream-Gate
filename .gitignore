@@ -36,11 +36,8 @@ desktop.ini
 # User settings
 settings.json
 
-# Note: The following files MUST be committed to the repository:
-# - slipstream-client-mac (required for macOS builds)
-# - slipstream-client-win.exe (required for Windows builds)
-# - intro.png (used in intro modal)
-# These are essential for the build process
+# Local SlipStream client binaries (downloaded)
+binaries/
 
 # Environment
 .env

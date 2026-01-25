@@ -81,6 +81,24 @@ let isRunning = false;
 let tunManager = null;
 let systemProxyConfigured = false; // Track system proxy state
 
+function canSendToWindow() {
+  return !!(
+    mainWindow &&
+    !mainWindow.isDestroyed() &&
+    mainWindow.webContents &&
+    !mainWindow.webContents.isDestroyed()
+  );
+}
+
+function safeSend(channel, payload) {
+  try {
+    if (!canSendToWindow()) return;
+    mainWindow.webContents.send(channel, payload);
+  } catch (_) {
+    // Ignore: window is closing/destroyed.
+  }
+}
+
 function createWindow() {
   const iconPath = path.join(__dirname, 'assets', 'icon.png');
   const windowOptions = {
@@ -114,6 +132,11 @@ function createWindow() {
   
   mainWindow = new BrowserWindow(windowOptions);
   mainWindow.loadFile('index.html');
+
+  // Avoid "Object has been destroyed" during shutdown.
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
   
   // Request admin privileges on macOS
   if (process.platform === 'darwin') {
@@ -132,11 +155,35 @@ function getSlipstreamClientPath() {
     : __dirname;
   
   if (platform === 'darwin') {
-    return path.join(resourcesPath, 'slipstream-client-mac');
+    const preferred =
+      process.arch === 'arm64' ? 'slipstream-client-mac-arm64' : 'slipstream-client-mac-intel';
+    const fallback =
+      process.arch === 'arm64' ? 'slipstream-client-mac-intel' : 'slipstream-client-mac-arm64';
+    const candidates = [
+      // Preferred: packaged and dev both keep binaries under ./binaries/
+      path.join(resourcesPath, 'binaries', preferred),
+      // Back-compat: allow repo-root placement during transition
+      path.join(resourcesPath, preferred),
+      // Extra back-compat: legacy single mac binary name
+      path.join(resourcesPath, 'binaries', 'slipstream-client-mac'),
+      path.join(resourcesPath, 'slipstream-client-mac'),
+      // If user runs under Rosetta, try the other arch too (if present)
+      path.join(resourcesPath, 'binaries', fallback),
+      path.join(resourcesPath, fallback)
+    ];
+    return candidates.find((p) => fs.existsSync(p)) || candidates[0];
   } else if (platform === 'win32') {
-    return path.join(resourcesPath, 'slipstream-client-win.exe');
+    const candidates = [
+      path.join(resourcesPath, 'binaries', 'slipstream-client-win.exe'),
+      path.join(resourcesPath, 'slipstream-client-win.exe')
+    ];
+    return candidates.find((p) => fs.existsSync(p)) || candidates[0];
   } else if (platform === 'linux') {
-    return path.join(resourcesPath, 'slipstream-client-linux');
+    const candidates = [
+      path.join(resourcesPath, 'binaries', 'slipstream-client-linux'),
+      path.join(resourcesPath, 'slipstream-client-linux')
+    ];
+    return candidates.find((p) => fs.existsSync(p)) || candidates[0];
   }
   return null;
 }
@@ -147,13 +194,15 @@ function startSlipstreamClient(resolver, domain) {
     throw new Error('Unsupported platform');
   }
   if (!fs.existsSync(clientPath)) {
-    const where = app.isPackaged ? 'inside the app resources folder' : 'in the project root';
+    const where = app.isPackaged ? 'inside the app resources folder' : 'in the project folder';
     const baseMsg = `SlipStream client binary not found ${where}.`;
     const expectedMsg = `Expected at: ${clientPath}`;
     const hint =
       process.platform === 'win32'
-        ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes slipstream-client-win.exe.'
-        : 'Ensure the correct slipstream client binary exists and is executable.';
+        ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes slipstream-client-win.exe.\n\nWindows Defender tip: open Windows Security → Virus & threat protection → Protection history, restore/allow "slipstream-client-win.exe" if quarantined, and add an Exclusion for the install folder.'
+        : process.platform === 'darwin'
+          ? 'Ensure the correct macOS slipstream client binary exists under ./binaries/ (slipstream-client-mac-arm64 or slipstream-client-mac-intel) and is executable.'
+          : 'Ensure the correct slipstream client binary exists under ./binaries/ and is executable.';
     throw new Error(`${baseMsg}\n${expectedMsg}\n${hint}`);
   }
 
@@ -165,8 +214,7 @@ function startSlipstreamClient(resolver, domain) {
     } catch (err) {
       // File is not executable, set execute permission automatically
       fs.chmodSync(clientPath, 0o755);
-      const binaryName = process.platform === 'darwin' ? 'slipstream-client-mac' : 'slipstream-client-linux';
-      console.log(`Automatically set execute permissions on ${binaryName}`);
+      console.log(`Automatically set execute permissions on ${path.basename(clientPath)}`);
     }
   }
 
@@ -179,9 +227,7 @@ function startSlipstreamClient(resolver, domain) {
 
   slipstreamProcess.stdout.on('data', (data) => {
     console.log(`Slipstream: ${data}`);
-    if (mainWindow) {
-      mainWindow.webContents.send('slipstream-log', data.toString());
-    }
+    safeSend('slipstream-log', data.toString());
     sendStatusUpdate();
   });
 
@@ -196,25 +242,19 @@ function startSlipstreamClient(resolver, domain) {
       exec('lsof -ti:5201 | xargs kill -9 2>/dev/null', (err) => {
         if (!err) {
           console.log('Killed process using port 5201. Please restart the VPN.');
-          if (mainWindow) {
-            mainWindow.webContents.send('slipstream-error', 'Port 5201 was in use. Killed existing process. Please restart the VPN.');
-          }
+          safeSend('slipstream-error', 'Port 5201 was in use. Killed existing process. Please restart the VPN.');
         }
       });
     }
     
-    if (mainWindow) {
-      mainWindow.webContents.send('slipstream-error', errorStr);
-    }
+    safeSend('slipstream-error', errorStr);
     sendStatusUpdate();
   });
 
   slipstreamProcess.on('close', (code) => {
     console.log(`Slipstream process exited with code ${code}`);
     slipstreamProcess = null;
-    if (mainWindow) {
-      mainWindow.webContents.send('slipstream-exit', code);
-    }
+    safeSend('slipstream-exit', code);
     sendStatusUpdate();
     if (isRunning) {
       stopService();
@@ -234,10 +274,8 @@ function startSlipstreamClient(resolver, domain) {
       const msg = `SlipStream failed to start: ${err.code || 'ERROR'} ${err.message || String(err)}`;
       console.error(msg);
       slipstreamProcess = null;
-      if (mainWindow) {
-        mainWindow.webContents.send('slipstream-error', msg);
-        mainWindow.webContents.send('slipstream-exit', -1);
-      }
+      safeSend('slipstream-error', msg);
+      safeSend('slipstream-exit', -1);
       sendStatusUpdate();
       settle(reject, new Error(`Slipstream client failed to start: ${err.message || String(err)}`));
     });
@@ -257,10 +295,8 @@ function startSlipstreamClient(resolver, domain) {
 }
 
 function sendStatusUpdate() {
-  if (!mainWindow) return;
-  
   const details = getStatusDetails();
-  mainWindow.webContents.send('status-update', details);
+  safeSend('status-update', details);
 }
 
 function startHttpProxy() {
@@ -301,13 +337,8 @@ function startHttpProxy() {
         
         const logMsg = `[${requestId}] ${message}`;
         console.log(logMsg);
-        if (mainWindow) {
-          if (isError) {
-            mainWindow.webContents.send('slipstream-error', logMsg);
-          } else {
-            mainWindow.webContents.send('slipstream-log', logMsg);
-          }
-        }
+        if (isError) safeSend('slipstream-error', logMsg);
+        else safeSend('slipstream-log', logMsg);
       };
       
       const urlParts = req.url.split(':');
@@ -401,13 +432,8 @@ function startHttpProxy() {
         
         const logMsg = `[${requestId}] ${message}`;
         console.log(logMsg);
-        if (mainWindow) {
-          if (isError) {
-            mainWindow.webContents.send('slipstream-error', logMsg);
-          } else {
-            mainWindow.webContents.send('slipstream-log', logMsg);
-          }
-        }
+        if (isError) safeSend('slipstream-error', logMsg);
+        else safeSend('slipstream-log', logMsg);
       };
       
       logRequest(`→ ${req.method} ${req.url}`, false, true);
@@ -719,13 +745,9 @@ async function configureSystemProxy() {
     
     if (systemProxyConfigured) {
       sendStatusUpdate();
-      if (mainWindow) {
-        mainWindow.webContents.send('slipstream-log', `System proxy configured and enabled successfully`);
-      }
+      safeSend('slipstream-log', `System proxy configured and enabled successfully`);
     } else {
-      if (mainWindow) {
-        mainWindow.webContents.send('slipstream-error', `System proxy configuration failed. You may need admin privileges or configure manually: 127.0.0.1:${HTTP_PROXY_PORT}`);
-      }
+      safeSend('slipstream-error', `System proxy configuration failed. You may need admin privileges or configure manually: 127.0.0.1:${HTTP_PROXY_PORT}`);
     }
     return systemProxyConfigured;
   } catch (err) {
@@ -847,9 +869,7 @@ async function startService(resolver, domain, tunMode = false) {
         isRunning = true;
         sendStatusUpdate();
         
-        if (mainWindow) {
-          mainWindow.webContents.send('slipstream-log', 'TUN mode: HTTP Proxy is not used (TUN provides system-wide tunneling)');
-        }
+        safeSend('slipstream-log', 'TUN mode: HTTP Proxy is not used (TUN provides system-wide tunneling)');
         
         return {
           success: true,
@@ -864,9 +884,7 @@ async function startService(resolver, domain, tunMode = false) {
         };
       } catch (err) {
         console.error('TUN mode failed:', err);
-        if (mainWindow) {
-          mainWindow.webContents.send('slipstream-error', `TUN mode failed: ${err.message}. Falling back to HTTP Proxy mode.`);
-        }
+        safeSend('slipstream-error', `TUN mode failed: ${err.message}. Falling back to HTTP Proxy mode.`);
         // Fallback to HTTP proxy mode
         useTunMode = false;
         // Stop Slipstream if it was started
@@ -883,9 +901,7 @@ async function startService(resolver, domain, tunMode = false) {
       // HTTP proxy is listening - system proxy configuration is optional
       // Check if user wants system proxy configured (from settings or toggle)
       
-      if (mainWindow) {
-        mainWindow.webContents.send('slipstream-log', 'HTTP Proxy mode: TUN Interface is not used (only needed for TUN mode)');
-      }
+      safeSend('slipstream-log', 'HTTP Proxy mode: TUN Interface is not used (only needed for TUN mode)');
       
       isRunning = true;
       sendStatusUpdate();

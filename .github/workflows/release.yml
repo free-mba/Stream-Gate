@@ -47,12 +47,64 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # If binaries are stored via Git LFS, ensure we fetch the real contents.
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
+
+      - name: Download latest SlipStream client binary (from slipstream-rust-deploy)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO="mirzaaghazadeh/slipstream-rust-deploy"
+          mkdir -p binaries
+          # Ensure we always use fresh binaries for releases
+          rm -f binaries/slipstream-client-*
+
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              ASSET="slipstream-client-darwin-arm64"
+              OUT="slipstream-client-mac-arm64"
+            else
+              ASSET="slipstream-client-darwin-amd64"
+              OUT="slipstream-client-mac-intel"
+            fi
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            ASSET="slipstream-client-linux-amd64"
+            OUT="slipstream-client-linux"
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            ASSET="slipstream-client-windows-amd64.exe"
+            OUT="slipstream-client-win.exe"
+          else
+            echo "Unknown platform: ${{ matrix.platform }}"
+            exit 1
+          fi
+
+          echo "Downloading $ASSET from $REPO..."
+          gh release download --repo "$REPO" --pattern "$ASSET" --dir binaries
+          mv "binaries/$ASSET" "binaries/$OUT"
+          ls -lh binaries/
+
+      - name: Verify required SlipStream client binaries
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            node scripts/verify-binaries.js --platform mac --arch "${{ matrix.arch }}"
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            node scripts/verify-binaries.js --platform win
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            node scripts/verify-binaries.js --platform linux
+          else
+            echo "Unknown platform: ${{ matrix.platform }}"
+            exit 1
+          fi
 
       - name: Install system dependencies for Linux
         if: matrix.platform == 'linux'
@@ -67,9 +119,13 @@ jobs:
         if: matrix.platform == 'mac' || matrix.platform == 'linux'
         run: |
           if [ "${{ matrix.platform }}" == "mac" ]; then
-            chmod +x slipstream-client-mac
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              chmod +x binaries/slipstream-client-mac-arm64
+            else
+              chmod +x binaries/slipstream-client-mac-intel
+            fi
           elif [ "${{ matrix.platform }}" == "linux" ]; then
-            chmod +x slipstream-client-linux
+            chmod +x binaries/slipstream-client-linux
           fi
 
       - name: Build application
@@ -325,5 +381,7 @@ jobs:
             release/macos/*
             release/windows/*
             release/linux/*
-          draft: false
-          prerelease: false
+          # Beta tags should not be publicly "published" yet, but should exist as a release entry.
+          # We treat any version containing "-beta" as a draft prerelease.
+          draft: ${{ contains(steps.get_version.outputs.VERSION, '-beta') }}
+          prerelease: ${{ contains(steps.get_version.outputs.VERSION, '-beta') }}
