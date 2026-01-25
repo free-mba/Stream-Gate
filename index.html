@@ -104,6 +104,27 @@
             transform: scale(1.1);
         }
 
+        .dns-btn {
+            position: absolute;
+            top: 0;
+            right: 42px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 999px;
+            height: 32px;
+            padding: 0 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #673ab7;
+            transition: all 0.3s;
+        }
+
+        .dns-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.04);
+        }
+
         .github-btn {
             position: absolute;
             top: 0;
@@ -136,6 +157,17 @@
 
         .github-btn:hover svg {
             fill: #667eea;
+        }
+
+        @keyframes githubPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(102, 126, 234, 0); }
+            35% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(102, 126, 234, 0.15); }
+            70% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(102, 126, 234, 0); }
+        }
+
+        .github-btn.attention {
+            animation: githubPulse 0.9s ease-in-out 0s 4;
         }
 
         /* Tooltip */
@@ -586,10 +618,32 @@
             position: sticky;
             top: 0;
             background: white;
-            z-index: 1;
+            z-index: 10;
             padding: 6px 0 12px;
             margin-bottom: 18px;
             border-bottom: 1px solid #eee;
+        }
+
+        /* DNS Checker modal: make header flush to top */
+        #dnsCheckerModal .modal-content {
+            padding: 0;
+        }
+
+        #dnsCheckerModal .modal-header {
+            padding: 14px 18px;
+            margin-bottom: 0;
+            min-height: 56px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        #dnsCheckerModal .dns-checker {
+            margin-top: 0;
+            border: none;
+            border-radius: 0 0 15px 15px;
+            background: transparent;
+            padding: 18px;
         }
 
         .modal-title {
@@ -793,6 +847,83 @@
         .update-dismiss:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        .dns-checker {
+            margin-top: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .dns-warning {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 193, 7, 0.12);
+            border: 1px solid rgba(255, 193, 7, 0.25);
+            color: #c62828;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Keep the VPN warning readable while scrolling inside the modal */
+        #dnsCheckerModal .dns-warning {
+            background: #fff5f5;
+            border: 1px solid rgba(198, 40, 40, 0.28);
+            /* normal flow: scrolls with content (no "freeze") */
+            position: static;
+            box-shadow: none;
+        }
+
+        .dns-table-wrap {
+            margin-top: 12px;
+            max-height: 220px;
+            overflow: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #fff;
+        }
+
+        .dns-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .dns-table th,
+        .dns-table td {
+            padding: 10px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .dns-table th {
+            position: sticky;
+            top: 0;
+            background: #f5f5f5;
+            z-index: 1;
+            font-weight: 600;
+        }
+
+        .dns-muted {
+            opacity: 0.8;
+        }
+
+        .dns-progress {
+            white-space: nowrap;
+        }
+
+        .dns-status-ok { color: #4caf50; }
+        .dns-status-warn { color: #ff9800; }
+        .dns-status-bad { color: #f44336; }
+
+        textarea.form-input {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.35;
+        }
     </style>
 </head>
 <body>
@@ -805,9 +936,12 @@
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                 </a>
+                <button class="dns-btn" onclick="showDnsChecker()" title="DNS Checker">DNS Checker</button>
                 <button class="help-btn" onclick="showHelp()" title="Help & About">?</button>
-                <h1>🔒 SlipStream GUI <span class="version-badge" id="versionBadge">v1.0.2</span></h1>
-                <p>Secure your connection</p>
+                <h1>🔒 SlipStream GUI</h1>
+                <div style="margin-top: 6px;">
+                    <span class="version-badge" id="versionBadge">v1.0.5</span>
+                </div>
             </div>
 
             <!-- Update Notification -->
@@ -951,6 +1085,62 @@
         <div class="intro-modal-content">
             <img src="intro.png" alt="SlipStream GUI Introduction" class="intro-modal-image">
             <button class="intro-modal-button" onclick="closeIntro()">Get Started</button>
+        </div>
+    </div>
+
+    <!-- DNS Checker Modal -->
+    <div class="modal" id="dnsCheckerModal" onclick="if(event.target.id === 'dnsCheckerModal') closeDnsChecker()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">DNS Checker</div>
+                <button class="modal-close" onclick="closeDnsChecker()">&times;</button>
+            </div>
+
+            <div class="dns-checker" style="margin-top: 0;">
+                <div class="dns-warning">
+                    <strong>Important:</strong> Before running checks, please <strong>turn off any VPN</strong> that is currently running.
+                    VPNs can change routing/DNS and make results incorrect.
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label class="form-label">Test Domain</label>
+                    <input type="text" class="form-input" id="dnsTestDomainInput" placeholder="google.com" value="google.com">
+                    <div class="settings-help">We will test if each DNS server can resolve this domain.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">DNS Servers (one per line)</label>
+                    <textarea class="form-input" id="dnsListInput" placeholder="1.1.1.1&#10;8.8.8.8&#10;9.9.9.9"></textarea>
+                    <div class="settings-help">Accepted format: IPv4 or IPv4:port (default port is 53). You can also paste with commas/spaces.</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="button" id="dnsCheckBtn" onclick="startDnsCheck()" style="background:#673ab7; color:white; margin-top: 0;">Run DNS Check</button>
+                    <button class="button" id="dnsStopBtn" onclick="stopDnsCheck()" disabled style="background:#9e9e9e; color:white; margin-top: 0;">Stop</button>
+                    <div class="dns-muted dns-progress" id="dnsProgress" style="margin-left: auto; display:none;"></div>
+                </div>
+
+                <div class="dns-table-wrap">
+                    <table class="dns-table">
+                        <thead>
+                            <tr>
+                                <th>DNS Server</th>
+                                <th>Ping</th>
+                                <th>DNS</th>
+                                <th>Ping ms</th>
+                                <th>DNS ms</th>
+                                <th>Status</th>
+                                <th>Answer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dnsResultsBody">
+                            <tr><td colspan="7" class="dns-muted">Paste DNS servers above and click “Run DNS Check”.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dns-muted" id="dnsSummary" style="margin-top: 10px;"></div>
+            </div>
         </div>
     </div>
 
@@ -1174,6 +1364,18 @@ SlipStream VPN Server</pre>
         let isRunning = false;
         let useTunMode = false;
         let socks5AuthSaveTimer = null;
+
+        function showDnsChecker() {
+            document.getElementById('dnsCheckerModal')?.classList.add('show');
+        }
+
+        function closeDnsChecker() {
+            // If a scan is running, stop it when the modal closes
+            try {
+                if (dnsCheckRunning) stopDnsCheck();
+            } catch (_) {}
+            document.getElementById('dnsCheckerModal')?.classList.remove('show');
+        }
 
         function showHelp() {
             document.getElementById('helpModal').classList.add('show');
@@ -1445,6 +1647,265 @@ SlipStream VPN Server</pre>
             log.scrollTop = log.scrollHeight;
         }
 
+        let dnsCheckAbort = { aborted: false };
+        let dnsCheckRunning = false;
+        let dnsLastServers = [];
+        let dnsLastResults = [];
+
+        function parseDnsServersInput(text) {
+            const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+            const items = [];
+            for (const line of lines) {
+                const trimmed = String(line || '').trim();
+                if (!trimmed) continue;
+                // Ignore markdown/comment headings like "### Tabriz"
+                if (trimmed.startsWith('#')) continue;
+
+                // Allow comma/space/tab separated entries on non-comment lines
+                const parts = trimmed.replace(/[,\t ]+/g, '\n').split('\n');
+                for (const part of parts) {
+                    const t = String(part || '').trim();
+                    if (!t) continue;
+                    if (t.startsWith('#')) continue;
+                    items.push(t);
+                }
+            }
+            const uniq = [];
+            const seen = new Set();
+            for (const it of items) {
+                const key = it.toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+                uniq.push(it);
+            }
+            return uniq;
+        }
+
+        function setDnsUiRunning(running) {
+            dnsCheckRunning = running;
+            const runBtn = document.getElementById('dnsCheckBtn');
+            const stopBtn = document.getElementById('dnsStopBtn');
+            if (runBtn) runBtn.disabled = running;
+            if (stopBtn) stopBtn.disabled = !running;
+        }
+
+        function setDnsProgress(text, show = true) {
+            const el = document.getElementById('dnsProgress');
+            if (!el) return;
+            el.textContent = text || '';
+            el.style.display = show ? 'block' : 'none';
+        }
+
+        function setDnsSummary(text) {
+            const el = document.getElementById('dnsSummary');
+            if (!el) return;
+            el.textContent = text || '';
+        }
+
+        function setDnsSummaryCounts(ok, pingOnly, bad) {
+            const el = document.getElementById('dnsSummary');
+            if (!el) return;
+            el.innerHTML = `
+                <span class="dns-status-ok">OK: ${ok}</span>
+                <span class="dns-muted"> | </span>
+                <span class="dns-status-warn">Ping Only: ${pingOnly}</span>
+                <span class="dns-muted"> | </span>
+                <span class="dns-status-bad">Unreachable/Error: ${bad}</span>
+            `;
+        }
+
+        function renderDnsRows(servers) {
+            const body = document.getElementById('dnsResultsBody');
+            if (!body) return;
+            body.innerHTML = '';
+            servers.forEach((server, idx) => {
+                const tr = document.createElement('tr');
+                tr.id = `dns-row-${idx}`;
+                tr.innerHTML = `
+                    <td>${server}</td>
+                    <td class="dns-muted">…</td>
+                    <td class="dns-muted">…</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">Queued</td>
+                    <td class="dns-muted">-</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function statusSortKey(status) {
+            const s = String(status || '').toLowerCase();
+            if (s === 'ok') return 0;
+            if (s === 'ping only') return 1;
+            if (s === 'unreachable') return 2;
+            if (s === 'error') return 3;
+            return 9;
+        }
+
+        function sortDnsTableFinal() {
+            const servers = Array.isArray(dnsLastServers) ? dnsLastServers : [];
+            const results = Array.isArray(dnsLastResults) ? dnsLastResults : [];
+            if (!servers.length) return;
+
+            const entries = servers.map((server, idx) => ({
+                idx,
+                server,
+                result: results[idx] || null
+            }));
+
+            entries.sort((a, b) => {
+                const ak = statusSortKey(a.result?.status);
+                const bk = statusSortKey(b.result?.status);
+                if (ak !== bk) return ak - bk;
+                const as = String(a.server || '');
+                const bs = String(b.server || '');
+                const cmp = as.localeCompare(bs);
+                if (cmp !== 0) return cmp;
+                return a.idx - b.idx;
+            });
+
+            const body = document.getElementById('dnsResultsBody');
+            if (!body) return;
+            body.innerHTML = '';
+
+            // Re-render in sorted order (final results only)
+            entries.forEach((entry, newIdx) => {
+                const tr = document.createElement('tr');
+                tr.id = `dns-row-${newIdx}`;
+                tr.innerHTML = `
+                    <td>${entry.server}</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                    <td class="dns-muted">-</td>
+                `;
+                body.appendChild(tr);
+
+                // Paint final data into the row
+                if (entry.result) {
+                    updateDnsRow(newIdx, entry.result);
+                } else {
+                    updateDnsRow(newIdx, {
+                        ok: false,
+                        ping: { ok: false, timeMs: 0 },
+                        dns: { ok: false, timeMs: 0, answers: [], error: '-' },
+                        status: 'Unreachable'
+                    });
+                }
+            });
+        }
+
+        function updateDnsRow(idx, data) {
+            const tr = document.getElementById(`dns-row-${idx}`);
+            if (!tr) return;
+
+            const pingOk = !!data?.ping?.ok;
+            const dnsOk = !!data?.dns?.ok;
+            const status = data?.status || (data?.ok ? 'Unknown' : 'Error');
+
+            const statusClass =
+                status === 'OK' ? 'dns-status-ok' :
+                status === 'Ping Only' ? 'dns-status-warn' :
+                'dns-status-bad';
+
+            const answer = Array.isArray(data?.dns?.answers) && data.dns.answers.length
+                ? String(data.dns.answers[0])
+                : (data?.dns?.error ? String(data.dns.error) : '-');
+
+            tr.children[1].textContent = data?.stage === 'checking' ? '…' : (pingOk ? '✓' : '✗');
+            tr.children[2].textContent = data?.stage === 'checking' ? '…' : (dnsOk ? '✓' : '✗');
+            tr.children[3].textContent = data?.stage === 'checking' ? '-' : (pingOk ? (data?.ping?.timeMs ?? '-') : '-');
+            tr.children[4].textContent = data?.stage === 'checking' ? '-' : (dnsOk ? (data?.dns?.timeMs ?? '-') : '-');
+            tr.children[5].innerHTML = `<span class="${statusClass}">${status}</span>`;
+            tr.children[6].textContent = data?.stage === 'checking' ? '-' : answer;
+            tr.children[1].classList.toggle('dns-muted', data?.stage === 'checking');
+            tr.children[2].classList.toggle('dns-muted', data?.stage === 'checking');
+            tr.children[3].classList.toggle('dns-muted', data?.stage === 'checking');
+            tr.children[4].classList.toggle('dns-muted', data?.stage === 'checking');
+        }
+
+        async function startDnsCheck() {
+            if (dnsCheckRunning) return;
+
+            const domain = document.getElementById('dnsTestDomainInput')?.value?.trim() || '';
+            const listText = document.getElementById('dnsListInput')?.value || '';
+            const servers = parseDnsServersInput(listText);
+
+            if (!domain) {
+                addLog('DNS Checker: Please enter a test domain (e.g. google.com)', true);
+                return;
+            }
+            if (!servers.length) {
+                addLog('DNS Checker: Please enter at least one DNS server IP', true);
+                return;
+            }
+
+            dnsCheckAbort = { aborted: false };
+            setDnsUiRunning(true);
+            dnsLastServers = servers;
+            dnsLastResults = new Array(servers.length).fill(null);
+            renderDnsRows(servers);
+            setDnsProgress(`0 / ${servers.length}`);
+            setDnsSummaryCounts(0, 0, 0);
+
+            let ok = 0, pingOnly = 0, bad = 0, done = 0;
+
+            for (let i = 0; i < servers.length; i++) {
+                if (dnsCheckAbort.aborted) break;
+
+                updateDnsRow(i, { stage: 'checking', status: 'Checking…' });
+                setDnsProgress(`${done} / ${servers.length}`);
+
+                const result = await ipcRenderer.invoke('dns-check-single', {
+                    server: servers[i],
+                    domain,
+                    pingTimeoutMs: 2000,
+                    dnsTimeoutMs: 2500
+                });
+
+                if (!result?.ok) {
+                    const rowResult = {
+                        ok: false,
+                        ping: { ok: false, timeMs: 0 },
+                        dns: { ok: false, timeMs: 0, answers: [], error: result?.error || 'Error' },
+                        status: 'Error'
+                    };
+                    dnsLastResults[i] = rowResult;
+                    updateDnsRow(i, rowResult);
+                    bad++;
+                } else {
+                    dnsLastResults[i] = result;
+                    updateDnsRow(i, result);
+                    if (result.status === 'OK') ok++;
+                    else if (result.status === 'Ping Only') pingOnly++;
+                    else bad++;
+                }
+
+                done++;
+                setDnsProgress(`${done} / ${servers.length}`, true);
+                setDnsSummaryCounts(ok, pingOnly, bad);
+            }
+
+            if (dnsCheckAbort.aborted) {
+                addLog('DNS Checker: stopped by user');
+            } else {
+                addLog(`DNS Checker finished. OK: ${ok}, Ping Only: ${pingOnly}, Unreachable/Error: ${bad}`, false, true);
+                sortDnsTableFinal();
+            }
+
+            setDnsUiRunning(false);
+            setDnsProgress(`${done} / ${servers.length}`, true);
+        }
+
+        function stopDnsCheck() {
+            dnsCheckAbort.aborted = true;
+            setDnsUiRunning(false);
+            setDnsProgress('Stopping…', true);
+        }
+
         // Listen for status updates
         ipcRenderer.on('status-update', (event, details) => {
             updateStatus(isRunning, details);
@@ -1469,11 +1930,15 @@ SlipStream VPN Server</pre>
             updateStatus(false, {});
         });
 
-        // Show intro modal on every app opening
-        const introModal = document.getElementById('introModal');
-        if (introModal) {
-            introModal.classList.remove('hidden');
+        // Don't auto-show the intro modal on startup.
+        // Instead, gently draw attention to the GitHub "Star" button.
+        function animateGitHubStarHint() {
+            const btn = document.querySelector('.github-btn');
+            if (!btn) return;
+            btn.classList.add('attention');
+            setTimeout(() => btn.classList.remove('attention'), 4500);
         }
+        animateGitHubStarHint();
 
         // Load version on startup
         async function loadVersion() {
