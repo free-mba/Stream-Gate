@@ -37,6 +37,16 @@ jobs:
             arch: ia32
             build-script: build:win:ia32
             artifact-name: SlipStream-GUI-Windows-x86
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            build-script: build:linux:x64
+            artifact-name: SlipStream-GUI-Linux-x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            build-script: build:linux:arm64
+            artifact-name: SlipStream-GUI-Linux-ARM64
 
     steps:
       - name: Checkout code
@@ -51,9 +61,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Set execute permissions for macOS binary
-        if: matrix.os == 'macos-latest'
-        run: chmod +x slipstream-client-mac
+      - name: Set execute permissions for binaries
+        if: matrix.platform == 'mac' || matrix.platform == 'linux'
+        run: |
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            chmod +x slipstream-client-mac
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            chmod +x slipstream-client-linux
+          fi
 
       - name: Build application
         run: npm run ${{ matrix.build-script }}
@@ -65,8 +80,22 @@ jobs:
           echo "=== Build output directory ==="
           ls -lh dist/ || echo "No dist directory found"
           echo ""
-          echo "=== All files in dist ==="
-          find dist -type f -name "*.${{ matrix.platform == 'mac' && 'dmg' || 'exe' }}" || echo "No matching files found"
+          echo "=== All files in dist (recursive) ==="
+          find dist -type f || echo "No files found"
+          echo ""
+          echo "=== Platform-specific files ==="
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            find dist -type f -name "*.dmg" || echo "No matching files found"
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            find dist -type f -name "*.exe" || echo "No matching files found"
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            echo "Looking for AppImage files:"
+            find dist -type f -name "*.AppImage" || echo "No AppImage files found"
+            echo "Looking for DEB files:"
+            find dist -type f -name "*.deb" || echo "No DEB files found"
+            echo "All Linux-related files:"
+            find dist -type f \( -iname "*appimage" -o -iname "*.deb" -o -iname "*linux*" \) || echo "No Linux files found"
+          fi
           echo ""
           echo "=== Platform: ${{ matrix.platform }}, Arch: ${{ matrix.arch }} ==="
 
@@ -110,6 +139,32 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Upload Linux x64 artifact
+        if: matrix.platform == 'linux' && matrix.arch == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            dist/**/*.AppImage
+            dist/**/*.deb
+            dist/*.AppImage
+            dist/*.deb
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload Linux ARM64 artifact
+        if: matrix.platform == 'linux' && matrix.arch == 'arm64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            dist/**/*.AppImage
+            dist/**/*.deb
+            dist/*.AppImage
+            dist/*.deb
+          retention-days: 30
+          if-no-files-found: error
+
   create-release:
     needs: build-and-release
     runs-on: ubuntu-latest
@@ -148,6 +203,37 @@ jobs:
           path: release/windows/x86
         continue-on-error: true
 
+      - name: Download Linux x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SlipStream-GUI-Linux-x64
+          path: release/linux/x64
+        continue-on-error: true
+
+      - name: Download Linux ARM64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SlipStream-GUI-Linux-ARM64
+          path: release/linux/arm64
+        continue-on-error: true
+
+      - name: Check Linux artifacts availability
+        shell: bash
+        run: |
+          echo "=== Checking Linux artifact availability ==="
+          if [ -d release/linux/x64 ] && [ "$(ls -A release/linux/x64 2>/dev/null)" ]; then
+            echo "✅ Linux x64 artifacts found:"
+            ls -lh release/linux/x64/
+          else
+            echo "⚠️ No Linux x64 artifacts found"
+          fi
+          if [ -d release/linux/arm64 ] && [ "$(ls -A release/linux/arm64 2>/dev/null)" ]; then
+            echo "✅ Linux ARM64 artifacts found:"
+            ls -lh release/linux/arm64/
+          else
+            echo "⚠️ No Linux ARM64 artifacts found"
+          fi
+
       - name: Move Windows artifacts to release folder
         shell: bash
         run: |
@@ -160,6 +246,18 @@ jobs:
           fi
           rm -rf release/windows/x64 release/windows/x86 2>/dev/null || true
 
+      - name: Move Linux artifacts to release folder
+        shell: bash
+        run: |
+          mkdir -p release/linux
+          if [ -d release/linux/x64 ]; then
+            mv release/linux/x64/* release/linux/ 2>/dev/null || true
+          fi
+          if [ -d release/linux/arm64 ]; then
+            mv release/linux/arm64/* release/linux/ 2>/dev/null || true
+          fi
+          rm -rf release/linux/x64 release/linux/arm64 2>/dev/null || true
+
       - name: List downloaded artifacts
         shell: bash
         run: |
@@ -168,6 +266,9 @@ jobs:
           echo ""
           echo "=== Windows artifacts ==="
           ls -lh release/windows/ || echo "No Windows artifacts found"
+          echo ""
+          echo "=== Linux artifacts ==="
+          ls -lh release/linux/ || echo "No Linux artifacts found"
 
       - name: Extract version from tag or input
         id: get_version
@@ -192,6 +293,8 @@ jobs:
             - **macOS (Intel)**: Download the Intel DMG file below
             - **Windows (64-bit)**: Download the x64 EXE installer below
             - **Windows (32-bit)**: Download the x86 EXE installer below
+            - **Linux (64-bit)**: Download the x64 AppImage or DEB package below
+            - **Linux (ARM64)**: Download the ARM64 AppImage or DEB package below
 
             ### ✨ What's New
 
@@ -214,5 +317,6 @@ jobs:
           files: |
             release/macos/*
             release/windows/*
+            release/linux/*
           draft: false
           prerelease: false

@@ -11,7 +11,10 @@
     "build:win": "electron-builder --win --publish never",
     "build:win:x64": "electron-builder --win --x64 --publish never",
     "build:win:ia32": "electron-builder --win --ia32 --publish never",
-    "build:all": "electron-builder --mac --win --publish never"
+    "build:linux": "electron-builder --linux --publish never",
+    "build:linux:x64": "electron-builder --linux --x64 --publish never",
+    "build:linux:arm64": "electron-builder --linux --arm64 --publish never",
+    "build:all": "electron-builder --mac --win --linux --publish never"
   },
   "keywords": [
     "vpn",
@@ -78,6 +81,23 @@
         {
           "from": "slipstream-client-win.exe",
           "to": "slipstream-client-win.exe",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network",
+      "icon": "assets/icon.png",
+      "extraResources": [
+        {
+          "from": "slipstream-client-linux",
+          "to": "slipstream-client-linux",
           "filter": [
             "**/*"
           ]

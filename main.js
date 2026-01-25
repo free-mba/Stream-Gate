@@ -118,6 +118,8 @@ function getSlipstreamClientPath() {
     return path.join(resourcesPath, 'slipstream-client-mac');
   } else if (platform === 'win32') {
     return path.join(resourcesPath, 'slipstream-client-win.exe');
+  } else if (platform === 'linux') {
+    return path.join(resourcesPath, 'slipstream-client-linux');
   }
   return null;
 }
@@ -128,15 +130,16 @@ function startSlipstreamClient(resolver, domain) {
     throw new Error('Unsupported platform');
   }
 
-  // Ensure execute permissions on macOS (automatic, no user action needed)
-  if (process.platform === 'darwin' && fs.existsSync(clientPath)) {
+  // Ensure execute permissions on macOS and Linux (automatic, no user action needed)
+  if ((process.platform === 'darwin' || process.platform === 'linux') && fs.existsSync(clientPath)) {
     try {
       // Check if file is executable, if not, make it executable
       fs.accessSync(clientPath, fs.constants.X_OK);
     } catch (err) {
       // File is not executable, set execute permission automatically
       fs.chmodSync(clientPath, 0o755);
-      console.log('Automatically set execute permissions on slipstream-client-mac');
+      const binaryName = process.platform === 'darwin' ? 'slipstream-client-mac' : 'slipstream-client-linux';
+      console.log(`Automatically set execute permissions on ${binaryName}`);
     }
   }
 
@@ -583,6 +586,21 @@ async function configureSystemProxy() {
       } catch (err) {
         console.error('Failed to configure proxy via netsh:', err.message);
       }
+    } else if (platform === 'linux') {
+      // Linux: gsettings (GNOME) or environment variables
+      try {
+        // Try GNOME settings first
+        await execAsync(`gsettings set org.gnome.system.proxy mode 'manual'`);
+        await execAsync(`gsettings set org.gnome.system.proxy.http host '127.0.0.1'`);
+        await execAsync(`gsettings set org.gnome.system.proxy.http port ${HTTP_PROXY_PORT}`);
+        await execAsync(`gsettings set org.gnome.system.proxy.https host '127.0.0.1'`);
+        await execAsync(`gsettings set org.gnome.system.proxy.https port ${HTTP_PROXY_PORT}`);
+        console.log('System proxy configured via gsettings');
+        configured = true;
+      } catch (err) {
+        console.error('Failed to configure proxy via gsettings:', err.message);
+        console.log('Note: System proxy configuration may require manual setup on Linux');
+      }
     } else {
       console.error('Unsupported platform for proxy configuration');
     }
@@ -686,6 +704,20 @@ async function unconfigureSystemProxy() {
       systemProxyConfigured = false;
       sendStatusUpdate();
       return true;
+    } else if (platform === 'linux') {
+      // Linux: gsettings (GNOME)
+      try {
+        await execAsync(`gsettings set org.gnome.system.proxy mode 'none'`);
+        console.log('System proxy unconfigured via gsettings');
+        systemProxyConfigured = false;
+        sendStatusUpdate();
+        return true;
+      } catch (err) {
+        console.error('Failed to unconfigure proxy via gsettings:', err);
+        systemProxyConfigured = false;
+        sendStatusUpdate();
+        return false;
+      }
     } else {
       console.error('Unsupported platform for proxy configuration');
       systemProxyConfigured = false;

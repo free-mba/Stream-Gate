@@ -41,12 +41,32 @@ jobs:
       - name: Verify binaries exist
         shell: bash
         run: |
+          echo "Running on OS: ${{ runner.os }}"
           if [ "${{ runner.os }}" == "Linux" ]; then
-            echo "Skipping binary check on Linux"
+            if [ -f slipstream-client-linux ]; then
+              echo "✅ Linux binary found"
+            else
+              echo "❌ Linux binary (slipstream-client-linux) not found"
+              exit 1
+            fi
           elif [ "${{ runner.os }}" == "macOS" ]; then
-            test -f slipstream-client-mac || exit 1
-            echo "✅ macOS binary found"
+            if [ -f slipstream-client-mac ]; then
+              echo "✅ macOS binary found"
+            else
+              echo "❌ macOS binary (slipstream-client-mac) not found"
+              exit 1
+            fi
           elif [ "${{ runner.os }}" == "Windows" ]; then
-            test -f slipstream-client-win.exe || exit 1
-            echo "✅ Windows binary found"
+            if [ -f slipstream-client-win.exe ]; then
+              echo "✅ Windows binary found"
+            else
+              echo "❌ Windows binary (slipstream-client-win.exe) not found"
+              echo "Current directory: $(pwd)"
+              echo "Files in directory:"
+              ls -la || dir
+              exit 1
+            fi
+          else
+            echo "Unknown OS: ${{ runner.os }}"
+            exit 1
           fi

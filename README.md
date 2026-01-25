@@ -8,7 +8,7 @@
 
 
 <div align="center">
-  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue?style=for-the-badge" alt="Platform">
+  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Version-1.0.0-orange?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
@@ -45,6 +45,7 @@
 **Available for:**
 - 🍎 macOS (DMG installer)
 - 🪟 Windows (EXE installer)
+- 🐧 Linux (AppImage and DEB packages)
 
 ### Quick Install
 
@@ -118,7 +119,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-d
 
 ## ✨ Features
 
-- 🖥️ **Cross-Platform**: Native support for macOS and Windows
+- 🖥️ **Cross-Platform**: Native support for macOS, Windows, and Linux
 - 🔒 **System-Wide VPN**: Routes all traffic through SlipStream VPN
 - 🎨 **Modern GUI**: Intuitive interface with real-time status and logs
 - ⚙️ **Auto-Configuration**: Automatically configures system proxy settings
@@ -185,7 +186,10 @@ npm run build:mac
 # Build for Windows
 npm run build:win
 
-# Build for both platforms
+# Build for Linux
+npm run build:linux
+
+# Build for all platforms
 npm run build:all
 ```
 
@@ -211,7 +215,7 @@ SlipStream VPN Server
 
 ### Architecture
 
-1. **SlipStream Client**: Runs the native binary (`slipstream-client-mac` or `slipstream-client-win.exe`) that establishes a SOCKS5 proxy on port 5201
+1. **SlipStream Client**: Runs the native binary (`slipstream-client-mac`, `slipstream-client-win.exe`, or `slipstream-client-linux`) that establishes a SOCKS5 proxy on port 5201
 2. **HTTP Proxy Server**: Node.js server listening on port 8080 that converts HTTP requests to SOCKS5
 3. **System Proxy**: Automatically configures system proxy settings to route all traffic through the VPN
 
@@ -264,6 +268,7 @@ Settings are stored in `settings.json` (created automatically):
 
 - **macOS**: 10.13+ (High Sierra or later)
 - **Windows**: Windows 10 or later
+- **Linux**: Most modern distributions (AppImage works on most, DEB for Debian/Ubuntu-based)
 - **No special privileges**: Works immediately after installation
 - **No internet required**: After installation, everything is self-contained
 
