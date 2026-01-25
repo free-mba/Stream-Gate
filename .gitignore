@@ -5,12 +5,6 @@ node_modules/
 # Build outputs
 dist/
 build/
-*.dmg
-*.exe
-*.zip
-*.deb
-*.rpm
-*.AppImage
 
 # Logs
 *.log

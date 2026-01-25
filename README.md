@@ -10,7 +10,7 @@
 <div align="center">
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Version-1.0.2-orange?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.5-orange?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
   <a href="https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest">
     <img src="https://img.shields.io/github/v/release/mirzaaghazadeh/SlipStreamGUI?style=for-the-badge&label=Latest%20Release" alt="Latest Release">

@@ -694,11 +694,29 @@
             margin-bottom: 8px;
         }
 
-        .modal-section ul {
+        .modal-section ul,
+        .modal-section ol {
             font-size: 14px;
             color: #666;
             line-height: 1.8;
-            margin-left: 20px;
+            margin: 8px 0 10px;
+            padding-left: 22px;
+        }
+
+        .modal-section li {
+            margin: 6px 0;
+        }
+
+        .modal-section li:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
         }
 
         .tech-button {
@@ -1353,7 +1371,7 @@ SlipStream VPN Server</pre>
 
             <div class="modal-section">
                 <h3>Version</h3>
-                <p>SlipStream GUI v1.0.2</p>
+                <p>SlipStream GUI <span class="version-badge" id="helpVersionBadge">v—</span></p>
             </div>
         </div>
     </div>
@@ -1947,6 +1965,10 @@ SlipStream VPN Server</pre>
                 const versionBadge = document.getElementById('versionBadge');
                 if (versionBadge) {
                     versionBadge.textContent = `v${version}`;
+                }
+                const helpVersionBadge = document.getElementById('helpVersionBadge');
+                if (helpVersionBadge) {
+                    helpVersionBadge.textContent = `v${version}`;
                 }
             } catch (err) {
                 console.error('Failed to load version:', err);
