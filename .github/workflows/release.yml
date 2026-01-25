@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            platform: mac
+            artifact-name: SlipStream-GUI-macOS
+          - os: windows-latest
+            platform: win
+            artifact-name: SlipStream-GUI-Windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set execute permissions for macOS binary
+        if: matrix.os == 'macos-latest'
+        run: chmod +x slipstream-client-mac
+
+      - name: Build application
+        run: npm run build:${{ matrix.platform }}
+
+      - name: Upload macOS artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist/*.dmg
+          retention-days: 30
+
+      - name: Upload Windows artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist/*.exe
+          retention-days: 30
+
+  create-release:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SlipStream-GUI-macOS
+          path: release/macos
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SlipStream-GUI-Windows
+          path: release/windows
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🎉 SlipStream GUI v${{ steps.get_version.outputs.VERSION }}
+
+            ### 📥 Downloads
+
+            - **macOS**: Download the DMG file below
+            - **Windows**: Download the EXE installer below
+
+            ### ✨ What's New
+
+            See the [changelog](https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.VERSION }}...main) for details.
+
+            ### 🚀 Quick Start
+
+            1. Download the installer for your platform
+            2. Install the application
+            3. Launch SlipStream GUI
+            4. Click "Start VPN"
+
+            ### 📖 Documentation
+
+            For setup instructions and troubleshooting, see the [README](https://github.com/${{ github.repository }}#readme).
+
+            ---
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.VERSION }}...main
+          files: |
+            release/macos/*
+            release/windows/*
+          draft: false
+          prerelease: false

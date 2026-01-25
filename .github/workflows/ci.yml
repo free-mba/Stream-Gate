@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify project structure
+        run: |
+          echo "Checking project files..."
+          test -f main.js || exit 1
+          test -f index.html || exit 1
+          test -f package.json || exit 1
+          echo "✅ All required files present"
+
+      - name: Check syntax
+        run: node -c main.js
+
+      - name: Verify binaries exist
+        run: |
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            echo "Skipping binary check on Linux"
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            test -f slipstream-client-mac || exit 1
+            echo "✅ macOS binary found"
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            test -f slipstream-client-win.exe || exit 1
+            echo "✅ Windows binary found"
+          fi

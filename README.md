@@ -8,10 +8,11 @@
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Version-1.0.0-orange?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/Node.js-16%2B-brightgreen?style=for-the-badge" alt="Node.js">
-  <a href="https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest">
-    <img src="https://img.shields.io/github/v/release/mirzaaghazadeh/SlipStreamGUI?style=for-the-badge&label=Latest%20Release" alt="Latest Release">
+  <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
+  <a href="https://github.com/mirzaaghazadeh/SlipStreeamGUI/releases/latest">
+    <img src="https://img.shields.io/github/v/release/mirzaaghazadeh/SlipStreeamGUI?style=for-the-badge&label=Latest%20Release" alt="Latest Release">
   </a>
+  <img src="https://img.shields.io/github/actions/workflow/status/mirzaaghazadeh/SlipStreeamGUI/release.yml?style=for-the-badge&label=Build" alt="Build Status">
 </div>
 
 <br>
@@ -294,5 +295,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <strong>Made with ❤️ for the SlipStream community</strong>
+  <strong>Made with ❤️ for those we remember</strong>
 </div>
