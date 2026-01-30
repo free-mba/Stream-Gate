@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -160,10 +161,25 @@
         }
 
         @keyframes githubPulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 rgba(102, 126, 234, 0); }
-            35% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(102, 126, 234, 0.15); }
-            70% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 rgba(102, 126, 234, 0); }
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 rgba(102, 126, 234, 0);
+            }
+
+            35% {
+                transform: scale(1.08);
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0.15);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 rgba(102, 126, 234, 0);
+            }
         }
 
         .github-btn.attention {
@@ -239,8 +255,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .status-row {
@@ -355,15 +378,15 @@
             transform: translateX(24px);
         }
 
-        .toggle-container input:checked + .toggle-slider {
+        .toggle-container input:checked+.toggle-slider {
             background-color: #667eea;
         }
 
-        .toggle-container input:not(:checked) + .toggle-slider {
+        .toggle-container input:not(:checked)+.toggle-slider {
             background-color: #ccc;
         }
 
-        .toggle-container input:not(:checked) + .toggle-slider:before {
+        .toggle-container input:not(:checked)+.toggle-slider:before {
             transform: translateX(0);
         }
 
@@ -790,6 +813,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -933,9 +957,17 @@
             white-space: nowrap;
         }
 
-        .dns-status-ok { color: #4caf50; }
-        .dns-status-warn { color: #ff9800; }
-        .dns-status-bad { color: #f44336; }
+        .dns-status-ok {
+            color: #4caf50;
+        }
+
+        .dns-status-warn {
+            color: #ff9800;
+        }
+
+        .dns-status-bad {
+            color: #f44336;
+        }
 
         .dns-use-btn {
             padding: 6px 10px;
@@ -970,6 +1002,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Main Panel -->
@@ -977,7 +1010,8 @@
             <div class="header">
                 <a href="#" onclick="openGitHub(); return false;" class="github-btn" title="Don't forget to Star it">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                     </svg>
                 </a>
                 <button class="dns-btn" onclick="showDnsChecker()" title="DNS Checker">DNS Checker</button>
@@ -994,7 +1028,8 @@
                     <span class="update-notification-icon">🆕</span>
                     <div class="update-notification-text">
                         <div class="update-notification-title">New Version Available!</div>
-                        <div class="update-notification-subtitle" id="updateNotificationText">Version <span id="latestVersionText"></span> is now available</div>
+                        <div class="update-notification-subtitle" id="updateNotificationText">Version <span
+                                id="latestVersionText"></span> is now available</div>
                     </div>
                 </div>
                 <div class="update-notification-actions">
@@ -1063,10 +1098,12 @@
                 </div>
                 <div class="form-group proxy-auth-section" id="proxyAuthFields" style="display:none;">
                     <label class="form-label">Proxy Username</label>
-                    <input type="text" class="form-input" id="proxyAuthUsername" placeholder="username" autocomplete="off" spellcheck="false">
+                    <input type="text" class="form-input" id="proxyAuthUsername" placeholder="username"
+                        autocomplete="off" spellcheck="false">
                     <div style="height: 6px;"></div>
                     <label class="form-label">Proxy Password</label>
-                    <input type="password" class="form-input" id="proxyAuthPassword" placeholder="password" autocomplete="new-password">
+                    <input type="password" class="form-input" id="proxyAuthPassword" placeholder="password"
+                        autocomplete="new-password">
                     <div class="settings-note">
                         Note: enabling this may break “Configure System Proxy” unless your apps support proxy auth.
                     </div>
@@ -1080,32 +1117,50 @@
                         </label>
                     </label>
                     <div class="settings-help">
-                        SOCKS5 (upstream) username/password. 
+                        SOCKS5 (upstream) username/password.
                     </div>
                 </div>
                 <div class="form-group" id="socks5AuthFields" style="display:none;">
                     <label class="form-label">SOCKS5 Username</label>
-                    <input type="text" class="form-input" id="socks5AuthUsername" placeholder="username" autocomplete="off" spellcheck="false">
+                    <input type="text" class="form-input" id="socks5AuthUsername" placeholder="username"
+                        autocomplete="off" spellcheck="false">
                     <div style="height: 6px;"></div>
                     <label class="form-label">SOCKS5 Password</label>
-                    <input type="password" class="form-input" id="socks5AuthPassword" placeholder="password" autocomplete="new-password">
+                    <input type="password" class="form-input" id="socks5AuthPassword" placeholder="password"
+                        autocomplete="new-password">
                     <div class="settings-note">
                         Note: changes take effect on the next VPN start (or restart).
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">DNS Resolver (IP:Port)</label>
-                    <input type="text" class="form-input" id="resolverInput" placeholder="8.8.8.8:53" value="8.8.8.8:53">
+                    <input type="text" class="form-input" id="resolverInput" placeholder="8.8.8.8:53"
+                        value="8.8.8.8:53">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Domain</label>
-                    <input type="text" class="form-input" id="domainInput" placeholder="s.example.com" value="s.example.com">
+                    <input type="text" class="form-input" id="domainInput" placeholder="s.example.com"
+                        value="s.example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>Authoritative Mode</span>
+                        <label class="toggle-container">
+                            <input type="checkbox" id="authoritativeToggle" onchange="toggleAuthoritative()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <div class="settings-help">
+                        Use <code>--authoritative</code> flag instead of <code>--resolver</code> for direct
+                        authoritative DNS resolution.
+                    </div>
                 </div>
             </div>
 
             <button class="button button-start" id="startBtn" onclick="startService()">Start VPN</button>
             <button class="button button-stop" id="stopBtn" onclick="stopService()" disabled>Stop VPN</button>
-            <button class="button" id="testBtn" onclick="testProxy()" style="background: #2196f3; color: white; margin-top: 0;" disabled>Test Proxy Connection</button>
+            <button class="button" id="testBtn" onclick="testProxy()"
+                style="background: #2196f3; color: white; margin-top: 0;" disabled>Test Proxy Connection</button>
         </div>
 
         <!-- Logs Panel -->
@@ -1149,25 +1204,31 @@
 
             <div class="dns-checker" style="margin-top: 0;">
                 <div class="dns-warning">
-                    <strong>Important:</strong> Before running checks, please <strong>turn off any VPN</strong> that is currently running.
+                    <strong>Important:</strong> Before running checks, please <strong>turn off any VPN</strong> that is
+                    currently running.
                     VPNs can change routing/DNS and make results incorrect.
                 </div>
 
                 <div class="form-group" style="margin-top: 12px;">
                     <label class="form-label">Test Domain</label>
-                    <input type="text" class="form-input" id="dnsTestDomainInput" placeholder="google.com" value="google.com">
+                    <input type="text" class="form-input" id="dnsTestDomainInput" placeholder="google.com"
+                        value="google.com">
                     <div class="settings-help">We will test if each DNS server can resolve this domain.</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">DNS Servers (one per line)</label>
-                    <textarea class="form-input" id="dnsListInput" placeholder="1.1.1.1&#10;8.8.8.8&#10;9.9.9.9"></textarea>
-                    <div class="settings-help">Accepted format: IPv4 or IPv4:port (default port is 53). You can also paste with commas/spaces.</div>
+                    <textarea class="form-input" id="dnsListInput"
+                        placeholder="1.1.1.1&#10;8.8.8.8&#10;9.9.9.9"></textarea>
+                    <div class="settings-help">Accepted format: IPv4 or IPv4:port (default port is 53). You can also
+                        paste with commas/spaces.</div>
                 </div>
 
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="button" id="dnsCheckBtn" onclick="startDnsCheck()" style="background:#673ab7; color:white; margin-top: 0;">Run DNS Check</button>
-                    <button class="button" id="dnsStopBtn" onclick="stopDnsCheck()" disabled style="background:#9e9e9e; color:white; margin-top: 0;">Stop</button>
+                    <button class="button" id="dnsCheckBtn" onclick="startDnsCheck()"
+                        style="background:#673ab7; color:white; margin-top: 0;">Run DNS Check</button>
+                    <button class="button" id="dnsStopBtn" onclick="stopDnsCheck()" disabled
+                        style="background:#9e9e9e; color:white; margin-top: 0;">Stop</button>
                     <div class="dns-muted dns-progress" id="dnsProgress" style="margin-left: auto; display:none;"></div>
                 </div>
 
@@ -1186,7 +1247,10 @@
                             </tr>
                         </thead>
                         <tbody id="dnsResultsBody">
-                            <tr><td colspan="8" class="dns-muted">Paste DNS servers above and click “Run DNS Check”.</td></tr>
+                            <tr>
+                                <td colspan="8" class="dns-muted">Paste DNS servers above and click “Run DNS Check”.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1203,11 +1267,14 @@
                 <div class="modal-title">Help & About</div>
                 <button class="modal-close" onclick="closeHelp()">&times;</button>
             </div>
-            
+
             <div class="modal-section">
                 <h3>About SlipStream GUI</h3>
-                <p>SlipStream GUI is a user-friendly, cross-platform VPN client that makes it easy to connect to SlipStream VPN. It provides secure, encrypted tunneling for all your internet traffic through an intuitive graphical interface.</p>
-                <p>Whether you're looking to protect your privacy, access geo-restricted content, or secure your connection on public Wi-Fi, SlipStream GUI makes VPN protection accessible to everyone.</p>
+                <p>SlipStream GUI is a user-friendly, cross-platform VPN client that makes it easy to connect to
+                    SlipStream VPN. It provides secure, encrypted tunneling for all your internet traffic through an
+                    intuitive graphical interface.</p>
+                <p>Whether you're looking to protect your privacy, access geo-restricted content, or secure your
+                    connection on public Wi-Fi, SlipStream GUI makes VPN protection accessible to everyone.</p>
             </div>
 
             <div class="modal-section">
@@ -1217,21 +1284,21 @@
                     <li>Enter your DNS Resolver (default: 8.8.8.8:53)</li>
                     <li>Enter your SlipStream server domain (default: s.example.com)</li>
                 </ul>
-                
+
                 <p><strong>Step 2: Start the VPN</strong></p>
                 <ul>
                     <li>Click the "Start VPN" button</li>
                     <li>Wait for the status indicators to show "Running"</li>
                     <li>The app will automatically configure system proxy if the toggle is enabled</li>
                 </ul>
-                
+
                 <p><strong>Step 3: Use Your Apps</strong></p>
                 <ul>
                     <li>If system proxy is configured, all apps will automatically use the VPN</li>
                     <li>Otherwise, configure individual apps to use HTTP proxy: <strong>127.0.0.1:8080</strong></li>
                     <li>Check the logs panel to see connection activity</li>
                 </ul>
-                
+
                 <p><strong>Step 4: Stop When Done</strong></p>
                 <ul>
                     <li>Click "Stop VPN" when you want to disconnect</li>
@@ -1254,28 +1321,37 @@
             <div class="modal-section">
                 <h3>Status Indicators</h3>
                 <ul>
-                    <li><strong>SlipStream Client:</strong> Shows if the SlipStream process is running in the background</li>
-                    <li><strong>HTTP Proxy:</strong> Shows if the HTTP proxy server is active (listening on 127.0.0.1:8080)</li>
-                    <li><strong>System Proxy:</strong> Shows if system proxy is configured (optional - you can configure apps manually)</li>
+                    <li><strong>SlipStream Client:</strong> Shows if the SlipStream process is running in the background
+                    </li>
+                    <li><strong>HTTP Proxy:</strong> Shows if the HTTP proxy server is active (listening on
+                        127.0.0.1:8080)</li>
+                    <li><strong>System Proxy:</strong> Shows if system proxy is configured (optional - you can configure
+                        apps manually)</li>
                 </ul>
             </div>
 
             <div class="modal-section">
                 <h3>Settings Explained</h3>
                 <ul>
-                    <li><strong>Configure System Proxy:</strong> Automatically configure your system to use the VPN for all apps</li>
-                    <li><strong>DNS Resolver:</strong> The DNS server to use for domain name resolution (format: IP:Port)</li>
+                    <li><strong>Configure System Proxy:</strong> Automatically configure your system to use the VPN for
+                        all apps</li>
+                    <li><strong>DNS Resolver:</strong> The DNS server to use for domain name resolution (format:
+                        IP:Port)</li>
                     <li><strong>Domain:</strong> Your SlipStream server domain address</li>
-                    <li><strong>Verbose Logging:</strong> Show detailed connection logs (useful for troubleshooting)</li>
+                    <li><strong>Authoritative Mode:</strong> Use <code>--authoritative</code> flag instead of
+                        <code>--resolver</code> for direct authoritative resolution.</li>
+                    <li><strong>Verbose Logging:</strong> Show detailed connection logs (useful for troubleshooting)
+                    </li>
                 </ul>
-                <p><strong>Note:</strong> Changes to DNS Resolver or Domain require restarting the VPN to take effect.</p>
+                <p><strong>Note:</strong> Changes to DNS Resolver or Domain require restarting the VPN to take effect.
+                </p>
             </div>
 
             <div class="modal-section">
                 <button class="tech-button" onclick="toggleTechnical()">🔧 Are you a technical guy?</button>
                 <div class="tech-section" id="techSection">
                     <h3>Technical Details</h3>
-                    
+
                     <h4>Architecture Overview</h4>
                     <p>SlipStream GUI is built with Electron and uses a multi-layer proxy architecture:</p>
                     <pre>Application Layer (Browser/Apps)
@@ -1289,7 +1365,11 @@ SlipStream VPN Server</pre>
                     <h4>How It Works</h4>
                     <p><strong>1. SlipStream Client Process:</strong></p>
                     <ul>
-                        <li>Runs the native <code>binaries/slipstream-client-mac-arm64</code> / <code>binaries/slipstream-client-mac-intel</code>, <code>binaries/slipstream-client-win.exe</code>, or <code>binaries/slipstream-client-linux</code> binary</li>
+                        <li>Runs the native <code>binaries/slipstream-client-mac-arm64</code> /
+                            <code>binaries/slipstream-client-mac-intel</code>,
+                            <code>binaries/slipstream-client-win.exe</code>, or
+                            <code>binaries/slipstream-client-linux</code> binary
+                        </li>
                         <li>Establishes SOCKS5 proxy on <code>127.0.0.1:5201</code></li>
                         <li>Handles encryption and connection to SlipStream servers</li>
                     </ul>
@@ -1305,17 +1385,24 @@ SlipStream VPN Server</pre>
 
                     <p><strong>3. System Proxy Configuration:</strong></p>
                     <ul>
-                        <li><strong>macOS:</strong> Uses <code>networksetup -setwebproxy</code> and <code>networksetup -setsecurewebproxy</code></li>
+                        <li><strong>macOS:</strong> Uses <code>networksetup -setwebproxy</code> and
+                            <code>networksetup -setsecurewebproxy</code>
+                        </li>
                         <li><strong>Windows:</strong> Uses <code>netsh winhttp set proxy</code></li>
                         <li>Automatically detects active network interfaces on macOS</li>
                     </ul>
 
                     <h4>Code Structure</h4>
                     <ul>
-                        <li><strong>main.js:</strong> Electron main process - handles window creation, IPC, proxy server, and system integration</li>
-                        <li><strong>index.html:</strong> Renderer process - UI, status display, logs, and user interactions</li>
-                        <li><strong>check-system-proxy.js:</strong> Helper module to check current system proxy status</li>
-                        <li><strong>package.json:</strong> Dependencies: <code>electron</code>, <code>socks</code>, <code>socks-proxy-agent</code>, <code>http-proxy</code></li>
+                        <li><strong>main.js:</strong> Electron main process - handles window creation, IPC, proxy
+                            server, and system integration</li>
+                        <li><strong>index.html:</strong> Renderer process - UI, status display, logs, and user
+                            interactions</li>
+                        <li><strong>check-system-proxy.js:</strong> Helper module to check current system proxy status
+                        </li>
+                        <li><strong>package.json:</strong> Dependencies: <code>electron</code>, <code>socks</code>,
+                            <code>socks-proxy-agent</code>, <code>http-proxy</code>
+                        </li>
                     </ul>
 
                     <h4>Key Technologies</h4>
@@ -1323,7 +1410,8 @@ SlipStream VPN Server</pre>
                         <li><strong>Electron:</strong> Cross-platform desktop app framework</li>
                         <li><strong>Node.js HTTP Module:</strong> HTTP proxy server implementation</li>
                         <li><strong>SOCKS5:</strong> Protocol for routing traffic through SlipStream client</li>
-                        <li><strong>IPC (Inter-Process Communication):</strong> Communication between main and renderer processes</li>
+                        <li><strong>IPC (Inter-Process Communication):</strong> Communication between main and renderer
+                            processes</li>
                         <li><strong>Child Process:</strong> Spawning and managing SlipStream client binary</li>
                     </ul>
 
@@ -1341,7 +1429,8 @@ SlipStream VPN Server</pre>
 
                     <h4>Configuration Files</h4>
                     <ul>
-                        <li><strong>settings.json:</strong> Stores user preferences (resolver, domain, verbose logging)</li>
+                        <li><strong>settings.json:</strong> Stores user preferences (resolver, domain, verbose logging)
+                        </li>
                         <li>Created automatically in app directory</li>
                         <li>Persists across app restarts</li>
                     </ul>
@@ -1350,8 +1439,9 @@ SlipStream VPN Server</pre>
 
             <div class="modal-section">
                 <h3>Sharing PC Internet via Mobile (Same Network)</h3>
-                <p>If your PC and mobile device are on the same Wi-Fi network, you can configure your mobile device to use your PC's internet connection (including the VPN) through the proxy.</p>
-                
+                <p>If your PC and mobile device are on the same Wi-Fi network, you can configure your mobile device to
+                    use your PC's internet connection (including the VPN) through the proxy.</p>
+
                 <p><strong>Prerequisites:</strong></p>
                 <ul>
                     <li>PC and mobile device must be connected to the same Wi-Fi network</li>
@@ -1361,8 +1451,11 @@ SlipStream VPN Server</pre>
 
                 <p><strong>Finding Your PC's IP Address:</strong></p>
                 <ul>
-                    <li><strong>macOS/Linux:</strong> Open Terminal and run <code>ifconfig | grep "inet " | grep -v 127.0.0.1</code> or <code>ip addr show</code></li>
-                    <li><strong>Windows:</strong> Open Command Prompt and run <code>ipconfig</code>, look for "IPv4 Address" under your active network adapter</li>
+                    <li><strong>macOS/Linux:</strong> Open Terminal and run
+                        <code>ifconfig | grep "inet " | grep -v 127.0.0.1</code> or <code>ip addr show</code>
+                    </li>
+                    <li><strong>Windows:</strong> Open Command Prompt and run <code>ipconfig</code>, look for "IPv4
+                        Address" under your active network adapter</li>
                     <li>It will typically look like <code>192.168.1.XXX</code> or <code>10.0.0.XXX</code></li>
                 </ul>
 
@@ -1372,12 +1465,14 @@ SlipStream VPN Server</pre>
                     <li>Tap the <strong>(i)</strong> icon next to your connected Wi-Fi network</li>
                     <li>Scroll down to <strong>"HTTP Proxy"</strong> section</li>
                     <li>Select <strong>"Manual"</strong></li>
-                    <li>Enter your PC's IP address in <strong>"Server"</strong> field (e.g., <code>192.168.1.100</code>)</li>
+                    <li>Enter your PC's IP address in <strong>"Server"</strong> field (e.g., <code>192.168.1.100</code>)
+                    </li>
                     <li>Enter <strong>"8080"</strong> in the <strong>"Port"</strong> field</li>
                     <li>Leave <strong>"Authentication"</strong> off</li>
                     <li>Tap <strong>"Save"</strong> in the top right</li>
                 </ol>
-                <p><strong>Note:</strong> Your iOS device will now route all internet traffic through your PC's VPN connection. To disable, go back to Wi-Fi settings and set HTTP Proxy to "Off".</p>
+                <p><strong>Note:</strong> Your iOS device will now route all internet traffic through your PC's VPN
+                    connection. To disable, go back to Wi-Fi settings and set HTTP Proxy to "Off".</p>
 
                 <h4>🤖 Android Configuration</h4>
                 <ol>
@@ -1386,19 +1481,28 @@ SlipStream VPN Server</pre>
                     <li>Select <strong>"Modify network"</strong> or <strong>"Network details"</strong></li>
                     <li>Tap <strong>"Advanced options"</strong> or expand the advanced settings</li>
                     <li>Under <strong>"Proxy"</strong>, select <strong>"Manual"</strong></li>
-                    <li>Enter your PC's IP address in <strong>"Proxy hostname"</strong> (e.g., <code>192.168.1.100</code>)</li>
+                    <li>Enter your PC's IP address in <strong>"Proxy hostname"</strong> (e.g.,
+                        <code>192.168.1.100</code>)
+                    </li>
                     <li>Enter <strong>"8080"</strong> in <strong>"Proxy port"</strong></li>
-                    <li>Leave <strong>"Bypass proxy for"</strong> empty (or add local addresses like <code>localhost,127.0.0.1</code>)</li>
+                    <li>Leave <strong>"Bypass proxy for"</strong> empty (or add local addresses like
+                        <code>localhost,127.0.0.1</code>)
+                    </li>
                     <li>Tap <strong>"Save"</strong></li>
                 </ol>
-                <p><strong>Note:</strong> Some Android versions may have slightly different menu paths. If you can't find these options, try: <strong>Settings</strong> → <strong>Network & Internet</strong> → <strong>Wi-Fi</strong> → (tap network) → <strong>Advanced</strong> → <strong>Proxy</strong>.</p>
-                <p><strong>To disable:</strong> Go back to Wi-Fi settings, modify the network, and set Proxy back to "None".</p>
+                <p><strong>Note:</strong> Some Android versions may have slightly different menu paths. If you can't
+                    find these options, try: <strong>Settings</strong> → <strong>Network & Internet</strong> →
+                    <strong>Wi-Fi</strong> → (tap network) → <strong>Advanced</strong> → <strong>Proxy</strong>.
+                </p>
+                <p><strong>To disable:</strong> Go back to Wi-Fi settings, modify the network, and set Proxy back to
+                    "None".</p>
 
                 <p><strong>⚠️ Important:</strong></p>
                 <ul>
                     <li>Make sure your PC's firewall allows incoming connections on port 8080</li>
                     <li>The proxy only works while both devices are on the same network</li>
-                    <li>If your PC's IP address changes, you'll need to update the proxy settings on your mobile device</li>
+                    <li>If your PC's IP address changes, you'll need to update the proxy settings on your mobile device
+                    </li>
                     <li>Some apps may bypass system proxy settings - you may need to configure them individually</li>
                 </ul>
             </div>
@@ -1425,7 +1529,7 @@ SlipStream VPN Server</pre>
             // If a scan is running, stop it when the modal closes
             try {
                 if (dnsCheckRunning) stopDnsCheck();
-            } catch (_) {}
+            } catch (_) { }
             document.getElementById('dnsCheckerModal')?.classList.remove('show');
         }
 
@@ -1510,7 +1614,7 @@ SlipStream VPN Server</pre>
                 proxyIndicator.classList.remove('running');
                 proxyStatus.textContent = 'Stopped';
             }
-            
+
             // SOCKS5 Forwarder status
             const socksIndicator = document.getElementById('socksForwardIndicator');
             const socksStatus = document.getElementById('socksForwardStatus');
@@ -1527,13 +1631,13 @@ SlipStream VPN Server</pre>
             // System proxy status
             const systemProxyStatus = document.getElementById('systemProxyStatus');
             systemProxyStatus.textContent = details.systemProxyConfigured ? 'Configured' : 'Not Configured (Optional)';
-            
+
             // Update toggle to match system proxy status
             const toggle = document.getElementById('systemProxyToggle');
             if (toggle && details.systemProxyConfigured !== undefined) {
                 toggle.checked = details.systemProxyConfigured;
             }
-            
+
             // Proxy info is now shown in logs instead
         }
 
@@ -1555,25 +1659,43 @@ SlipStream VPN Server</pre>
             }
         }
 
+        async function toggleAuthoritative() {
+            const toggle = document.getElementById('authoritativeToggle');
+            const enable = toggle.checked;
+            try {
+                const result = await ipcRenderer.invoke('set-authoritative', enable);
+                if (result.success) {
+                    addLog(`Authoritative mode ${result.enabled ? 'enabled' : 'disabled'}`);
+                } else {
+                    toggle.checked = !enable;
+                    addLog(`Failed to update authoritative mode: ${result.error}`, true);
+                }
+            } catch (err) {
+                console.error('Error toggling authoritative mode:', err);
+                toggle.checked = !enable;
+                addLog('Error: Failed to toggle authoritative mode', true);
+            }
+        }
+
         async function toggleSystemProxy() {
             const toggle = document.getElementById('systemProxyToggle');
             const enable = toggle.checked;
-            
+
             if (!isRunning) {
                 addLog('Please start the VPN first before configuring system proxy', true);
                 toggle.checked = !enable; // Revert toggle
                 return;
             }
-            
+
             const result = await ipcRenderer.invoke('toggle-system-proxy', enable);
             if (result.success) {
                 // Update status with full details
                 const currentStatus = await ipcRenderer.invoke('get-status');
                 updateStatus(isRunning, currentStatus.details || { systemProxyConfigured: result.configured });
-                
+
                 // Update toggle to match actual state
                 toggle.checked = result.configured;
-                
+
                 if (enable) {
                     addLog('System proxy configured successfully', false, true);
                 } else {
@@ -1651,7 +1773,7 @@ SlipStream VPN Server</pre>
             const domain = document.getElementById('domainInput').value.trim();
             const tunMode = false;
             useTunMode = false;
-            
+
             if (!resolver || !domain) {
                 addLog('Error: Please fill in all settings', true);
                 return;
@@ -1663,10 +1785,10 @@ SlipStream VPN Server</pre>
                 addLog(`Service started successfully`, false, true);
                 addLog(`HTTP proxy listening on 127.0.0.1:8080`);
                 addLog(`SOCKS5 forwarder listening on 0.0.0.0:10809`);
-                
+
                 // Enable test button
                 document.getElementById('testBtn').disabled = false;
-                
+
                 // Auto-configure system proxy if toggle is ON
                 const toggle = document.getElementById('systemProxyToggle');
                 if (toggle && toggle.checked) {
@@ -1676,7 +1798,7 @@ SlipStream VPN Server</pre>
                             const currentStatus = await ipcRenderer.invoke('get-status');
                             updateStatus(isRunning, currentStatus.details || {});
                             addLog('System proxy configured automatically', false, true);
-                            
+
                             // Auto-test after a delay
                             setTimeout(() => {
                                 testProxy();
@@ -1704,9 +1826,9 @@ SlipStream VPN Server</pre>
             const testBtn = document.getElementById('testBtn');
             testBtn.disabled = true;
             testBtn.textContent = 'Testing...';
-            
+
             addLog('Testing proxy connection...');
-            
+
             try {
                 const result = await ipcRenderer.invoke('test-proxy');
                 if (result.success) {
@@ -1729,7 +1851,7 @@ SlipStream VPN Server</pre>
             if (emptyMsg) {
                 emptyMsg.remove();
             }
-            
+
             const entry = document.createElement('div');
             entry.className = 'log-entry' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
             entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
@@ -1933,8 +2055,8 @@ SlipStream VPN Server</pre>
 
             const statusClass =
                 status === 'OK' ? 'dns-status-ok' :
-                status === 'Ping Only' ? 'dns-status-warn' :
-                'dns-status-bad';
+                    status === 'Ping Only' ? 'dns-status-warn' :
+                        'dns-status-bad';
 
             const answer = Array.isArray(data?.dns?.answers) && data.dns.answers.length
                 ? String(data.dns.answers[0])
@@ -2123,7 +2245,7 @@ SlipStream VPN Server</pre>
             const notification = document.getElementById('updateNotification');
             const latestVersionText = document.getElementById('latestVersionText');
             const updateNotificationText = document.getElementById('updateNotificationText');
-            
+
             if (notification && update) {
                 latestVersionText.textContent = `v${update.latestVersion}`;
                 updateNotificationText.innerHTML = `Version <strong>v${update.latestVersion}</strong> is now available (you have v${update.currentVersion})`;
@@ -2153,7 +2275,7 @@ SlipStream VPN Server</pre>
         window.addEventListener('load', async () => {
             const status = await ipcRenderer.invoke('get-status');
             updateStatus(status.isRunning, status.details || {});
-            
+
             // Load saved settings
             const settings = await ipcRenderer.invoke('get-settings');
             if (settings.resolver) {
@@ -2161,6 +2283,9 @@ SlipStream VPN Server</pre>
             }
             if (settings.domain) {
                 document.getElementById('domainInput').value = settings.domain;
+            }
+            if (settings.authoritative !== undefined) {
+                document.getElementById('authoritativeToggle').checked = !!settings.authoritative;
             }
             if (settings.verbose !== undefined) {
                 document.getElementById('verboseToggle').checked = settings.verbose;
@@ -2182,7 +2307,7 @@ SlipStream VPN Server</pre>
             const socksPassEl = document.getElementById('socks5AuthPassword');
             if (socksUserEl) socksUserEl.addEventListener('input', scheduleSocks5AuthSave);
             if (socksPassEl) socksPassEl.addEventListener('input', scheduleSocks5AuthSave);
-            
+
             // Check system proxy status and update toggle (default to ON)
             const proxyStatus = await ipcRenderer.invoke('check-system-proxy');
             const toggle = document.getElementById('systemProxyToggle');
@@ -2191,4 +2316,5 @@ SlipStream VPN Server</pre>
         });
     </script>
 </body>
+
 </html>

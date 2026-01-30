@@ -23,6 +23,7 @@ const fs = require('fs');
 let RESOLVER = '8.8.8.8:53';
 let DOMAIN = 's.example.com';
 let useTunMode = false; // Toggle between HTTP proxy and TUN mode
+let authoritativeMode = false; // NEW: Toggle between --resolver and --authoritative
 let verboseLogging = false; // Verbose logging toggle
 let socks5AuthEnabled = false;
 let socks5AuthUsername = '';
@@ -79,6 +80,7 @@ function loadSettings() {
       if (settings.resolver) RESOLVER = settings.resolver;
       if (settings.domain) DOMAIN = settings.domain;
       if (settings.mode) useTunMode = (settings.mode === 'tun');
+      if (settings.authoritative !== undefined) authoritativeMode = !!settings.authoritative;
       if (settings.verbose !== undefined) verboseLogging = settings.verbose;
       if (settings.socks5AuthEnabled !== undefined) socks5AuthEnabled = !!settings.socks5AuthEnabled;
       if (typeof settings.socks5AuthUsername === 'string') socks5AuthUsername = settings.socks5AuthUsername;
@@ -98,6 +100,7 @@ function saveSettings(overrides = {}) {
       resolver: overrides.resolver ?? RESOLVER,
       domain: overrides.domain ?? DOMAIN,
       mode: overrides.mode ?? (useTunMode ? 'tun' : 'proxy'),
+      authoritative: overrides.authoritative ?? authoritativeMode,
       verbose: overrides.verbose ?? verboseLogging,
       socks5AuthEnabled: overrides.socks5AuthEnabled ?? socks5AuthEnabled,
       socks5AuthUsername: overrides.socks5AuthUsername ?? socks5AuthUsername,
@@ -111,6 +114,7 @@ function saveSettings(overrides = {}) {
     RESOLVER = next.resolver;
     DOMAIN = next.domain;
     useTunMode = next.mode === 'tun';
+    authoritativeMode = !!next.authoritative;
     verboseLogging = !!next.verbose;
     socks5AuthEnabled = !!next.socks5AuthEnabled;
     socks5AuthUsername = next.socks5AuthUsername || '';
@@ -293,7 +297,12 @@ function startSlipstreamClient(resolver, domain) {
     }
   }
 
-  const args = ['--resolver', resolver, '--domain', domain];
+  const args = [
+    authoritativeMode ? '--authoritative' : '--resolver',
+    resolver,
+    '--domain',
+    domain
+  ];
 
   slipstreamProcess = spawn(clientPath, args, {
     stdio: 'pipe',
@@ -1367,7 +1376,8 @@ function getStatusDetails() {
     systemProxyConfigured: systemProxyConfigured,
     mode: currentMode,
     retryAttempts: retryAttempts,
-    maxRetries: MAX_RETRY_ATTEMPTS
+    maxRetries: MAX_RETRY_ATTEMPTS,
+    authoritativeMode: authoritativeMode
   };
 }
 
@@ -1515,6 +1525,7 @@ ipcMain.handle('get-settings', () => {
     resolver: RESOLVER,
     domain: DOMAIN,
     mode: useTunMode ? 'tun' : 'proxy',
+    authoritative: authoritativeMode,
     verbose: verboseLogging,
     socks5AuthEnabled,
     socks5AuthUsername,
@@ -1522,6 +1533,15 @@ ipcMain.handle('get-settings', () => {
     systemProxyEnabledByApp,
     systemProxyServiceName
   };
+});
+
+ipcMain.handle('set-authoritative', (event, enable) => {
+  try {
+    saveSettings({ authoritative: !!enable });
+    return { success: true, enabled: authoritativeMode };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 });
 
 ipcMain.handle('set-resolver', (event, payload) => {
