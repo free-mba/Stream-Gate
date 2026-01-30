@@ -1026,6 +1026,13 @@
                     <span class="status-label">System Proxy:</span>
                     <span class="status-value" id="systemProxyStatus">Not Configured (Optional)</span>
                 </div>
+                <div class="status-row">
+                    <span class="status-label">SOCKS5 Forwarder:</span>
+                    <span class="status-value">
+                        <span class="status-indicator" id="socksForwardIndicator"></span>
+                        <span id="socksForwardStatus">Stopped</span>
+                    </span>
+                </div>
             </div>
 
             <div class="settings">
@@ -1503,6 +1510,19 @@ SlipStream VPN Server</pre>
                 proxyIndicator.classList.remove('running');
                 proxyStatus.textContent = 'Stopped';
             }
+            
+            // SOCKS5 Forwarder status
+            const socksIndicator = document.getElementById('socksForwardIndicator');
+            const socksStatus = document.getElementById('socksForwardStatus');
+            if (details.socksForwardRunning) {
+                socksIndicator.classList.add('running');
+                socksIndicator.classList.remove('stopped');
+                socksStatus.textContent = 'Running';
+            } else {
+                socksIndicator.classList.add('stopped');
+                socksIndicator.classList.remove('running');
+                socksStatus.textContent = 'Stopped';
+            }
 
             // System proxy status
             const systemProxyStatus = document.getElementById('systemProxyStatus');
@@ -1642,6 +1662,7 @@ SlipStream VPN Server</pre>
             if (result.success) {
                 addLog(`Service started successfully`, false, true);
                 addLog(`HTTP proxy listening on 127.0.0.1:8080`);
+                addLog(`SOCKS5 forwarder listening on 0.0.0.0:10809`);
                 
                 // Enable test button
                 document.getElementById('testBtn').disabled = false;

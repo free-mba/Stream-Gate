@@ -129,6 +129,11 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log(`⬇️  ${assetName} -> binaries/${outName} (release: ${tag})`);
     await downloadToFile(asset.browser_download_url, dest);
+
+    // Explicitly set executable permissions for Mac/Linux binaries
+    if (process.platform !== 'win32' && !outName.endsWith('.exe')) {
+      await fs.promises.chmod(dest, 0o755);
+    }
   }
 
   // eslint-disable-next-line no-console
