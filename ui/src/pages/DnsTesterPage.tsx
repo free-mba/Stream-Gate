@@ -11,6 +11,7 @@ import { useAtom } from "jotai";
 import { dnsResultsAtom, isDnsScanningAtom, dnsProgressAtom } from "@/store";
 import { DnsResultRow } from "@/components/DnsResultRow";
 import { APP_NAME } from "@/lib/constants";
+import type { DnsCheckResult, Settings } from "@/types";
 
 const DEFAULT_DNS_LIST = `1.1.1.1
 1.0.0.1
@@ -72,7 +73,7 @@ export default function DnsTesterPage() {
             // Ping first (quick check)
             // Actually the IPC does both.
 
-            const res = await ipc.invoke('dns-check-single', {
+            const res = await ipc.invoke<DnsCheckResult>('dns-check-single', {
                 server,
                 domain: testDomain,
                 pingTimeoutMs: 1500,
@@ -81,7 +82,13 @@ export default function DnsTesterPage() {
 
             setResults(prev => {
                 const next = [...prev];
-                next[i] = { ...res, server, stage: 'done' };
+                // Manually construct the new object to avoid spread issues if types are loose
+                next[i] = {
+                    ...res,
+                    server,
+                    stage: 'done' as const,
+                    status: res.status ?? 'Unknown'
+                };
                 return next;
             });
 
@@ -103,7 +110,7 @@ export default function DnsTesterPage() {
         // We just save it as the 'resolver' in settings, OR we need to let Home Page knw.
         // The user asked to "persist the selected dns on the home page".
         // So we will trigger a save-settings.
-        const settings = await ipc.invoke('get-settings');
+        const settings = await ipc.invoke<Settings>('get-settings');
         await ipc.invoke('save-settings', { ...settings, resolver: normalized });
 
         // Optionally navigate to home? 

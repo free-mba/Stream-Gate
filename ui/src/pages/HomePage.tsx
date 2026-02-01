@@ -8,29 +8,31 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import type { Settings, Status, TrafficData, Config } from "@/types";
+import type { IpcRendererEvent } from "electron";
 
 export default function HomePage() {
     const ipc = useIpc();
-    const [status, setStatus] = useState<any>({});
-    const [settings, setSettings] = useState<any>({});
+    const [status, setStatus] = useState<Partial<Status>>({});
+    const [settings, setSettings] = useState<Partial<Settings>>({});
     const [addDnsOpen, setAddDnsOpen] = useState(false);
     const [newDns, setNewDns] = useState("");
     const [systemProxy, setSystemProxy] = useState(false);
 
     // Mock traffic stats
-    const [traffic, setTraffic] = useState({ down: 0, up: 0 });
+    const [traffic, setTraffic] = useState<TrafficData>({ down: 0, up: 0 });
 
     useEffect(() => {
         if (!ipc) return;
 
         // Initial fetch
-        ipc.invoke('get-status').then((s: any) => setStatus(s));
-        ipc.invoke('get-settings').then((s: any) => {
+        ipc.invoke<Status>('get-status').then((s) => setStatus(s));
+        ipc.invoke<Settings>('get-settings').then((s) => {
             setSettings(s);
             setSystemProxy(!!s.systemProxyEnabledByApp);
         });
 
-        const handleStatus = (_: any, s: any) => setStatus(s);
+        const handleStatus = (_: IpcRendererEvent, s: unknown) => setStatus(s as Status);
         ipc.on('status-update', handleStatus);
 
         return () => {
@@ -44,8 +46,8 @@ export default function HomePage() {
     useEffect(() => {
         if (!ipc) return;
 
-        const handleTraffic = (_: any, data: any) => {
-            setTraffic(data);
+        const handleTraffic = (_: IpcRendererEvent, data: unknown) => {
+            setTraffic(data as TrafficData);
         };
 
         ipc.on('traffic-update', handleTraffic);
@@ -61,13 +63,13 @@ export default function HomePage() {
         setSystemProxy(newState); // Optimistic update
         await ipc.invoke('toggle-system-proxy', newState);
         // Verify (optional, IPC usually returns result)
-        const updated = await ipc.invoke('get-settings');
+        const updated = await ipc.invoke<Settings>('get-settings');
         setSystemProxy(!!updated.systemProxyEnabledByApp);
     };
 
     const toggleConnection = () => {
         if (!!ipc && status.isRunning) {
-            ipc?.invoke('stop-service');
+            ipc.invoke('stop-service');
         } else {
             const payload = {
                 resolver: settings.resolver,
@@ -98,7 +100,7 @@ export default function HomePage() {
     const dnsOptions = Array.from(new Set([currentResolver, ...savedDns, ...COMMON_DNS]));
 
     const handleConfigChange = async (configId: string) => {
-        const config = configs.find((c: any) => c.id === configId);
+        const config = configs.find((c: Config) => c.id === configId);
         if (config) {
             await ipc?.invoke('save-settings', {
                 ...settings,
@@ -109,14 +111,14 @@ export default function HomePage() {
                 socks5AuthEnabled: !!(config.socks?.username && config.socks?.password)
             });
             // Update local state instantly
-            setSettings((prev: any) => ({ ...prev, selectedConfigId: configId }));
+            setSettings((prev) => ({ ...prev, selectedConfigId: configId }));
         }
     };
 
     const handleDnsChange = async (val: string) => {
         await ipc?.invoke('set-resolver', val); // This saves internally + updates settings
         // Also update local state
-        setSettings((prev: any) => ({ ...prev, resolver: val }));
+        setSettings((prev) => ({ ...prev, resolver: val }));
     };
 
     const handleAddDns = async () => {
@@ -131,7 +133,7 @@ export default function HomePage() {
             savedDns: newSavedDns
         });
 
-        setSettings((prev: any) => ({ ...prev, savedDns: newSavedDns }));
+        setSettings((prev) => ({ ...prev, savedDns: newSavedDns }));
         setAddDnsOpen(false);
         setNewDns("");
 
@@ -164,7 +166,7 @@ export default function HomePage() {
                             </div>
                         </SelectTrigger>
                         <SelectContent className="bg-card backdrop-blur-xl border-white/10 max-h-[300px] overflow-hidden">
-                            {configs.map((c: any) => (
+                            {configs.map((c: Config) => (
                                 <SelectItem key={c.id} value={c.id} className="cursor-pointer">
                                     <span className="flex items-center gap-2">
                                         <span>{c.country || "🏳️"}</span>

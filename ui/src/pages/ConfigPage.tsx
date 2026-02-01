@@ -7,18 +7,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Edit, Check, Globe, Share2, Download, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Config, Settings } from "@/types";
 
-interface Config {
-    id: string;
-    remark: string;
-    domain: string;
-    country: string; // Emoji or code
-    socks?: { username?: string; password?: string };
+interface ImportError {
+    success: boolean;
+    count?: number;
+    errors?: number;
+    error?: string;
+    data?: string;
 }
 
 export default function ConfigPage() {
     const ipc = useIpc();
-    const [settings, setSettings] = useState<any>({});
+    const [settings, setSettings] = useState<Partial<Settings>>({});
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingConfig, setEditingConfig] = useState<Config | null>(null);
 
@@ -33,7 +34,8 @@ export default function ConfigPage() {
     const confirmDelete = async () => {
         if (!deletingId) return;
 
-        const configs = Array.isArray(settings.configs) ? settings.configs.filter((c: any) => c.id !== deletingId) : [];
+        const currentConfigs = settings.configs || [];
+        const configs = currentConfigs.filter((c) => c.id !== deletingId);
         const newSettings = { ...settings, configs };
 
         if (settings.selectedConfigId === deletingId) {
@@ -46,21 +48,22 @@ export default function ConfigPage() {
 
     useEffect(() => {
         if (!ipc) return;
-        ipc.invoke('get-settings').then(setSettings);
+        ipc.invoke<Settings>('get-settings').then(setSettings);
     }, [ipc]);
 
-    const saveSettings = async (newSettings: any) => {
+    const saveSettings = async (newSettings: Partial<Settings>) => {
         if (!ipc) return;
         setSettings(newSettings); // Optimistic update
         await ipc.invoke('save-settings', newSettings);
     };
 
     const handleSaveConfig = async () => {
-        const configs = Array.isArray(settings.configs) ? [...settings.configs] : [];
+        const currentConfigs = settings.configs || [];
+        const configs = [...currentConfigs];
 
         if (editingConfig) {
             // Edit existing
-            const index = configs.findIndex((c: any) => c.id === editingConfig.id);
+            const index = configs.findIndex((c) => c.id === editingConfig.id);
             if (index !== -1) {
                 configs[index] = { ...editingConfig, ...formData } as Config;
             }
@@ -115,8 +118,9 @@ export default function ConfigPage() {
     const handleShare = (config: Config, e: React.MouseEvent) => {
         e.stopPropagation();
         try {
-            const data = { ...config };
-            delete (data as any).id;
+            // Create a copy without the ID
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id, ...data } = config;
 
             // Handle UTF-8 for base64 (to support emojis)
             const json = JSON.stringify(data);
@@ -135,8 +139,8 @@ export default function ConfigPage() {
     };
 
     const handleExportAll = async () => {
-        const result = await ipc?.invoke('export-configs');
-        if (result?.success) {
+        const result = await ipc?.invoke<ImportError>('export-configs');
+        if (result?.success && result.data) {
             navigator.clipboard.writeText(result.data);
             setIsExported(true);
             setTimeout(() => setIsExported(false), 2000);
@@ -145,15 +149,21 @@ export default function ConfigPage() {
 
     const handleImport = async () => {
         if (!importText.trim()) return;
-        const result = await ipc?.invoke('import-configs', importText);
+        const result = await ipc?.invoke<ImportError>('import-configs', importText);
+
         if (result?.success) {
-            alert(`Imported ${result.count} configurations successfully!${result.errors ? ` (${result.errors} errors)` : ""}`);
+            const errorMsg = result.errors ? ` (${result.errors} errors)` : "";
+            alert(`Imported ${result.count} configurations successfully!${errorMsg}`);
+
             setIsImportDialogOpen(false);
             setImportText("");
             // Refresh settings
-            ipc?.invoke('get-settings').then(setSettings);
+            if (ipc) {
+                const newSettings = await ipc.invoke<Settings>('get-settings');
+                setSettings(newSettings);
+            }
         } else {
-            alert("Failed to import: " + result.error);
+            alert("Failed to import: " + (result?.error || "Unknown error"));
         }
     };
 

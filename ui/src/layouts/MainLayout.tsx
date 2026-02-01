@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { useIpc } from "@/hooks/useIpc";
 import { APP_NAME } from "@/lib/constants";
+import type { IpcRendererEvent } from "electron";
 
 export default function MainLayout() {
     const [showLogs, setShowLogs] = useState(false);
@@ -15,8 +16,8 @@ export default function MainLayout() {
     useEffect(() => {
         if (!ipc) return;
 
-        const handleLog = (_: any, msg: string) => {
-            setLogs(prev => [...prev, msg]);
+        const handleLog = (_: IpcRendererEvent, msg: unknown) => {
+            setLogs(prev => [...prev, String(msg)]);
         };
 
         ipc.on('slipstream-log', handleLog);

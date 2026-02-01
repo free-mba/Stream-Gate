@@ -6,20 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Shield, Server } from "lucide-react";
 import { APP_NAME, APP_VERSION } from "@/lib/constants";
 
+import type { Settings } from "@/types";
+
 export default function SettingsPage() {
     const ipc = useIpc();
-    const [settings, setSettings] = useState<any>({});
+    const [settings, setSettings] = useState<Partial<Settings>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!ipc) return;
-        ipc.invoke('get-settings').then((s: any) => {
+        ipc.invoke<Settings>('get-settings').then((s) => {
             setSettings(s);
             setLoading(false);
         });
     }, [ipc]);
 
-    const updateSetting = async (key: string, value: any) => {
+    const updateSetting = async (key: keyof Settings, value: unknown) => {
         const newSettings = { ...settings, [key]: value };
         setSettings(newSettings);
         if (ipc) {
