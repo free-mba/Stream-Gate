@@ -226,6 +226,91 @@ class DNSService {
 
     return results;
   }
+
+  /**
+   * Start a high-performance DNS scan using worker threads
+   * @param {Object} payload
+   * @param {Array<string>} payload.servers
+   * @param {string} payload.domain
+   * @param {string} payload.mode - 'dnstt' or 'slipstream'
+   * @param {number} payload.timeout - timeout in seconds
+   * @param {number} payload.workers - concurrency count
+   * @param {Function} onProgress - callback(completedCount, totalCount)
+   * @param {Function} onResult - callback(resultItem)
+   * @param {Function} onComplete - callback()
+   */
+  async startScan(payload, onProgress, onResult, onComplete) {
+    if (this.scanWorker) {
+      await this.stopScan();
+    }
+
+    const { Worker } = require('worker_threads');
+    const path = require('path');
+
+    const servers = payload.servers || [];
+    const domain = payload.domain || 'google.com';
+    const mode = payload.mode || 'slipstream';
+    const timeout = payload.timeout || 3;
+    const concurrency = Math.min(Math.max(1, payload.workers || 50), 500);
+
+    this.logger.info(`Starting DNS Scan: ${servers.length} servers, mode=${mode}, concurrency=${concurrency}`);
+
+    const workerPath = path.join(__dirname, '../../scripts/dns-scanner-worker.js');
+    this.scanWorker = new Worker(workerPath);
+
+    let completed = 0;
+    let active = 0;
+    let queueIndex = 0;
+    const total = servers.length;
+    this.isScanning = true;
+
+    const processQueue = () => {
+      if (!this.isScanning) return;
+
+      while (active < concurrency && queueIndex < total) {
+        const server = servers[queueIndex++];
+        this.scanWorker.postMessage({ server, domain, mode, timeout });
+        active++;
+      }
+
+      if (active === 0 && queueIndex >= total) {
+        this.stopScan();
+        if (onComplete) onComplete();
+      }
+    };
+
+    this.scanWorker.on('message', (msg) => {
+      active--;
+      completed++;
+
+      if (onResult) onResult(msg);
+      if (onProgress) onProgress(completed, total);
+
+      processQueue();
+    });
+
+    this.scanWorker.on('error', (err) => {
+      this.logger.error('DNS Worker Error:', err);
+    });
+
+    this.scanWorker.on('exit', (code) => {
+      if (code !== 0 && this.isScanning) {
+        this.logger.error(`DNS Worker stopped with exit code ${code}`);
+      }
+    });
+
+    // Initial fill
+    processQueue();
+  }
+
+  async stopScan() {
+    this.isScanning = false;
+    if (this.scanWorker) {
+      await this.scanWorker.terminate();
+      this.scanWorker = null;
+      this.logger.info('DNS Scan stopped');
+    }
+  }
 }
 
 module.exports = DNSService;

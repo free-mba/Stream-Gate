@@ -25,6 +25,8 @@ export interface Settings {
     configs: Config[];
     selectedConfigId: string | null;
     savedDns: string[];
+    language?: 'en' | 'fa';
+    theme?: 'light' | 'dark' | 'system';
 }
 
 export interface Status {
@@ -46,8 +48,27 @@ export interface DnsCheckResult {
     server: string;
     stage?: 'checking' | 'done' | 'failed' | 'queued';
     status: string;
+
+    // Legacy properties
     ping?: { ok: boolean; timeMs: number; error?: string };
     dns?: { ok: boolean; timeMs: number; answers: string[]; error?: string };
+
+    // Worker scan properties
+    success?: boolean;
+    elapsed?: number;
+    message?: string;
+    data?: {
+        score: number;
+        maxScore: number;
+        isCompatible: boolean;
+        details: string;
+        stats?: {
+            avgTime: number;
+            maxTime: number;
+            stdDev: number;
+        }
+    };
+
     error?: string;
     ok?: boolean;
 }

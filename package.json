@@ -4,7 +4,7 @@
   "description": "Stream Gate - VPN Client with HTTP Proxy",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "cd ui && npm run build && cd .. && electron .",
     "dev": "cd ui && npm run dev",
     "generate-icons": "node scripts/generate-icons.js && npx electron-icon-builder --input=./assets/icon.png --output=./assets --flatten",
     "download:binaries": "node scripts/download-binaries.js",
@@ -56,6 +56,7 @@
     "sharp": "0.34.5"
   },
   "dependencies": {
+    "base32-encode": "2.0.0",
     "http-proxy": "1.18.1",
     "ip": "^2.0.1",
     "socks": "^2.7.1",

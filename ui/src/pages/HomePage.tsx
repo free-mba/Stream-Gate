@@ -3,21 +3,29 @@ import { motion } from "framer-motion";
 import { useIpc } from "@/hooks/useIpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, MapPin, Zap, Shield, Globe } from "lucide-react";
+import { ArrowUp, ArrowDown, MapPin, Zap, Shield, Globe, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { Settings, Status, TrafficData, Config } from "@/types";
 import type { IpcRendererEvent } from "electron";
+import { useTranslation } from "@/lib/i18n";
+import { useAtom } from "jotai";
+import { themeAtom } from "@/store";
+
 
 export default function HomePage() {
     const ipc = useIpc();
+    const { t } = useTranslation();
     const [status, setStatus] = useState<Partial<Status>>({});
     const [settings, setSettings] = useState<Partial<Settings>>({});
     const [addDnsOpen, setAddDnsOpen] = useState(false);
     const [newDns, setNewDns] = useState("");
     const [systemProxy, setSystemProxy] = useState(false);
+    const [theme] = useAtom(themeAtom);
+
+
 
     // Mock traffic stats
     const [traffic, setTraffic] = useState<TrafficData>({ down: 0, up: 0 });
@@ -81,6 +89,8 @@ export default function HomePage() {
     };
 
     const isConnected = !!status.isRunning;
+    const isLight = theme === 'light';
+
 
     // We need lists for the selects
     const configs = Array.isArray(settings.configs) ? settings.configs : [];
@@ -157,15 +167,15 @@ export default function HomePage() {
                 <div className="grid grid-cols-2 gap-2 w-full">
                     {/* Config Select */}
                     <Select value={settings.selectedConfigId || ""} onValueChange={handleConfigChange}>
-                        <SelectTrigger className="w-full min-w-[140px] bg-card/40 backdrop-blur border-white/5 h-12 text-left px-3">
-                            <div className="flex items-center gap-2 overflow-hidden w-full">
-                                <MapPin className="w-4 h-4 text-primary shrink-0" />
-                                <span className="truncate block flex-1 text-left">
-                                    <SelectValue placeholder="Config" />
-                                </span>
+                        <SelectTrigger className="w-full min-w-[140px] bg-card/40 backdrop-blur border-border h-12 text-left px-3">
+                            <div className="flex items-center gap-2 overflow-hidden w-full h-full">
+                                <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                                <div className="truncate flex-1 text-left leading-none flex items-center h-4 translate-y-[2px]">
+                                    <SelectValue placeholder={t("Config")} />
+                                </div>
                             </div>
                         </SelectTrigger>
-                        <SelectContent className="bg-card backdrop-blur-xl border-white/10 max-h-[300px] overflow-hidden">
+                        <SelectContent className="bg-card backdrop-blur-xl border-border max-h-[300px] overflow-hidden">
                             {configs.map((c: Config) => (
                                 <SelectItem key={c.id} value={c.id} className="cursor-pointer">
                                     <span className="flex items-center gap-2">
@@ -174,37 +184,38 @@ export default function HomePage() {
                                     </span>
                                 </SelectItem>
                             ))}
-                            {configs.length === 0 && <div className="p-2 text-xs text-muted-foreground text-center">No configs</div>}
+                            {configs.length === 0 && <div className="p-2 text-xs text-muted-foreground text-center">{t("No configurations found.")}</div>}
                         </SelectContent>
                     </Select>
 
 
                     <Select value={currentResolver} onValueChange={handleDnsChange}>
-                        <SelectTrigger className="w-full min-w-[140px] bg-card/40 backdrop-blur border-white/5 h-12 text-left px-3">
-                            <div className="flex items-center gap-2 overflow-hidden w-full">
-                                <Globe className="w-4 h-4 text-blue-400 shrink-0" />
-                                <span className="truncate block flex-1 text-left">
-                                    <SelectValue placeholder="DNS" />
-                                </span>
+                        <SelectTrigger className="w-full min-w-[140px] bg-card/40 backdrop-blur border-border h-12 text-left px-3">
+                            <div className="flex items-center gap-2 overflow-hidden w-full h-full">
+                                <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                                <div className="truncate flex-1 text-left leading-none flex items-center h-4 translate-y-[2px]">
+                                    <SelectValue placeholder={t("DNS")} />
+                                </div>
                             </div>
                         </SelectTrigger>
-                        <SelectContent className="bg-card backdrop-blur-xl border-white/10 max-h-[200px] overflow-hidden">
+                        <SelectContent className="bg-card backdrop-blur-xl border-border max-h-[200px] overflow-hidden">
                             {dnsOptions.map((d: string) => (
                                 <SelectItem key={d} value={d} className="font-mono text-xs cursor-pointer">
                                     {d}
                                 </SelectItem>
                             ))}
-                            <div className="p-1 border-t border-white/10 mt-1">
+                            <div className="p-1 border-t border-border mt-1">
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full justify-start h-8 text-xs font-medium"
+                                    className="w-full justify-start h-8 text-xs font-medium gap-2"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         setAddDnsOpen(true);
                                     }}
                                 >
-                                    + Add Custom DNS
+                                    <Plus className="w-3 h-3" />
+                                    <span>{t("Add Custom DNS")}</span>
                                 </Button>
                             </div>
                         </SelectContent>
@@ -212,11 +223,11 @@ export default function HomePage() {
                 </div>
 
                 <Dialog open={addDnsOpen} onOpenChange={setAddDnsOpen}>
-                    <DialogContent className="sm:max-w-md bg-card/90 backdrop-blur-xl border-white/10">
+                    <DialogContent className="sm:max-w-md bg-card/90 backdrop-blur-xl border-border">
                         <DialogHeader>
-                            <DialogTitle>Add Custom DNS</DialogTitle>
+                            <DialogTitle>{t("Add Custom DNS")}</DialogTitle>
                             <DialogDescription>
-                                Enter a DNS server address (IP:Port).
+                                {t("Enter a DNS server address (IP:Port).")}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="flex items-center space-x-2">
@@ -226,16 +237,16 @@ export default function HomePage() {
                                     placeholder="8.8.8.8:53"
                                     value={newDns}
                                     onChange={(e) => setNewDns(e.target.value)}
-                                    className="col-span-3 bg-white/5 border-white/10"
+                                    className="col-span-3 bg-muted border-border"
                                 />
                             </div>
                         </div>
-                        <DialogFooter className="sm:justify-end">
+                        <DialogFooter className="sm:justify-end rtl:sm:justify-start">
                             <Button type="button" variant="secondary" onClick={() => setAddDnsOpen(false)}>
-                                Cancel
+                                {t("Cancel")}
                             </Button>
                             <Button type="button" onClick={handleAddDns}>
-                                Add
+                                {t("Add")}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -243,9 +254,9 @@ export default function HomePage() {
             </div>
 
             {settings.authoritative && (
-                <div className="flex items-center gap-2 text-xs md:text-sm text-yellow-500/90 bg-yellow-500/10 px-3 py-1 rounded-md uppercase tracking-wider font-bold border border-yellow-500/20 shadow-[0_0_15px_-3px_rgba(234,179,8,0.3)]">
-                    <Shield className="w-4 h-4" />
-                    Authoritative Mode
+                <div className="flex items-center gap-2 text-xs md:text-sm text-primary bg-primary/10 px-3 py-1 rounded-md uppercase tracking-wider font-bold border border-primary/20 shadow-[0_0_15px_-3px_rgba(37,99,235,0.3)]">
+                    <Shield className="w-4 h-4 shrink-0" />
+                    <span className="h-4 flex items-center leading-none translate-y-[1.5px]">{t("Authoritative Mode")}</span>
                 </div>
             )}
             <div className="relative group my-8">
@@ -265,7 +276,7 @@ export default function HomePage() {
                 {/* Main Button */}
                 <motion.button
                     onClick={toggleConnection}
-                    whileHover="hover"
+                    whileHover={isConnected ? "connectedHover" : "hover"}
                     whileTap="tap"
                     animate={isConnected ? "connected" : "disconnected"}
                     variants={{
@@ -276,10 +287,16 @@ export default function HomePage() {
                             boxShadow: "0px 10px 30px -10px rgba(37, 99, 235, 0.5)",
                         },
                         connected: {
-                            background: "rgba(0, 0, 0, 0.4)",
+                            background: isLight ? "#059669" : "rgba(0, 0, 0, 0.4)", // emerald-600
                             borderColor: "rgba(34, 197, 94, 0.5)",
                             scale: 1,
                             boxShadow: "0px 10px 30px -10px rgba(34, 197, 94, 0.2)",
+                        },
+                        connectedHover: {
+                            background: isLight ? "#dc2626" : "rgba(0, 0, 0, 0.6)", // Red background on hover
+                            borderColor: isLight ? "#dc2626" : "rgba(239, 68, 68, 0.5)",
+                            scale: 1.05,
+                            transition: { duration: 0.3, ease: "easeOut" }
                         },
                         hover: {
                             scale: 1.05,
@@ -303,21 +320,21 @@ export default function HomePage() {
                         <Zap
                             className={cn(
                                 "w-10 h-10 fill-current transition-colors duration-300",
-                                isConnected ? "text-green-400 group-hover:text-red-500" : "text-white/90"
+                                isConnected ? "text-white" : "text-white/90"
                             )}
                         />
                         <span
                             className={cn(
-                                "tracking-widest transition-colors duration-300",
-                                isConnected ? "text-green-400 group-hover:text-red-500" : "text-white"
+                                "tracking-widest transition-colors duration-300 font-bold",
+                                isConnected ? "text-white" : "text-white"
                             )}
                         >
-                            {isConnected ? "STOP" : "CONNECT"}
+                            {isConnected ? t("STOP") : t("CONNECT")}
                         </span>
 
                         {/* Timer only shows when connected */}
                         {isConnected && (
-                            <div className="group-hover:text-red-400 transition-colors duration-300">
+                            <div className="text-white transition-colors duration-300">
                                 <TimerDisplay />
                             </div>
                         )}
@@ -326,11 +343,6 @@ export default function HomePage() {
                     {/* Pulse Ring for Connect State */}
                     {!isConnected && (
                         <span className="absolute inset-0 rounded-full border-4 border-white/20 animate-ping opacity-20 duration-[3000ms]" />
-                    )}
-
-                    {/* Red Border Overlay for Stop State Hover */}
-                    {isConnected && (
-                        <div className="absolute inset-0 rounded-full border-[6px] border-red-500/0 transition-colors duration-300 group-hover:border-red-500" />
                     )}
                 </motion.button>
             </div>
@@ -346,7 +358,7 @@ export default function HomePage() {
                             <ArrowDown className="w-5 h-5" />
                         </div>
                         <div>
-                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Download</div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{t("Download")}</div>
                             <div className="text-lg font-mono font-medium">{formatSpeed(traffic.down)}</div>
                         </div>
                     </CardContent>
@@ -357,7 +369,7 @@ export default function HomePage() {
                             <ArrowUp className="w-5 h-5" />
                         </div>
                         <div>
-                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Upload</div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{t("Upload")}</div>
                             <div className="text-lg font-mono font-medium">{formatSpeed(traffic.up)}</div>
                         </div>
                     </CardContent>
@@ -373,20 +385,26 @@ export default function HomePage() {
                     className={cn(
                         "flex items-center gap-4 px-8 py-4 rounded-full backdrop-blur-xl border transition-all duration-300 shadow-xl",
                         systemProxy
-                            ? "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-500/50"
+                            ? (isLight
+                                ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50"
+                                : "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 hover:border-green-500/50")
                             : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20"
                     )}
                 >
                     <div className={cn(
                         "w-3 h-3 rounded-full shadow-[0_0_15px_currentColor] transition-colors duration-300",
-                        systemProxy ? "bg-green-500" : "bg-neutral-500"
+                        systemProxy
+                            ? (isLight ? "bg-primary" : "bg-green-500")
+                            : "bg-neutral-500"
                     )} />
-                    <span className="font-medium text-lg">System Proxy</span>
+                    <span className="font-medium text-lg">{t("System Proxy")}</span>
                     <span className={cn(
                         "text-xs uppercase tracking-wider font-bold px-2.5 py-1 rounded-full transition-colors",
-                        systemProxy ? "bg-green-500/20 text-green-400" : "bg-white/10 text-muted-foreground"
+                        systemProxy
+                            ? (isLight ? "bg-primary/20 text-primary" : "bg-green-500/20 text-green-400")
+                            : "bg-white/10 text-muted-foreground"
                     )}>
-                        {systemProxy ? "ON" : "OFF"}
+                        {systemProxy ? t("ON") : t("OFF")}
                     </span>
                 </motion.button>
             </div>

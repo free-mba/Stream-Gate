@@ -89,6 +89,8 @@ class IPCController {
 
     // DNS checking
     ipcMain.handle('dns-check-single', this._handleDNSCheckSingle.bind(this));
+    ipcMain.handle('dns-scan-start', this._handleDNSScanStart.bind(this));
+    ipcMain.handle('dns-scan-stop', this._handleDNSScanStop.bind(this));
 
     // App information
     ipcMain.handle('get-version', this._handleGetVersion.bind(this));
@@ -531,6 +533,34 @@ class IPCController {
       if (c !== 0) return c;
     }
     return 0;
+  }
+  /**
+   * Handle dns-scan-start
+   * @private
+   */
+  async _handleDNSScanStart(event, payload) {
+    this.dnsService.startScan(
+      payload,
+      (completed, total) => {
+        this.windowService.sendToRenderer('dns-scan-progress', { completed, total });
+      },
+      (result) => {
+        this.windowService.sendToRenderer('dns-scan-result', result);
+      },
+      () => {
+        this.windowService.sendToRenderer('dns-scan-complete');
+      }
+    );
+    return { success: true };
+  }
+
+  /**
+   * Handle dns-scan-stop
+   * @private
+   */
+  async _handleDNSScanStop() {
+    await this.dnsService.stopScan();
+    return { success: true };
   }
 }
 
