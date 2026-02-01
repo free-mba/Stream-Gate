@@ -57,31 +57,31 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Download latest Stream Gate client binary (from stream-gate-rust-deploy)
+      - name: Download latest Stream Gate client binary (from slipstream-rust-deploy)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          REPO="free-mba/Stream-Gate-rust-deploy"
+          REPO="mirzaaghazadeh/slipstream-rust-deploy"
           mkdir -p binaries
           # Ensure we always use fresh binaries for releases
-          rm -f binaries/stream-gate-client-*
+          rm -f binaries/stream-client-*
 
           if [ "${{ matrix.platform }}" == "mac" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
-              ASSET="stream-gate-client-darwin-arm64"
-              OUT="stream-gate-client-mac-arm64"
+              ASSET="slipstream-client-darwin-arm64"
+              OUT="stream-client-mac-arm64"
             else
-              ASSET="stream-gate-client-darwin-amd64"
-              OUT="stream-gate-client-mac-intel"
+              ASSET="slipstream-client-darwin-amd64"
+              OUT="stream-client-mac-intel"
             fi
           elif [ "${{ matrix.platform }}" == "linux" ]; then
-            ASSET="stream-gate-client-linux-amd64"
-            OUT="stream-gate-client-linux"
+            ASSET="slipstream-client-linux-amd64"
+            OUT="stream-client-linux"
           elif [ "${{ matrix.platform }}" == "win" ]; then
-            ASSET="stream-gate-client-windows-amd64.exe"
-            OUT="stream-gate-client-win.exe"
+            ASSET="slipstream-client-windows-amd64.exe"
+            OUT="stream-client-win.exe"
           else
             echo "Unknown platform: ${{ matrix.platform }}"
             exit 1

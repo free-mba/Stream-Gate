@@ -43,8 +43,8 @@ function assertBinaryPresent(fileName) {
   if (!p) {
     throw new Error(
       `Missing required binary: ${fileName}\n` +
-        `Expected at: ${candidates.join(' OR ')}\n` +
-        `Fix: place ${fileName} under ./binaries/ (preferred) before building.`
+      `Expected at: ${candidates.join(' OR ')}\n` +
+      `Fix: place ${fileName} under ./binaries/ (preferred) before building.`
     );
   }
 
@@ -58,8 +58,8 @@ function assertBinaryPresent(fileName) {
   if (isGitLfsPointer(headBuf)) {
     throw new Error(
       `${fileName} looks like a Git LFS pointer file, not the real binary.\n` +
-        `Path: ${p}\n` +
-        `Fix: enable LFS checkout (e.g. actions/checkout with lfs: true) or run 'git lfs pull' locally.`
+      `Path: ${p}\n` +
+      `Fix: enable LFS checkout (e.g. actions/checkout with lfs: true) or run 'git lfs pull' locally.`
     );
   }
 
@@ -67,8 +67,8 @@ function assertBinaryPresent(fileName) {
   if (stat.size < 10 * 1024) {
     throw new Error(
       `${fileName} is unexpectedly small (${stat.size} bytes).\n` +
-        `Path: ${p}\n` +
-        `Fix: ensure the correct binary is present (not a placeholder) before building.`
+      `Path: ${p}\n` +
+      `Fix: ensure the correct binary is present (not a placeholder) before building.`
     );
   }
 }
@@ -78,22 +78,22 @@ function main() {
   const p = platform || 'all';
 
   const required = [];
-  if (p === 'win') required.push('Stream Gate-client-win.exe');
+  if (p === 'win') required.push('stream-client-win.exe');
   else if (p === 'mac') {
     // If arch is specified, verify only that target. Otherwise verify both.
     const a = (arch || '').toLowerCase();
-    if (a === 'arm64' || a === 'aarch64') required.push('Stream Gate-client-mac-arm64');
+    if (a === 'arm64' || a === 'aarch64') required.push('stream-client-mac-arm64');
     else if (a === 'x64' || a === 'amd64' || a === 'intel' || a === 'x86_64')
-      required.push('Stream Gate-client-mac-intel');
-    else required.push('Stream Gate-client-mac-arm64', 'Stream Gate-client-mac-intel');
+      required.push('stream-client-mac-intel');
+    else required.push('stream-client-mac-arm64', 'stream-client-mac-intel');
   }
-  else if (p === 'linux') required.push('Stream Gate-client-linux');
+  else if (p === 'linux') required.push('stream-client-linux');
   else if (p === 'all')
     required.push(
-      'Stream Gate-client-win.exe',
-      'Stream Gate-client-mac-arm64',
-      'Stream Gate-client-mac-intel',
-      'Stream Gate-client-linux'
+      'stream-client-win.exe',
+      'stream-client-mac-arm64',
+      'stream-client-mac-intel',
+      'stream-client-linux'
     );
   else {
     throw new Error(`Unknown --platform value: ${String(platform)}`);
