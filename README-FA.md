@@ -34,6 +34,14 @@
 | Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
 | Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
 
+
+> [!CAUTION] 
+> **حل مشکل اجرا در مک (App is damaged):**  
+> اگر با خطای *"Stream Gate is damaged and can’t be opened"* مواجه شدید، دستور زیر را در ترمینال اجرا کنید:  
+> ```bash
+> xattr -cr /Applications/Stream\ Gate.app
+> ```
+
 اگر دانلود مستقیم کار نکرد، از صفحه [Releases](https://github.com/free-mba/Stream-Gate/releases/latest) استفاده کنید.
 
 2. فایل نصب مناسب سیستم عامل خود را دانلود کنید:

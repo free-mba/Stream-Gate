@@ -63,6 +63,16 @@ Download the latest release for your platform:
 | Android | [SlipNet](https://github.com/obscuraio/SlipNet) (Recommended Client) |
 
 ---
+<br>
+
+> [!CAUTION] 
+> **macOS: App is damaged and can’t be opened?**  
+> If you see the error *"Stream Gate is damaged and can’t be opened"*, run this command in Terminal:  
+> ```bash
+> xattr -cr /Applications/Stream\ Gate.app
+> ```
+
+---
 
 ## 🚀 Quick Launch Guide
 

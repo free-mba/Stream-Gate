@@ -95,6 +95,14 @@ If you need to create a release manually:
 4. Write release notes and publish
 
 ## Troubleshooting
+ 
+### macOS: "App is damaged and can’t be opened"
+
+If users report this error, it is due to macOS Gatekeeper quarantine. The fix is to remove the quarantine attribute:
+
+```bash
+xattr -cr /Applications/Stream\ Gate.app
+```
 
 ### Build fails in GitHub Actions
 
