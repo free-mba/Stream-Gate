@@ -98,10 +98,13 @@ If you need to create a release manually:
  
 ### macOS: "App is damaged and can’t be opened"
 
-If users report this error, it is due to macOS Gatekeeper quarantine. The fix is to remove the quarantine attribute:
+xattr: [Errno 1] Operation not permitted
+```
+
+The fix is to remove the quarantine attribute using `sudo`:
 
 ```bash
-xattr -cr /Applications/Stream\ Gate.app
+sudo xattr -cr /Applications/Stream\ Gate.app
 ```
 
 ### Build fails in GitHub Actions

@@ -69,8 +69,9 @@ Download the latest release for your platform:
 > **macOS: App is damaged and can’t be opened?**  
 > If you see the error *"Stream Gate is damaged and can’t be opened"*, run this command in Terminal:  
 > ```bash
-> xattr -cr /Applications/Stream\ Gate.app
+> sudo xattr -cr /Applications/Stream\ Gate.app
 > ```
+> *(Enter your password if prompted)*
 
 ---
 
