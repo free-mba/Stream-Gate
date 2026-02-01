@@ -249,7 +249,7 @@ class DNSService {
 
     const servers = payload.servers || [];
     const domain = payload.domain || 'google.com';
-    const mode = payload.mode || 'Stream Gate';
+    const mode = payload.mode || 'stream';
     const timeout = payload.timeout || 3;
     const concurrency = Math.min(Math.max(1, payload.workers || 50), 500);
 

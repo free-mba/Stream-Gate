@@ -44,7 +44,7 @@ class ConnectionService {
     // Listen for process exit
     this.processManager.onExit((code) => {
       if (this.isRunning && !this.quitting && !this.cleanupInProgress) {
-        this.logger.info('Stream Gate process died unexpectedly. Attempting automatic reconnection...');
+        this.logger.info('Stream client process died unexpectedly. Attempting automatic reconnection...');
         this._attemptReconnection();
       }
     });
@@ -310,7 +310,7 @@ class ConnectionService {
     const proxyStatus = this.proxyService.getStatus();
 
     return {
-      Stream GateRunning: this.processManager.isRunning(),
+      streamRunning: this.processManager.isRunning(),
       proxyRunning: proxyStatus.httpProxyRunning,
       socksForwardRunning: proxyStatus.socksForwardRunning,
       tunRunning: false, // TUN mode not used

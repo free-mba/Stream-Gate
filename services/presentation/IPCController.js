@@ -33,29 +33,29 @@ class IPCController {
     this.eventEmitter.on('log:message', (data) => {
       const level = data && data.level ? data.level.toUpperCase() : 'INFO';
       const message = data && data.message ? data.message : String(data);
-      this.windowService.sendToRenderer('Stream Gate-log', `[${level}] ${message}`);
+      this.windowService.sendToRenderer('stream-log', `[${level}] ${message}`);
     });
 
     this.eventEmitter.on('log:error', (data) => {
-      this.windowService.sendToRenderer('Stream Gate-error', `[ERROR] ${data.message}`);
+      this.windowService.sendToRenderer('stream-error', `[ERROR] ${data.message}`);
     });
 
     // Forward process output
     this.eventEmitter.on('process:output', (data) => {
-      this.windowService.sendToRenderer('Stream Gate-log', data);
+      this.windowService.sendToRenderer('stream-log', data);
     });
 
     this.eventEmitter.on('process:error', (data) => {
-      this.windowService.sendToRenderer('Stream Gate-error', data);
+      this.windowService.sendToRenderer('stream-error', data);
     });
 
     // Forward proxy logs
     this.eventEmitter.on('proxy:log', (data) => {
-      this.windowService.sendToRenderer('Stream Gate-log', data);
+      this.windowService.sendToRenderer('stream-log', data);
     });
 
     this.eventEmitter.on('proxy:error', (data) => {
-      this.windowService.sendToRenderer('Stream Gate-error', data);
+      this.windowService.sendToRenderer('stream-error', data);
     });
 
     // Forward traffic updates
@@ -307,7 +307,7 @@ class IPCController {
           path: '/repos/free-mba/Stream-Gate/releases/latest',
           method: 'GET',
           headers: {
-            'User-Agent': 'Stream Gate-GUI',
+            'User-Agent': 'stream-client-gui',
             'Accept': 'application/vnd.github.v3+json'
           }
         };

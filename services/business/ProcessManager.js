@@ -24,7 +24,7 @@ class ProcessManager {
    * @returns {string|null} Path to binary or null if unsupported
    * @private
    */
-  _getStream GateClientPath() {
+  _getClientPath() {
     const platform = process.platform;
     const resourcesPath = this.app.isPackaged
       ? path.join(process.resourcesPath)
@@ -32,17 +32,17 @@ class ProcessManager {
 
     if (platform === 'darwin') {
       const preferred =
-        process.arch === 'arm64' ? 'Stream Gate-client-mac-arm64' : 'Stream Gate-client-mac-intel';
+        process.arch === 'arm64' ? 'stream-client-mac-arm64' : 'stream-client-mac-intel';
       const fallback =
-        process.arch === 'arm64' ? 'Stream Gate-client-mac-intel' : 'Stream Gate-client-mac-arm64';
+        process.arch === 'arm64' ? 'stream-client-mac-intel' : 'stream-client-mac-arm64';
       const candidates = [
         // Preferred: packaged and dev both keep binaries under ./binaries/
         path.join(resourcesPath, 'binaries', preferred),
         // Back-compat: allow repo-root placement during transition
         path.join(resourcesPath, preferred),
         // Extra back-compat: legacy single mac binary name
-        path.join(resourcesPath, 'binaries', 'Stream Gate-client-mac'),
-        path.join(resourcesPath, 'Stream Gate-client-mac'),
+        path.join(resourcesPath, 'binaries', 'stream-client-mac'),
+        path.join(resourcesPath, 'stream-client-mac'),
         // If user runs under Rosetta, try the other arch too (if present)
         path.join(resourcesPath, 'binaries', fallback),
         path.join(resourcesPath, fallback)
@@ -50,14 +50,14 @@ class ProcessManager {
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     } else if (platform === 'win32') {
       const candidates = [
-        path.join(resourcesPath, 'binaries', 'Stream Gate-client-win.exe'),
-        path.join(resourcesPath, 'Stream Gate-client-win.exe')
+        path.join(resourcesPath, 'binaries', 'stream-client-win.exe'),
+        path.join(resourcesPath, 'stream-client-win.exe')
       ];
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     } else if (platform === 'linux') {
       const candidates = [
-        path.join(resourcesPath, 'binaries', 'Stream Gate-client-linux'),
-        path.join(resourcesPath, 'Stream Gate-client-linux')
+        path.join(resourcesPath, 'binaries', 'stream-client-linux'),
+        path.join(resourcesPath, 'stream-client-linux')
       ];
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     }
@@ -102,7 +102,7 @@ class ProcessManager {
   async start(resolver, domain, options = {}) {
     const { authoritative = false } = options;
 
-    const clientPath = this._getStream GateClientPath();
+    const clientPath = this._getClientPath();
     if (!clientPath) {
       throw new Error('Unsupported platform');
     }
@@ -113,9 +113,9 @@ class ProcessManager {
       const expectedMsg = `Expected at: ${clientPath}`;
       const hint =
         process.platform === 'win32'
-          ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes Stream Gate-client-win.exe.\n\nWindows Defender tip: open Windows Security → Virus & threat protection → Protection history, restore/allow "Stream Gate-client-win.exe" if quarantined, and add an Exclusion for the install folder.'
+          ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes stream-client-win.exe.\n\nWindows Defender tip: open Windows Security → Virus & threat protection → Protection history, restore/allow "stream-client-win.exe" if quarantined, and add an Exclusion for the install folder.'
           : process.platform === 'darwin'
-            ? 'Ensure the correct macOS Stream Gate client binary exists under ./binaries/ (Stream Gate-client-mac-arm64 or Stream Gate-client-mac-intel) and is executable.'
+            ? 'Ensure the correct macOS Stream Gate client binary exists under ./binaries/ (stream-client-mac-arm64 or stream-client-mac-intel) and is executable.'
             : 'Ensure the correct Stream Gate client binary exists under ./binaries/ and is executable.';
       throw new Error(`${baseMsg}\n${expectedMsg}\n${hint}`);
     }

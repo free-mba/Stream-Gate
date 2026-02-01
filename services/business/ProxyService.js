@@ -553,7 +553,7 @@ class ProxyService {
           let connectMsg = `CONNECT ${host}:${port} HTTP/1.1\r\n`;
           connectMsg += `Host: ${host}:${port}\r\n`;
           connectMsg += `Proxy-Connection: Keep-Alive\r\n`;
-          connectMsg += `User-Agent: Stream Gate-Bridge/1.0\r\n`;
+          connectMsg += `User-Agent: stream-bridge/1.0\r\n`;
 
           // Add auth if configured
           if (settings.socks5AuthEnabled && settings.socks5AuthUsername && settings.socks5AuthPassword) {

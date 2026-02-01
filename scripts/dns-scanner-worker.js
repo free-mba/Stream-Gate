@@ -148,7 +148,7 @@ async function testDnstt(resolver, server, domain, timeoutMs) {
 /**
  * Test Stream Gate Compatibility
  */
-async function testStream Gate(resolver, server, domain, timeoutMs) {
+async function testStreamGate(resolver, server, domain, timeoutMs) {
     let successful = 0;
     const responseTimes = [];
     const totalQueries = 15;
@@ -275,7 +275,7 @@ parentPort.on('message', async (task) => {
         if (mode === 'dnstt') {
             resultData = await testDnstt(resolver, server, domain, timeoutMs);
         } else {
-            resultData = await testStream Gate(resolver, server, domain, timeoutMs);
+            resultData = await testStreamGate(resolver, server, domain, timeoutMs);
         }
 
         const diff = process.hrtime(start);
