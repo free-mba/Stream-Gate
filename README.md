@@ -1,9 +1,9 @@
-# SlipStream GUI
+# Stream Gate
 
 
 
 <div align="center">
-  <img src="screen.png" alt="SlipStream GUI Screenshot" width="800">
+  <img src="screen.png" alt="Stream Gate Screenshot" width="800">
 </div>
 
 
@@ -11,10 +11,10 @@
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
-  <a href="https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest">
-    <img src="https://img.shields.io/github/v/release/mirzaaghazadeh/SlipStreamGUI?style=for-the-badge&label=Version&sort=semver" alt="Version">
+  <a href="https://github.com/free-mba/Stream-Gate/releases/latest">
+    <img src="https://img.shields.io/github/v/release/free-mba/Stream-Gate?style=for-the-badge&label=Version&sort=semver" alt="Version">
   </a>
-  <img src="https://img.shields.io/github/actions/workflow/status/mirzaaghazadeh/SlipStreamGUI/release.yml?style=for-the-badge&label=Build" alt="Build Status">
+  <img src="https://img.shields.io/github/actions/workflow/status/free-mba/Stream-Gate/release.yml?style=for-the-badge&label=Build" alt="Build Status">
 </div>
 
 <br>
@@ -30,7 +30,7 @@
 <br>
 
 <div align="center">
-  <strong>A modern, cross-platform GUI client for SlipStream VPN</strong><br>
+  <strong>A modern, cross-platform GUI client for Stream Gate VPN</strong><br>
   Provides secure, system-wide tunneling through an HTTP proxy interface
 </div>
 
@@ -53,7 +53,7 @@
 ### Latest Release
 
 <div align="center">
-  <a href="https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest">
+  <a href="https://github.com/free-mba/Stream-Gate/releases/latest">
     <img src="https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge&logo=github" alt="Download Latest Release">
   </a>
 </div>
@@ -62,18 +62,18 @@
 
 | Platform | Download |
 |----------|----------|
-| macOS (Apple Silicon) | [SlipStream-GUI-macOS-ARM64.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-ARM64.dmg) |
-| macOS (Intel) | [SlipStream-GUI-macOS-Intel.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-Intel.dmg) |
-| Windows (64-bit) | [SlipStream-GUI-Windows-x64.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x64.exe) |
-| Windows (32-bit) | [SlipStream-GUI-Windows-x86.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x86.exe) |
-| Linux (x86_64) AppImage | [SlipStream-GUI-Linux-x64.AppImage](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.AppImage) |
-| Linux (x86_64) DEB | [SlipStream-GUI-Linux-x64.deb](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.deb) |
+| macOS (Apple Silicon) | [Stream Gate-GUI-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream Gate-GUI-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream Gate-GUI-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x64.exe) |
+| Windows (32-bit) | [Stream Gate-GUI-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
 
-If a direct download fails, use the [Releases page](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest).
+If a direct download fails, use the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest).
 
 ### Quick Install
 
-1. **Download** the latest release for your platform from the [Releases page](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest)
+1. **Download** the latest release for your platform from the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest)
 2. **Install** the application (double-click the installer)
 3. **Run** the app and click "Start VPN"
 
@@ -85,11 +85,11 @@ That's it! No additional setup required.
 
 ### First Time Setup
 
-1. **Launch SlipStream GUI** after installation
+1. **Launch Stream Gate** after installation
 
 2. **Configure Settings** (optional):
    - **DNS Resolver**: Your DNS server (default: `8.8.8.8:53`)
-   - **Domain**: Your SlipStream server domain (default: `s.example.com`)
+   - **Domain**: Your Stream Gate server domain (default: `s.example.com`)
    - **System Proxy**: Toggle to auto-configure system proxy (recommended)
 
 3. **DNS Checker (optional, recommended if you're unsure about DNS)**:
@@ -102,7 +102,7 @@ That's it! No additional setup required.
 4. **Start the VPN**:
    - Click the **"Start VPN"** button
    - Wait for status indicators to show "Running"
-   - Your traffic is now routed through SlipStream!
+   - Your traffic is now routed through Stream Gate!
 
 ### Using the VPN
 
@@ -112,13 +112,13 @@ That's it! No additional setup required.
 - **Test Connection**: Use the "Test Proxy Connection" button to verify functionality
 - **Stop VPN**: Click "Stop VPN" when you want to disconnect
 
-### Setting Up a SlipStream Server
+### Setting Up a Stream Gate Server
 
-To use SlipStream GUI, you need a SlipStream server running. For detailed instructions on deploying your own SlipStream server, check out:
+To use Stream Gate, you need a Stream Gate server running. For detailed instructions on deploying your own Stream Gate server, check out:
 
-🔗 **[slipstream-rust-deploy](https://github.com/AliRezaBeigy/slipstream-rust-deploy)**
+🔗 **[stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy)**
 
-This repository provides a one-click deployment script for setting up a SlipStream server, including:
+This repository provides a one-click deployment script for setting up a Stream Gate server, including:
 
 - ✅ **One-command installation**: Automated server deployment
 - ✅ **DNS configuration guide**: Step-by-step DNS setup instructions
@@ -131,7 +131,7 @@ This repository provides a one-click deployment script for setting up a SlipStre
 
 ```bash
 # One-command server installation
-bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-deploy/master/slipstream-rust-deploy.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/stream-rust-deploy/master/stream-rust-deploy.sh)
 ```
 
 **What You'll Need:**
@@ -140,9 +140,9 @@ bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-d
 - Root or sudo access on the server
 
 **After Server Setup:**
-1. Configure your DNS records (see the [slipstream-rust-deploy](https://github.com/AliRezaBeigy/slipstream-rust-deploy) repository for detailed DNS setup)
+1. Configure your DNS records (see the [stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy) repository for detailed DNS setup)
 2. Wait for DNS propagation (can take up to 24 hours)
-3. In SlipStream GUI, enter your server domain (e.g., `s.example.com`)
+3. In Stream Gate, enter your server domain (e.g., `s.example.com`)
 4. Enter your DNS resolver (e.g., `YOUR_SERVER_IP:53`)
 5. Click "Start VPN" to connect!
 
@@ -151,7 +151,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-d
 ## ✨ Features
 
 - 🖥️ **Cross-Platform**: Native support for macOS, Windows, and Linux
-- 🔒 **System-Wide VPN**: Routes all traffic through SlipStream VPN
+- 🔒 **System-Wide VPN**: Routes all traffic through Stream Gate VPN
 - 🎨 **Modern GUI**: Intuitive interface with real-time status and logs
 - ⚙️ **Auto-Configuration**: Automatically configures system proxy settings
 - 📦 **Self-Contained**: All dependencies bundled (no internet required after installation)
@@ -168,7 +168,7 @@ If your PC and mobile device are on the same Wi-Fi network, you can configure yo
 ### Prerequisites
 
 - PC and mobile device must be connected to the same Wi-Fi network
-- SlipStream GUI must be running with VPN started
+- Stream Gate must be running with VPN started
 - Find your PC's local IP address (see instructions below)
 
 ### Finding Your PC's IP Address
@@ -230,14 +230,14 @@ The IP address will typically look like `192.168.1.XXX` or `10.0.0.XXX`.
 
 ## 🐛 Troubleshooting
 
-### macOS: "SlipStream GUI is damaged and can't be opened"
+### macOS: "Stream Gate is damaged and can't be opened"
 
 If you see this error when trying to open the app on macOS, it's usually due to macOS Gatekeeper security settings. Here's how to fix it:
 
 **Option 1: Remove the quarantine attribute (Recommended)**
 ```bash
 # Open Terminal and run:
-xattr -cr /Applications/SlipStream\ GUI.app
+xattr -cr /Applications/Stream Gate\ GUI.app
 ```
 
 Then try opening the app again.
@@ -245,11 +245,11 @@ Then try opening the app again.
 **Option 2: Allow the app in System Settings**
 1. Go to **System Settings** → **Privacy & Security**
 2. Scroll down to the **Security** section
-3. If you see a message about "SlipStream GUI" being blocked, click **"Open Anyway"**
+3. If you see a message about "Stream Gate" being blocked, click **"Open Anyway"**
 4. Confirm by clicking **"Open"** in the dialog
 
 **Option 3: Right-click to open**
-1. Right-click (or Control-click) on the SlipStream GUI app
+1. Right-click (or Control-click) on the Stream Gate app
 2. Select **"Open"** from the context menu
 3. Click **"Open"** in the confirmation dialog
 
@@ -257,15 +257,15 @@ After the first successful launch, macOS will remember your choice and you won't
 
 ### Windows: Run as Administrator
 
-For best functionality on Windows, especially when configuring system proxy settings, run SlipStream GUI as Administrator:
+For best functionality on Windows, especially when configuring system proxy settings, run Stream Gate as Administrator:
 
 **Option 1: Right-click method**
-1. Right-click on the SlipStream GUI shortcut or executable
+1. Right-click on the Stream Gate shortcut or executable
 2. Select **"Run as administrator"**
 3. Click **"Yes"** in the User Account Control (UAC) prompt
 
 **Option 2: Always run as administrator**
-1. Right-click on the SlipStream GUI shortcut
+1. Right-click on the Stream Gate shortcut
 2. Select **"Properties"**
 3. Go to the **"Compatibility"** tab
 4. Check **"Run this program as an administrator"**
@@ -291,7 +291,7 @@ For best functionality on Windows, especially when configuring system proxy sett
 
 - Use the "Test Proxy Connection" button to verify functionality
 - Enable verbose logging for detailed connection information
-- Check that your SlipStream server domain is correct
+- Check that your Stream Gate server domain is correct
 
 ---
 
@@ -306,8 +306,8 @@ For best functionality on Windows, especially when configuring system proxy sett
 
 ```bash
 # Clone the repository
-git clone https://github.com/mirzaaghazadeh/SlipStreamGUI.git
-cd SlipStreamGUI
+git clone https://github.com/free-mba/Stream-Gate.git
+cd Stream-Gate
 
 # Install dependencies
 npm install
@@ -316,7 +316,7 @@ npm install
 ### Development
 
 ```bash
-# Download the latest SlipStream client binaries (recommended)
+# Download the latest Stream Gate client binaries (recommended)
 npm run download:binaries
 
 # Run in development mode
@@ -326,7 +326,7 @@ npm start
 ### Building
 
 ```bash
-# Download the latest SlipStream client binaries (recommended)
+# Download the latest Stream Gate client binaries (recommended)
 npm run download:binaries
 
 # Build for macOS
@@ -350,7 +350,7 @@ For detailed build instructions, see [BUILD.md](BUILD.md).
 
 ## 📖 How It Works
 
-SlipStream GUI creates a multi-layer proxy architecture:
+Stream Gate creates a multi-layer proxy architecture:
 
 ```
 Your Applications
@@ -359,12 +359,12 @@ HTTP Proxy Server (127.0.0.1:8080)
     ↓ SOCKS5 Protocol
 SOCKS5 Client (127.0.0.1:5201)
     ↓ Encrypted Tunnel
-SlipStream VPN Server
+Stream Gate VPN Server
 ```
 
 ### Architecture
 
-1. **SlipStream Client**: Runs the native binary (`binaries/slipstream-client-mac-arm64` / `binaries/slipstream-client-mac-intel`, `binaries/slipstream-client-win.exe`, or `binaries/slipstream-client-linux`) that establishes a SOCKS5 proxy on port 5201
+1. **Stream Gate Client**: Runs the native binary (`binaries/stream-client-mac-arm64` / `binaries/stream-client-mac-intel`, `binaries/stream-client-win.exe`, or `binaries/stream-client-linux`) that establishes a SOCKS5 proxy on port 5201
 2. **HTTP Proxy Server**: Node.js server listening on port 8080 that converts HTTP requests to SOCKS5
 3. **System Proxy**: Automatically configures system proxy settings to route all traffic through the VPN
 
@@ -373,7 +373,7 @@ SlipStream VPN Server
 ## 📁 Project Structure
 
 ```
-SlipStream-GUI/
+Stream Gate-GUI/
 ├── assets/              # App icons and images
 │   └── icon.png
 ├── main.js              # Electron main process
@@ -402,7 +402,7 @@ For detailed project structure, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 ### Ports
 
 - **8080**: HTTP Proxy Server
-- **5201**: SOCKS5 Proxy (SlipStream client)
+- **5201**: SOCKS5 Proxy (Stream Gate client)
 
 ### Configuration
 
@@ -445,7 +445,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Related Projects
 
-- **[slipstream-rust-deploy](https://github.com/AliRezaBeigy/slipstream-rust-deploy)**: Deploy your own SlipStream server
+- **[stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy)**: Deploy your own Stream Gate server
 
 ---
 

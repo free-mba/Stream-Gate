@@ -1,5 +1,5 @@
 /**
- * SlipStream GUI - Main Entry Point
+ * Stream Gate - Main Entry Point
  *
  * This file acts as the orchestrator, initializing all services
  * and wiring up dependencies using dependency injection.

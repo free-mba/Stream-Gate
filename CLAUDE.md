@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SlipStream GUI is a cross-platform desktop VPN client built with Electron. It creates a multi-layer proxy architecture where user applications connect to an HTTP proxy (port 8080), which forwards to a SOCKS5 client (port 5201), which tunnels through an encrypted connection to a SlipStream VPN server.
+Stream Gate is a cross-platform desktop VPN client built with Electron. It creates a multi-layer proxy architecture where user applications connect to an HTTP proxy (port 8080), which forwards to a SOCKS5 client (port 5201), which tunnels through an encrypted connection to a Stream Gate VPN server.
 
 **Technology Stack:**
 - Electron 28.0.0 (desktop framework)
 - Vanilla HTML/CSS/JavaScript (no frontend frameworks)
 - Node.js (backend runtime)
-- Native C++ binaries (SlipStream client executables)
+- Native C++ binaries (Stream Gate client executables)
 
 **Key Files:**
 - `main.js` - Electron main process (2000+ lines), handles process management, IPC, HTTP proxy server, system proxy configuration
@@ -41,7 +41,7 @@ npm run build:all            # Build for all platforms
 dist/                        # Contains built installers
 ```
 
-**Note:** Build commands have pre-hooks that automatically verify binaries exist. The download script fetches from `mirzaaghazadeh/slipstream-rust-deploy` releases on GitHub.
+**Note:** Build commands have pre-hooks that automatically verify binaries exist. The download script fetches from `free-mba/Stream Gate-rust-deploy` releases on GitHub.
 
 ## Architecture
 
@@ -52,9 +52,9 @@ User Applications
     ↓ HTTP/HTTPS (127.0.0.1:8080)
 HTTP Proxy Server (Node.js http-proxy)
     ↓ SOCKS5 Protocol (127.0.0.1:5201)
-SOCKS5 Client (slipstream-client binary)
+SOCKS5 Client (Stream Gate-client binary)
     ↓ Encrypted Tunnel
-SlipStream VPN Server
+Stream Gate VPN Server
 ```
 
 ### Main Process Architecture (main.js)
@@ -67,7 +67,7 @@ SlipStream VPN Server
    - One-time migration from legacy local settings file
 
 2. **Process Management**
-   - Spawns native SlipStream client binaries as child processes
+   - Spawns native Stream Gate client binaries as child processes
    - Platform-aware binary selection (mac-arm64, mac-intel, win, linux)
    - Automatic executable permission handling on Unix systems
    - Graceful process termination on app quit
@@ -128,7 +128,7 @@ const settingsPath = path.join(app.getPath('userData'), 'settings.json');
 ### Binary Execution
 ```javascript
 // Platform-aware binary selection
-const binaryName = process.platform === 'darwin' ? 'slipstream-client-mac-arm64' : ...
+const binaryName = process.platform === 'darwin' ? 'Stream Gate-client-mac-arm64' : ...
 const binaryPath = path.join(isDev ? __dirname : process.resourcesPath, 'binaries', binaryName);
 spawn(binaryPath, args, { stdio: 'pipe' });
 ```
@@ -170,4 +170,4 @@ Use `process.platform` checks:
 
 ## Related Projects
 
-- **slipstream-rust-deploy** (https://github.com/AliRezaBeigy/slipstream-rust-deploy): Server deployment scripts and source of native client binaries
+- **Stream Gate-rust-deploy** (https://github.com/AliRezaBeigy/Stream Gate-rust-deploy): Server deployment scripts and source of native client binaries

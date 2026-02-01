@@ -44,7 +44,7 @@ class ConnectionService {
     // Listen for process exit
     this.processManager.onExit((code) => {
       if (this.isRunning && !this.quitting && !this.cleanupInProgress) {
-        this.logger.info('SlipStream process died unexpectedly. Attempting automatic reconnection...');
+        this.logger.info('Stream Gate process died unexpectedly. Attempting automatic reconnection...');
         this._attemptReconnection();
       }
     });
@@ -86,7 +86,7 @@ class ConnectionService {
       this.lastUsedResolver = resolver;
       this.lastUsedDomain = domain;
 
-      // Start Slipstream client
+      // Start Stream Gate client
       const authoritative = this.settingsService.get('authoritative');
       await this.processManager.start(resolver, domain, { authoritative });
 
@@ -310,7 +310,7 @@ class ConnectionService {
     const proxyStatus = this.proxyService.getStatus();
 
     return {
-      slipstreamRunning: this.processManager.isRunning(),
+      Stream GateRunning: this.processManager.isRunning(),
       proxyRunning: proxyStatus.httpProxyRunning,
       socksForwardRunning: proxyStatus.socksForwardRunning,
       tunRunning: false, // TUN mode not used

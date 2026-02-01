@@ -22,12 +22,12 @@ export default function MainLayout() {
             setLogs(prev => [...prev, String(msg)]);
         };
 
-        ipc.on('slipstream-log', handleLog);
-        ipc.on('slipstream-error', handleLog);
+        ipc.on('stream-log', handleLog);
+        ipc.on('stream-error', handleLog);
 
         return () => {
-            ipc.removeListener('slipstream-log', handleLog);
-            ipc.removeListener('slipstream-error', handleLog);
+            ipc.removeListener('stream-log', handleLog);
+            ipc.removeListener('stream-error', handleLog);
         };
     }, [ipc]);
 
@@ -54,7 +54,7 @@ export default function MainLayout() {
                     </div>
                     <div>
                         <h1 className="font-bold text-lg tracking-tight leading-none text-foreground">{APP_NAME}</h1>
-                        <span className="text-[10px] text-muted-foreground/60 font-semibold tracking-wider uppercase">{t("GUI Client for Slipstream")}</span>
+                        <span className="text-[10px] text-muted-foreground/60 font-semibold tracking-wider uppercase">{t("GUI Client for Stream Gate")}</span>
                     </div>
                 </div>
 

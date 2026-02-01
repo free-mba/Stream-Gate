@@ -44,26 +44,26 @@ jobs:
           echo "Running on OS: ${{ runner.os }}"
           MISSING_BINARY=0
           if [ "${{ runner.os }}" == "Linux" ]; then
-            if [ -f binaries/slipstream-client-linux ] || [ -f slipstream-client-linux ]; then
+            if [ -f binaries/Stream Gate-client-linux ] || [ -f Stream Gate-client-linux ]; then
               echo "✅ Linux binary found"
             else
-              echo "⚠️  WARNING: Linux binary (binaries/slipstream-client-linux) not found"
+              echo "⚠️  WARNING: Linux binary (binaries/Stream Gate-client-linux) not found"
               echo "   This binary is required for Linux builds (see BUILD.md)"
               MISSING_BINARY=1
             fi
           elif [ "${{ runner.os }}" == "macOS" ]; then
-            if [ -f binaries/slipstream-client-mac-arm64 ] || [ -f binaries/slipstream-client-mac-intel ] || [ -f slipstream-client-mac ]; then
+            if [ -f binaries/Stream Gate-client-mac-arm64 ] || [ -f binaries/Stream Gate-client-mac-intel ] || [ -f Stream Gate-client-mac ]; then
               echo "✅ macOS binary found"
             else
-              echo "⚠️  WARNING: macOS binaries (binaries/slipstream-client-mac-arm64 and/or binaries/slipstream-client-mac-intel) not found"
+              echo "⚠️  WARNING: macOS binaries (binaries/Stream Gate-client-mac-arm64 and/or binaries/Stream Gate-client-mac-intel) not found"
               echo "   This binary is required for macOS builds (see BUILD.md)"
               MISSING_BINARY=1
             fi
           elif [ "${{ runner.os }}" == "Windows" ]; then
-            if [ -f binaries/slipstream-client-win.exe ] || [ -f slipstream-client-win.exe ]; then
+            if [ -f binaries/Stream Gate-client-win.exe ] || [ -f Stream Gate-client-win.exe ]; then
               echo "✅ Windows binary found"
             else
-              echo "⚠️  WARNING: Windows binary (binaries/slipstream-client-win.exe) not found"
+              echo "⚠️  WARNING: Windows binary (binaries/Stream Gate-client-win.exe) not found"
               echo "   This binary is required for Windows builds (see BUILD.md and .gitignore)"
               echo "   The binary must be present under ./binaries/ (preferred)."
               MISSING_BINARY=1

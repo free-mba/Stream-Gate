@@ -37,18 +37,17 @@
     "stream-gate"
   ],
   "author": {
-    "name": "Stream Gate Contributors",
-    "email": "noreply@github.com"
+    "name": "Stream Gate Contributors"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mirzaaghazadeh/SlipStreamGUI.git"
+    "url": "https://github.com/free-mba/Stream-Gate.git"
   },
   "bugs": {
-    "url": "https://github.com/mirzaaghazadeh/SlipStreamGUI/issues"
+    "url": "https://github.com/free-mba/Stream-Gate.git/issues"
   },
-  "homepage": "https://github.com/mirzaaghazadeh/SlipStreamGUI#readme",
+  "homepage": "https://github.com/free-mba/Stream-Gate.git#readme",
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
@@ -82,15 +81,15 @@
     "mac": {
       "extraResources": [
         {
-          "from": "binaries/slipstream-client-mac-arm64",
-          "to": "binaries/slipstream-client-mac-arm64",
+          "from": "binaries/stream-client-mac-arm64",
+          "to": "binaries/stream-client-mac-arm64",
           "filter": [
             "**/*"
           ]
         },
         {
-          "from": "binaries/slipstream-client-mac-intel",
-          "to": "binaries/slipstream-client-mac-intel",
+          "from": "binaries/stream-client-mac-intel",
+          "to": "binaries/stream-client-mac-intel",
           "filter": [
             "**/*"
           ]
@@ -113,8 +112,8 @@
       "icon": "assets/icons/icon.ico",
       "extraResources": [
         {
-          "from": "binaries/slipstream-client-win.exe",
-          "to": "binaries/slipstream-client-win.exe",
+          "from": "binaries/stream-client-win.exe",
+          "to": "binaries/stream-client-win.exe",
           "filter": [
             "**/*"
           ]
@@ -131,8 +130,8 @@
       "maintainer": "Stream Gate Contributors <noreply@github.com>",
       "extraResources": [
         {
-          "from": "binaries/slipstream-client-linux",
-          "to": "binaries/slipstream-client-linux",
+          "from": "binaries/stream-client-linux",
+          "to": "binaries/stream-client-linux",
           "filter": [
             "**/*"
           ]

@@ -1056,10 +1056,10 @@
                     <div class="status-main-text" id="statusText">Disconnected</div>
                 </div>
                 <div class="status-row">
-                    <span class="status-label">SlipStream Client:</span>
+                    <span class="status-label">Stream Gate Client:</span>
                     <span class="status-value">
-                        <span class="status-indicator" id="slipstreamIndicator"></span>
-                        <span id="slipstreamStatus">Stopped</span>
+                        <span class="status-indicator" id="streamIndicator"></span>
+                        <span id="streamStatus">Stopped</span>
                     </span>
                 </div>
                 <div class="status-row">
@@ -1201,7 +1201,7 @@
     <!-- Intro Modal -->
     <div class="intro-modal hidden" id="introModal">
         <div class="intro-modal-content">
-            <img src="intro.png" alt="SlipStream GUI Introduction" class="intro-modal-image">
+            <img src="intro.png" alt="Stream Gate Introduction" class="intro-modal-image">
             <button class="intro-modal-button" onclick="closeIntro()">Get Started</button>
         </div>
     </div>
@@ -1281,12 +1281,12 @@
             </div>
 
             <div class="modal-section">
-                <h3>About SlipStream GUI</h3>
-                <p>SlipStream GUI is a user-friendly, cross-platform VPN client that makes it easy to connect to
-                    SlipStream VPN. It provides secure, encrypted tunneling for all your internet traffic through an
+                <h3>About Stream Gate</h3>
+                <p>Stream Gate is a user-friendly, cross-platform VPN client that makes it easy to connect to
+                    Stream Gate VPN. It provides secure, encrypted tunneling for all your internet traffic through an
                     intuitive graphical interface.</p>
                 <p>Whether you're looking to protect your privacy, access geo-restricted content, or secure your
-                    connection on public Wi-Fi, SlipStream GUI makes VPN protection accessible to everyone.</p>
+                    connection on public Wi-Fi, Stream Gate makes VPN protection accessible to everyone.</p>
             </div>
 
             <div class="modal-section">
@@ -1294,7 +1294,7 @@
                 <p><strong>Step 1: Configure Settings (Optional)</strong></p>
                 <ul>
                     <li>Enter your DNS Resolver (default: 8.8.8.8:53)</li>
-                    <li>Enter your SlipStream server domain (default: s.example.com)</li>
+                    <li>Enter your Stream Gate server domain (default: s.example.com)</li>
                 </ul>
 
                 <p><strong>Step 2: Start the VPN</strong></p>
@@ -1333,7 +1333,7 @@
             <div class="modal-section">
                 <h3>Status Indicators</h3>
                 <ul>
-                    <li><strong>SlipStream Client:</strong> Shows if the SlipStream process is running in the background
+                    <li><strong>Stream Gate Client:</strong> Shows if the Stream Gate process is running in the background
                     </li>
                     <li><strong>HTTP Proxy:</strong> Shows if the HTTP proxy server is active (listening on
                         127.0.0.1:8080)</li>
@@ -1349,7 +1349,7 @@
                         all apps</li>
                     <li><strong>DNS Resolver:</strong> The DNS server to use for domain name resolution (format:
                         IP:Port)</li>
-                    <li><strong>Domain:</strong> Your SlipStream server domain address</li>
+                    <li><strong>Domain:</strong> Your Stream Gate server domain address</li>
                     <li><strong>Authoritative Mode:</strong> Use <code>--authoritative</code> flag instead of
                         <code>--resolver</code> for direct authoritative resolution.
                     </li>
@@ -1366,25 +1366,25 @@
                     <h3>Technical Details</h3>
 
                     <h4>Architecture Overview</h4>
-                    <p>SlipStream GUI is built with Electron and uses a multi-layer proxy architecture:</p>
+                    <p>Stream Gate is built with Electron and uses a multi-layer proxy architecture:</p>
                     <pre>Application Layer (Browser/Apps)
     ↓ HTTP/HTTPS Requests
 HTTP Proxy Server (Node.js - Port 8080)
     ↓ SOCKS5 Protocol
 SOCKS5 Client (Port 5201)
     ↓ Encrypted Tunnel
-SlipStream VPN Server</pre>
+Stream Gate VPN Server</pre>
 
                     <h4>How It Works</h4>
-                    <p><strong>1. SlipStream Client Process:</strong></p>
+                    <p><strong>1. Stream Gate Client Process:</strong></p>
                     <ul>
-                        <li>Runs the native <code>binaries/slipstream-client-mac-arm64</code> /
-                            <code>binaries/slipstream-client-mac-intel</code>,
-                            <code>binaries/slipstream-client-win.exe</code>, or
-                            <code>binaries/slipstream-client-linux</code> binary
+                        <li>Runs the native <code>binaries/stream-client-mac-arm64</code> /
+                            <code>binaries/stream-client-mac-intel</code>,
+                            <code>binaries/stream-client-win.exe</code>, or
+                            <code>binaries/stream-client-linux</code> binary
                         </li>
                         <li>Establishes SOCKS5 proxy on <code>127.0.0.1:5201</code></li>
-                        <li>Handles encryption and connection to SlipStream servers</li>
+                        <li>Handles encryption and connection to Stream Gate servers</li>
                     </ul>
 
                     <p><strong>2. HTTP Proxy Server:</strong></p>
@@ -1422,10 +1422,10 @@ SlipStream VPN Server</pre>
                     <ul>
                         <li><strong>Electron:</strong> Cross-platform desktop app framework</li>
                         <li><strong>Node.js HTTP Module:</strong> HTTP proxy server implementation</li>
-                        <li><strong>SOCKS5:</strong> Protocol for routing traffic through SlipStream client</li>
+                        <li><strong>SOCKS5:</strong> Protocol for routing traffic through Stream Gate client</li>
                         <li><strong>IPC (Inter-Process Communication):</strong> Communication between main and renderer
                             processes</li>
-                        <li><strong>Child Process:</strong> Spawning and managing SlipStream client binary</li>
+                        <li><strong>Child Process:</strong> Spawning and managing Stream Gate client binary</li>
                     </ul>
 
                     <h4>Request Flow</h4>
@@ -1437,7 +1437,7 @@ SlipStream VPN Server</pre>
    - Creates SOCKS5 tunnel via SocksClient.createConnection
    - Sends "200 Connection established" response
    - Pipes raw socket data bidirectionally
-5. SOCKS5 client forwards to SlipStream server
+5. SOCKS5 client forwards to Stream Gate server
 6. Response flows back through the same path</pre>
 
                     <h4>Configuration Files</h4>
@@ -1458,7 +1458,7 @@ SlipStream VPN Server</pre>
                 <p><strong>Prerequisites:</strong></p>
                 <ul>
                     <li>PC and mobile device must be connected to the same Wi-Fi network</li>
-                    <li>SlipStream GUI must be running with VPN started</li>
+                    <li>Stream Gate must be running with VPN started</li>
                     <li>Find your PC's local IP address (see instructions below)</li>
                 </ul>
 
@@ -1522,7 +1522,7 @@ SlipStream VPN Server</pre>
 
             <div class="modal-section">
                 <h3>Version</h3>
-                <p>SlipStream GUI <span class="version-badge" id="helpVersionBadge">v—</span></p>
+                <p>Stream Gate <span class="version-badge" id="helpVersionBadge">v—</span></p>
             </div>
         </div>
     </div>
@@ -1574,7 +1574,7 @@ SlipStream VPN Server</pre>
         }
 
         async function openGitHub() {
-            await ipcRenderer.invoke('open-external', 'http://github.com/mirzaaghazadeh/SlipStreamGUI');
+            await ipcRenderer.invoke('open-external', 'http://github.com/free-mba/Stream-Gate');
         }
 
         function clearLogs() {
@@ -1602,17 +1602,17 @@ SlipStream VPN Server</pre>
                 stopBtn.disabled = true;
             }
 
-            // SlipStream status
-            const slipstreamIndicator = document.getElementById('slipstreamIndicator');
-            const slipstreamStatus = document.getElementById('slipstreamStatus');
-            if (details.slipstreamRunning) {
-                slipstreamIndicator.classList.add('running');
-                slipstreamIndicator.classList.remove('stopped');
-                slipstreamStatus.textContent = 'Running';
+            // Stream Gate status
+            const streamIndicator = document.getElementById('streamIndicator');
+            const streamStatus = document.getElementById('streamStatus');
+            if (details.streamRunning) {
+                streamIndicator.classList.add('running');
+                streamIndicator.classList.remove('stopped');
+                streamStatus.textContent = 'Running';
             } else {
-                slipstreamIndicator.classList.add('stopped');
-                slipstreamIndicator.classList.remove('running');
-                slipstreamStatus.textContent = 'Stopped';
+                streamIndicator.classList.add('stopped');
+                streamIndicator.classList.remove('running');
+                streamStatus.textContent = 'Stopped';
             }
 
             // HTTP Proxy status
@@ -2197,16 +2197,16 @@ SlipStream VPN Server</pre>
         });
 
         // Listen for logs from main process
-        ipcRenderer.on('slipstream-log', (event, data) => {
+        ipcRenderer.on('stream-log', (event, data) => {
             addLog(data.trim());
         });
 
-        ipcRenderer.on('slipstream-error', (event, data) => {
+        ipcRenderer.on('stream-error', (event, data) => {
             addLog('Error: ' + data.trim(), true);
         });
 
-        ipcRenderer.on('slipstream-exit', (event, code) => {
-            addLog(`SlipStream client exited with code ${code}`, true);
+        ipcRenderer.on('stream-exit', (event, code) => {
+            addLog(`Stream Gate client exited with code ${code}`, true);
             updateStatus(false, {});
         });
 

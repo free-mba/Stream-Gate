@@ -22,27 +22,27 @@ jobs:
             platform: mac
             arch: arm64
             build-script: build:mac:arm64
-            artifact-name: SlipStream-GUI-macOS-ARM64
+            artifact-name: Stream Gate-GUI-macOS-ARM64
           - os: macos-latest
             platform: mac
             arch: x64
             build-script: build:mac:x64
-            artifact-name: SlipStream-GUI-macOS-Intel
+            artifact-name: Stream Gate-GUI-macOS-Intel
           - os: windows-latest
             platform: win
             arch: x64
             build-script: build:win:x64
-            artifact-name: SlipStream-GUI-Windows-x64
+            artifact-name: Stream Gate-GUI-Windows-x64
           - os: windows-latest
             platform: win
             arch: ia32
             build-script: build:win:ia32
-            artifact-name: SlipStream-GUI-Windows-x86
+            artifact-name: Stream Gate-GUI-Windows-x86
           - os: ubuntu-latest
             platform: linux
             arch: x64
             build-script: build:linux:x64
-            artifact-name: SlipStream-GUI-Linux-x64
+            artifact-name: Stream Gate-GUI-Linux-x64
 
     steps:
       - name: Checkout code
@@ -57,31 +57,31 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Download latest SlipStream client binary (from slipstream-rust-deploy)
+      - name: Download latest Stream Gate client binary (from Stream Gate-rust-deploy)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          REPO="mirzaaghazadeh/slipstream-rust-deploy"
+          REPO="free-mba/Stream Gate-rust-deploy"
           mkdir -p binaries
           # Ensure we always use fresh binaries for releases
-          rm -f binaries/slipstream-client-*
+          rm -f binaries/Stream Gate-client-*
 
           if [ "${{ matrix.platform }}" == "mac" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
-              ASSET="slipstream-client-darwin-arm64"
-              OUT="slipstream-client-mac-arm64"
+              ASSET="Stream Gate-client-darwin-arm64"
+              OUT="Stream Gate-client-mac-arm64"
             else
-              ASSET="slipstream-client-darwin-amd64"
-              OUT="slipstream-client-mac-intel"
+              ASSET="Stream Gate-client-darwin-amd64"
+              OUT="Stream Gate-client-mac-intel"
             fi
           elif [ "${{ matrix.platform }}" == "linux" ]; then
-            ASSET="slipstream-client-linux-amd64"
-            OUT="slipstream-client-linux"
+            ASSET="Stream Gate-client-linux-amd64"
+            OUT="Stream Gate-client-linux"
           elif [ "${{ matrix.platform }}" == "win" ]; then
-            ASSET="slipstream-client-windows-amd64.exe"
-            OUT="slipstream-client-win.exe"
+            ASSET="Stream Gate-client-windows-amd64.exe"
+            OUT="Stream Gate-client-win.exe"
           else
             echo "Unknown platform: ${{ matrix.platform }}"
             exit 1
@@ -92,7 +92,7 @@ jobs:
           mv "binaries/$ASSET" "binaries/$OUT"
           ls -lh binaries/
 
-      - name: Verify required SlipStream client binaries
+      - name: Verify required Stream Gate client binaries
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" == "mac" ]; then
@@ -120,12 +120,12 @@ jobs:
         run: |
           if [ "${{ matrix.platform }}" == "mac" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
-              chmod +x binaries/slipstream-client-mac-arm64
+              chmod +x binaries/Stream Gate-client-mac-arm64
             else
-              chmod +x binaries/slipstream-client-mac-intel
+              chmod +x binaries/Stream Gate-client-mac-intel
             fi
           elif [ "${{ matrix.platform }}" == "linux" ]; then
-            chmod +x binaries/slipstream-client-linux
+            chmod +x binaries/Stream Gate-client-linux
           fi
 
       - name: Build application
@@ -224,35 +224,35 @@ jobs:
       - name: Download macOS ARM64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: SlipStream-GUI-macOS-ARM64
+          name: Stream Gate-GUI-macOS-ARM64
           path: release/macos
         continue-on-error: true
 
       - name: Download macOS Intel artifact
         uses: actions/download-artifact@v4
         with:
-          name: SlipStream-GUI-macOS-Intel
+          name: Stream Gate-GUI-macOS-Intel
           path: release/macos
         continue-on-error: true
 
       - name: Download Windows x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: SlipStream-GUI-Windows-x64
+          name: Stream Gate-GUI-Windows-x64
           path: release/windows/x64
         continue-on-error: true
 
       - name: Download Windows x86 artifact
         uses: actions/download-artifact@v4
         with:
-          name: SlipStream-GUI-Windows-x86
+          name: Stream Gate-GUI-Windows-x86
           path: release/windows/x86
         continue-on-error: true
 
       - name: Download Linux x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: SlipStream-GUI-Linux-x64
+          name: Stream Gate-GUI-Linux-x64
           path: release/linux/x64
         continue-on-error: true
 
@@ -274,14 +274,14 @@ jobs:
           if [ -d release/windows/x64 ]; then
             for f in release/windows/x64/*.exe; do
               [ -e "$f" ] || continue
-              mv "$f" "release/windows/SlipStream-GUI-Windows-x64.exe"
+              mv "$f" "release/windows/Stream Gate-GUI-Windows-x64.exe"
               break
             done
           fi
           if [ -d release/windows/x86 ]; then
             for f in release/windows/x86/*.exe; do
               [ -e "$f" ] || continue
-              mv "$f" "release/windows/SlipStream-GUI-Windows-x86.exe"
+              mv "$f" "release/windows/Stream Gate-GUI-Windows-x86.exe"
               break
             done
           fi
@@ -298,10 +298,10 @@ jobs:
 
           # Normalize Linux filenames for stable "latest/download" links
           if ls release/linux/*.AppImage >/dev/null 2>&1; then
-            mv release/linux/*.AppImage "release/linux/SlipStream-GUI-Linux-x64.AppImage" 2>/dev/null || true
+            mv release/linux/*.AppImage "release/linux/Stream Gate-GUI-Linux-x64.AppImage" 2>/dev/null || true
           fi
           if ls release/linux/*_amd64.deb >/dev/null 2>&1; then
-            mv release/linux/*_amd64.deb "release/linux/SlipStream-GUI-Linux-x64.deb" 2>/dev/null || true
+            mv release/linux/*_amd64.deb "release/linux/Stream Gate-GUI-Linux-x64.deb" 2>/dev/null || true
           fi
 
       - name: Normalize macOS filenames
@@ -310,13 +310,13 @@ jobs:
           # Normalize macOS filenames for stable "latest/download" links
           if [ -d release/macos ]; then
             if ls release/macos/*arm64*.dmg >/dev/null 2>&1; then
-              mv release/macos/*arm64*.dmg "release/macos/SlipStream-GUI-macOS-ARM64.dmg" 2>/dev/null || true
+              mv release/macos/*arm64*.dmg "release/macos/Stream Gate-GUI-macOS-ARM64.dmg" 2>/dev/null || true
             fi
             if ls release/macos/*.dmg >/dev/null 2>&1; then
               # Remaining DMG is assumed to be Intel
               for f in release/macos/*.dmg; do
-                [ "$(basename "$f")" = "SlipStream-GUI-macOS-ARM64.dmg" ] && continue
-                mv "$f" "release/macos/SlipStream-GUI-macOS-Intel.dmg" 2>/dev/null || true
+                [ "$(basename "$f")" = "Stream Gate-GUI-macOS-ARM64.dmg" ] && continue
+                mv "$f" "release/macos/Stream Gate-GUI-macOS-Intel.dmg" 2>/dev/null || true
                 break
               done
             fi
@@ -349,7 +349,7 @@ jobs:
           tag_name: v${{ steps.get_version.outputs.VERSION }}
           name: Release v${{ steps.get_version.outputs.VERSION }}
           body: |
-            ## 🎉 SlipStream GUI v${{ steps.get_version.outputs.VERSION }}
+            ## 🎉 Stream Gate v${{ steps.get_version.outputs.VERSION }}
 
             ### 📥 Downloads
 
@@ -367,7 +367,7 @@ jobs:
 
             1. Download the installer for your platform
             2. Install the application
-            3. Launch SlipStream GUI
+            3. Launch Stream Gate
             4. Click "Start VPN"
 
             ### 📖 Documentation

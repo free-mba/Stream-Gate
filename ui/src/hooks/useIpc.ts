@@ -38,7 +38,7 @@ export function useIpc(): IpcRenderer {
                     return {
                         isRunning: false,
                         details: {
-                            slipstreamRunning: false,
+                            streamRunning: false,
                             proxyRunning: false,
                             socksForwardRunning: false
                         }

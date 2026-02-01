@@ -1,7 +1,7 @@
-# SlipStream GUI Features
+# Stream Gate Features
 
 ## Core Features
-*   **VPN Connection**: Connect to SlipStream servers using a user-friendly toggle.
+*   **VPN Connection**: Connect to Stream Gate servers using a user-friendly toggle.
 *   **System Proxy Integration**: Automatically sets system proxy settings (optional).
 *   **Cross-Platform**: Windows, macOS, and Linux support.
 

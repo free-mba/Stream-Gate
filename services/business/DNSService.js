@@ -232,7 +232,7 @@ class DNSService {
    * @param {Object} payload
    * @param {Array<string>} payload.servers
    * @param {string} payload.domain
-   * @param {string} payload.mode - 'dnstt' or 'slipstream'
+   * @param {string} payload.mode - 'dnstt' or 'Stream Gate'
    * @param {number} payload.timeout - timeout in seconds
    * @param {number} payload.workers - concurrency count
    * @param {Function} onProgress - callback(completedCount, totalCount)
@@ -249,7 +249,7 @@ class DNSService {
 
     const servers = payload.servers || [];
     const domain = payload.domain || 'google.com';
-    const mode = payload.mode || 'slipstream';
+    const mode = payload.mode || 'Stream Gate';
     const timeout = payload.timeout || 3;
     const concurrency = Math.min(Math.max(1, payload.workers || 50), 500);
 

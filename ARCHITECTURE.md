@@ -246,7 +246,7 @@ class IPCController {
 ## File Structure
 
 ```
-SlipStreamGUI/
+Stream-Gate/
 ├── main.js                          # Orchestrator (minimal)
 ├── services/                        # All business logic
 │   ├── core/

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Download latest SlipStream client binaries from:
- *   https://github.com/mirzaaghazadeh/slipstream-rust-deploy/releases/latest
+ * Download latest Stream Gate client binaries from:
+ *   https://github.com/free-mba/Stream Gate-rust-deploy/releases/latest
  *
  * Usage:
  *   node scripts/download-binaries.js
@@ -21,7 +21,7 @@ const path = require('path');
 const { pipeline } = require('stream/promises');
 const { Readable } = require('stream');
 
-const UPSTREAM_REPO = 'mirzaaghazadeh/slipstream-rust-deploy';
+const UPSTREAM_REPO = 'free-mba/Stream Gate-rust-deploy';
 const API_LATEST = `https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest`;
 
 function parseArgs(argv) {
@@ -41,7 +41,7 @@ function parseArgs(argv) {
 
 function headers() {
   const h = {
-    'User-Agent': 'SlipStreamGUI-binary-downloader',
+    'User-Agent': 'Stream-Gate-binary-downloader',
     Accept: 'application/vnd.github+json'
   };
   if (process.env.GH_TOKEN) h.Authorization = `Bearer ${process.env.GH_TOKEN}`;
@@ -94,13 +94,13 @@ function wantTargets(platform, arch) {
 function mappingForTarget(t) {
   switch (t) {
     case 'mac-arm64':
-      return { assetName: 'slipstream-client-darwin-arm64', outName: 'slipstream-client-mac-arm64' };
+      return { assetName: 'Stream Gate-client-darwin-arm64', outName: 'Stream Gate-client-mac-arm64' };
     case 'mac-intel':
-      return { assetName: 'slipstream-client-darwin-amd64', outName: 'slipstream-client-mac-intel' };
+      return { assetName: 'Stream Gate-client-darwin-amd64', outName: 'Stream Gate-client-mac-intel' };
     case 'linux':
-      return { assetName: 'slipstream-client-linux-amd64', outName: 'slipstream-client-linux' };
+      return { assetName: 'Stream Gate-client-linux-amd64', outName: 'Stream Gate-client-linux' };
     case 'win':
-      return { assetName: 'slipstream-client-windows-amd64.exe', outName: 'slipstream-client-win.exe' };
+      return { assetName: 'Stream Gate-client-windows-amd64.exe', outName: 'Stream Gate-client-win.exe' };
     default:
       throw new Error(`Unknown target: ${t}`);
   }

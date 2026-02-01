@@ -1,9 +1,9 @@
 /**
  * ProcessManager - Native binary process lifecycle management
  *
- * Single Responsibility: Manage SlipStream client process
+ * Single Responsibility: Manage Stream Gate client process
  *
- * Handles spawning, monitoring, and terminating the native SlipStream binary.
+ * Handles spawning, monitoring, and terminating the native Stream Gate binary.
  */
 
 const { spawn } = require('child_process');
@@ -20,11 +20,11 @@ class ProcessManager {
   }
 
   /**
-   * Get the path to the SlipStream client binary
+   * Get the path to the Stream Gate client binary
    * @returns {string|null} Path to binary or null if unsupported
    * @private
    */
-  _getSlipstreamClientPath() {
+  _getStream GateClientPath() {
     const platform = process.platform;
     const resourcesPath = this.app.isPackaged
       ? path.join(process.resourcesPath)
@@ -32,17 +32,17 @@ class ProcessManager {
 
     if (platform === 'darwin') {
       const preferred =
-        process.arch === 'arm64' ? 'slipstream-client-mac-arm64' : 'slipstream-client-mac-intel';
+        process.arch === 'arm64' ? 'Stream Gate-client-mac-arm64' : 'Stream Gate-client-mac-intel';
       const fallback =
-        process.arch === 'arm64' ? 'slipstream-client-mac-intel' : 'slipstream-client-mac-arm64';
+        process.arch === 'arm64' ? 'Stream Gate-client-mac-intel' : 'Stream Gate-client-mac-arm64';
       const candidates = [
         // Preferred: packaged and dev both keep binaries under ./binaries/
         path.join(resourcesPath, 'binaries', preferred),
         // Back-compat: allow repo-root placement during transition
         path.join(resourcesPath, preferred),
         // Extra back-compat: legacy single mac binary name
-        path.join(resourcesPath, 'binaries', 'slipstream-client-mac'),
-        path.join(resourcesPath, 'slipstream-client-mac'),
+        path.join(resourcesPath, 'binaries', 'Stream Gate-client-mac'),
+        path.join(resourcesPath, 'Stream Gate-client-mac'),
         // If user runs under Rosetta, try the other arch too (if present)
         path.join(resourcesPath, 'binaries', fallback),
         path.join(resourcesPath, fallback)
@@ -50,14 +50,14 @@ class ProcessManager {
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     } else if (platform === 'win32') {
       const candidates = [
-        path.join(resourcesPath, 'binaries', 'slipstream-client-win.exe'),
-        path.join(resourcesPath, 'slipstream-client-win.exe')
+        path.join(resourcesPath, 'binaries', 'Stream Gate-client-win.exe'),
+        path.join(resourcesPath, 'Stream Gate-client-win.exe')
       ];
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     } else if (platform === 'linux') {
       const candidates = [
-        path.join(resourcesPath, 'binaries', 'slipstream-client-linux'),
-        path.join(resourcesPath, 'slipstream-client-linux')
+        path.join(resourcesPath, 'binaries', 'Stream Gate-client-linux'),
+        path.join(resourcesPath, 'Stream Gate-client-linux')
       ];
       return candidates.find((p) => fs.existsSync(p)) || candidates[0];
     }
@@ -92,9 +92,9 @@ class ProcessManager {
   }
 
   /**
-   * Start the SlipStream client process
+   * Start the Stream Gate client process
    * @param {string} resolver - DNS resolver (e.g., "8.8.8.8:53")
-   * @param {string} domain - SlipStream server domain
+   * @param {string} domain - Stream Gate server domain
    * @param {Object} options - Additional options
    * @param {boolean} options.authoritative - Use authoritative mode instead of resolver mode
    * @returns {Promise<void>}
@@ -102,21 +102,21 @@ class ProcessManager {
   async start(resolver, domain, options = {}) {
     const { authoritative = false } = options;
 
-    const clientPath = this._getSlipstreamClientPath();
+    const clientPath = this._getStream GateClientPath();
     if (!clientPath) {
       throw new Error('Unsupported platform');
     }
 
     if (!fs.existsSync(clientPath)) {
       const where = this.app.isPackaged ? 'inside the app resources folder' : 'in the project folder';
-      const baseMsg = `SlipStream client binary not found ${where}.`;
+      const baseMsg = `Stream Gate client binary not found ${where}.`;
       const expectedMsg = `Expected at: ${clientPath}`;
       const hint =
         process.platform === 'win32'
-          ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes slipstream-client-win.exe.\n\nWindows Defender tip: open Windows Security → Virus & threat protection → Protection history, restore/allow "slipstream-client-win.exe" if quarantined, and add an Exclusion for the install folder.'
+          ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes Stream Gate-client-win.exe.\n\nWindows Defender tip: open Windows Security → Virus & threat protection → Protection history, restore/allow "Stream Gate-client-win.exe" if quarantined, and add an Exclusion for the install folder.'
           : process.platform === 'darwin'
-            ? 'Ensure the correct macOS slipstream client binary exists under ./binaries/ (slipstream-client-mac-arm64 or slipstream-client-mac-intel) and is executable.'
-            : 'Ensure the correct slipstream client binary exists under ./binaries/ and is executable.';
+            ? 'Ensure the correct macOS Stream Gate client binary exists under ./binaries/ (Stream Gate-client-mac-arm64 or Stream Gate-client-mac-intel) and is executable.'
+            : 'Ensure the correct Stream Gate client binary exists under ./binaries/ and is executable.';
       throw new Error(`${baseMsg}\n${expectedMsg}\n${hint}`);
     }
 
@@ -130,7 +130,7 @@ class ProcessManager {
       domain
     ];
 
-    this.logger.info(`Starting SlipStream client: ${clientPath}`, { args });
+    this.logger.info(`Starting Stream Gate client: ${clientPath}`, { args });
 
     this.process = spawn(clientPath, args, {
       stdio: 'pipe',
@@ -140,13 +140,13 @@ class ProcessManager {
     // Set up output handlers
     this.process.stdout.on('data', (data) => {
       const output = data.toString();
-      this.logger.verbose(`Slipstream: ${output}`);
+      this.logger.verbose(`Stream Gate: ${output}`);
       this.eventEmitter.emit('process:output', output);
     });
 
     this.process.stderr.on('data', (data) => {
       const errorStr = data.toString();
-      this.logger.error(`Slipstream Error: ${errorStr}`);
+      this.logger.error(`Stream Gate Error: ${errorStr}`);
 
       // Check for port already in use error
       if (errorStr.includes('Address already in use') || errorStr.includes('EADDRINUSE')) {
@@ -164,7 +164,7 @@ class ProcessManager {
     });
 
     this.process.on('close', (code) => {
-      this.logger.info(`Slipstream process exited with code ${code}`);
+      this.logger.info(`Stream Gate process exited with code ${code}`);
       this.process = null;
       this.eventEmitter.emit('process:exit', code);
     });
@@ -180,21 +180,21 @@ class ProcessManager {
 
       // If spawn fails (e.g., ENOENT), reject instead of crashing/pretending success.
       this.process.once('error', (err) => {
-        const msg = `SlipStream failed to start: ${err.code || 'ERROR'} ${err.message || String(err)}`;
+        const msg = `Stream Gate failed to start: ${err.code || 'ERROR'} ${err.message || String(err)}`;
         this.logger.error(msg);
         this.process = null;
         this.eventEmitter.emit('process:error', msg);
-        settle(reject, new Error(`Slipstream client failed to start: ${err.message || String(err)}`));
+        settle(reject, new Error(`Stream Gate client failed to start: ${err.message || String(err)}`));
       });
 
       // Only start the readiness timer after the process actually spawned.
       this.process.once('spawn', () => {
         setTimeout(() => {
           if (this.process && !this.process.killed) {
-            this.logger.info('SlipStream client is ready');
+            this.logger.info('Stream Gate client is ready');
             settle(resolve);
           } else {
-            settle(reject, new Error('Slipstream client failed to start'));
+            settle(reject, new Error('Stream Gate client failed to start'));
           }
         }, 2000);
       });
@@ -202,11 +202,11 @@ class ProcessManager {
   }
 
   /**
-   * Stop the SlipStream client process
+   * Stop the Stream Gate client process
    */
   stop() {
     if (this.process) {
-      this.logger.info('Stopping SlipStream client');
+      this.logger.info('Stopping Stream Gate client');
       this.process.kill();
       this.process = null;
     }

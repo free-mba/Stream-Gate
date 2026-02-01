@@ -25,7 +25,7 @@ import type { IpcRendererEvent } from "electron";
 
 // Types from modal
 export interface ScanConfig {
-    mode: 'dnstt' | 'slipstream';
+    mode: 'dnstt' | 'stream';
     domain: string;
     workers: number;
     timeout: number;
@@ -50,7 +50,7 @@ export default function DnsTesterPage() {
     const { t } = useTranslation();
 
     // Local Config State
-    const [mode, setMode] = useState<'dnstt' | 'slipstream'>('slipstream');
+    const [mode, setMode] = useState<'dnstt' | 'stream'>('stream');
     const [domain, setDomain] = useState("google.com");
     const [workers, setWorkers] = useState(20);
     const [scanTimeout, setScanTimeout] = useState(3);
@@ -194,17 +194,17 @@ export default function DnsTesterPage() {
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label className="text-xs">{t("Scan Mode")}</Label>
-                            <Select value={mode} onValueChange={(v: string) => setMode(v as 'dnstt' | 'slipstream')}>
+                            <Select value={mode} onValueChange={(v: string) => setMode(v as 'dnstt' | 'stream')}>
                                 <SelectTrigger className="h-8 text-xs bg-muted border-border">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="slipstream">Slipstream</SelectItem>
+                                    <SelectItem value="stream">Stream Gate</SelectItem>
                                     <SelectItem value="dnstt">DNSTT</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-[10px] text-muted-foreground">
-                                {mode === 'slipstream' ? t('Verify Slipstream') : t('Verify DNSTT')}
+                                {mode === 'stream' ? t('Verify Stream Gate') : t('Verify DNSTT')}
                             </p>
                         </div>
 

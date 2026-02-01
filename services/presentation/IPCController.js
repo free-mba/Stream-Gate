@@ -33,29 +33,29 @@ class IPCController {
     this.eventEmitter.on('log:message', (data) => {
       const level = data && data.level ? data.level.toUpperCase() : 'INFO';
       const message = data && data.message ? data.message : String(data);
-      this.windowService.sendToRenderer('slipstream-log', `[${level}] ${message}`);
+      this.windowService.sendToRenderer('Stream Gate-log', `[${level}] ${message}`);
     });
 
     this.eventEmitter.on('log:error', (data) => {
-      this.windowService.sendToRenderer('slipstream-error', `[ERROR] ${data.message}`);
+      this.windowService.sendToRenderer('Stream Gate-error', `[ERROR] ${data.message}`);
     });
 
     // Forward process output
     this.eventEmitter.on('process:output', (data) => {
-      this.windowService.sendToRenderer('slipstream-log', data);
+      this.windowService.sendToRenderer('Stream Gate-log', data);
     });
 
     this.eventEmitter.on('process:error', (data) => {
-      this.windowService.sendToRenderer('slipstream-error', data);
+      this.windowService.sendToRenderer('Stream Gate-error', data);
     });
 
     // Forward proxy logs
     this.eventEmitter.on('proxy:log', (data) => {
-      this.windowService.sendToRenderer('slipstream-log', data);
+      this.windowService.sendToRenderer('Stream Gate-log', data);
     });
 
     this.eventEmitter.on('proxy:error', (data) => {
-      this.windowService.sendToRenderer('slipstream-error', data);
+      this.windowService.sendToRenderer('Stream Gate-error', data);
     });
 
     // Forward traffic updates
@@ -304,10 +304,10 @@ class IPCController {
       return new Promise((resolve) => {
         const options = {
           hostname: 'api.github.com',
-          path: '/repos/mirzaaghazadeh/SlipStreamGUI/releases/latest',
+          path: '/repos/free-mba/Stream-Gate/releases/latest',
           method: 'GET',
           headers: {
-            'User-Agent': 'SlipStream-GUI',
+            'User-Agent': 'Stream Gate-GUI',
             'Accept': 'application/vnd.github.v3+json'
           }
         };

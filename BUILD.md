@@ -1,4 +1,4 @@
-# Building Slipstream VPN GUI
+# Building Stream Gate VPN GUI
 
 ## Quick Start
 
@@ -30,15 +30,15 @@ npm run build:all
 ```
 
 3. **Output**: Built applications will be in the `dist/` folder:
-   - macOS: `Slipstream VPN-1.0.0.dmg`
-   - Windows: `Slipstream VPN Setup 1.0.0.exe`
+   - macOS: `Stream Gate VPN-1.0.0.dmg`
+   - Windows: `Stream Gate VPN Setup 1.0.0.exe`
 
 ## What Gets Bundled
 
 The built applications are **completely self-contained**:
 - ✅ Electron runtime
 - ✅ All Node.js dependencies
-- ✅ Slipstream client binaries (Mac & Windows)
+- ✅ Stream Gate client binaries (Mac & Windows)
 - ✅ No internet connection required to run
 
 Users can install and use the app without any additional downloads or setup.
@@ -63,7 +63,7 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 4. ✅ **Everything works automatically - no manual actions needed!**
 
 **What's Hidden from Users:**
-- ✅ `binaries/slipstream-client-mac-arm64` / `binaries/slipstream-client-mac-intel` / `binaries/slipstream-client-win.exe` are bundled inside the app
+- ✅ `binaries/Stream Gate-client-mac-arm64` / `binaries/Stream Gate-client-mac-intel` / `binaries/Stream Gate-client-win.exe` are bundled inside the app
 - ✅ Users never see these files
 - ✅ No terminal commands needed
 - ✅ No chmod or permission setup needed
@@ -73,16 +73,16 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 
 ### Build fails with permission errors
 - The app automatically sets execute permissions on first run
-- For development: `chmod +x binaries/slipstream-client-mac-arm64` (or `binaries/slipstream-client-mac-intel`)
+- For development: `chmod +x binaries/Stream Gate-client-mac-arm64` (or `binaries/Stream Gate-client-mac-intel`)
 
 ### Missing dependencies
 - Run `npm install` again
 - Check that all dependencies in `package.json` are installed
 
-### App doesn't find slipstream client
+### App doesn't find Stream Gate client
 - Make sure the binaries are present under `binaries/`:
-  - `binaries/slipstream-client-mac-arm64`
-  - `binaries/slipstream-client-mac-intel`
-  - `binaries/slipstream-client-win.exe`
+  - `binaries/Stream Gate-client-mac-arm64`
+  - `binaries/Stream Gate-client-mac-intel`
+  - `binaries/Stream Gate-client-win.exe`
 - Check the build logs to see if files were copied correctly
 - The app automatically finds binaries in the Resources folder when packaged

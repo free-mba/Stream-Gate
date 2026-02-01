@@ -1,8 +1,8 @@
 # Simple English Guide
 
 <div align="center">
-  <strong>SlipStream GUI User Guide</strong><br>
-  A simple GUI for connecting to SlipStream VPN
+  <strong>Stream Gate User Guide</strong><br>
+  A simple GUI for connecting to Stream Gate VPN
 </div>
 
 ---
@@ -23,30 +23,30 @@
 ### Download & Install
 
 1. Go to the latest release on GitHub:
-   - [Releases (latest)](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest)
+   - [Releases (latest)](https://github.com/free-mba/Stream-Gate/releases/latest)
 2. Direct downloads (latest release):
 
 | Platform | Download |
 |----------|----------|
-| macOS (Apple Silicon) | [SlipStream-GUI-macOS-ARM64.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-ARM64.dmg) |
-| macOS (Intel) | [SlipStream-GUI-macOS-Intel.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-Intel.dmg) |
-| Windows (64-bit) | [SlipStream-GUI-Windows-x64.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x64.exe) |
-| Windows (32-bit) | [SlipStream-GUI-Windows-x86.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x86.exe) |
-| Linux (x86_64) AppImage | [SlipStream-GUI-Linux-x64.AppImage](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.AppImage) |
-| Linux (x86_64) DEB | [SlipStream-GUI-Linux-x64.deb](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.deb) |
+| macOS (Apple Silicon) | [Stream Gate-GUI-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream Gate-GUI-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream Gate-GUI-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x64.exe) |
+| Windows (32-bit) | [Stream Gate-GUI-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
 
-If a direct download fails, use the [Releases page](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest).
+If a direct download fails, use the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest).
 
 ### First Run
 
-1. Open **SlipStream GUI**
+1. Open **Stream Gate**
 2. (Optional) Configure:
    - **DNS Resolver**: your DNS server (default: `8.8.8.8:53`)
-   - **Domain**: your SlipStream server domain (default: `s.example.com`)
+   - **Domain**: your Stream Gate server domain (default: `s.example.com`)
    - **System Proxy**: enable auto system proxy configuration (recommended)
 3. Click **"Start VPN"**
 4. Wait until statuses show **Running**
-5. Your internet traffic is now routed through SlipStream.
+5. Your internet traffic is now routed through Stream Gate.
 
 ### 🔎 DNS Checker (optional)
 
@@ -62,14 +62,14 @@ If you’re not sure which DNS Resolver to use (or DNS hasn’t fully propagated
 
 ---
 
-## 🖥️ SlipStream Server Setup
+## 🖥️ Stream Gate Server Setup
 
-To use SlipStream GUI, you need a SlipStream server. You can deploy your own server or use an existing one.
+To use Stream Gate, you need a Stream Gate server. You can deploy your own server or use an existing one.
 
 ### Simple server install (one command)
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-deploy/master/slipstream-rust-deploy.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/Stream Gate-rust-deploy/master/Stream Gate-rust-deploy.sh)
 ```
 
 ### Server prerequisites
@@ -80,9 +80,9 @@ bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/slipstream-rust-d
 
 ### After server setup
 
-1. Configure your DNS records (see [slipstream-rust-deploy](https://github.com/AliRezaBeigy/slipstream-rust-deploy))
+1. Configure your DNS records (see [Stream Gate-rust-deploy](https://github.com/AliRezaBeigy/Stream Gate-rust-deploy))
 2. Wait for DNS propagation (can take up to 24 hours)
-3. In SlipStream GUI, enter your domain (example: `s.example.com`)
+3. In Stream Gate, enter your domain (example: `s.example.com`)
 4. Enter your DNS resolver (example: `YOUR_SERVER_IP:53`)
 5. Click **"Start VPN"**
 
@@ -95,7 +95,7 @@ If your PC and phone are on the same Wi‑Fi network, you can configure your pho
 ### Prerequisites
 
 - PC and phone must be on the same Wi‑Fi network
-- SlipStream GUI must be running with VPN started
+- Stream Gate must be running with VPN started
 - You need your PC’s local IP address
 
 ### Find your PC’s local IP
@@ -157,7 +157,7 @@ To disable later: set Proxy back to **None**.
 
 - Watch live connection status
 - Check the 3 indicators:
-  - **SlipStream Client**
+  - **Stream Gate Client**
   - **HTTP Proxy**
   - **System Proxy**
 
@@ -184,7 +184,7 @@ To disable later: set Proxy back to **None**.
 This is usually Gatekeeper quarantine. Fix:
 
 ```bash
-xattr -cr /Applications/SlipStream\ GUI.app
+xattr -cr /Applications/Stream Gate\ GUI.app
 ```
 
 ### VPN won’t start

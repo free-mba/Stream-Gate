@@ -1,6 +1,6 @@
 # Release Guide
 
-This document explains how to create a new release for SlipStream GUI.
+This document explains how to create a new release for Stream Gate.
 
 ## Automated Releases
 
@@ -58,14 +58,14 @@ Examples:
 ### What Gets Built
 
 - **macOS**: DMG installers
-  - `SlipStream-GUI-macOS-ARM64.dmg`
-  - `SlipStream-GUI-macOS-Intel.dmg`
+  - `Stream Gate-GUI-macOS-ARM64.dmg`
+  - `Stream Gate-GUI-macOS-Intel.dmg`
 - **Windows**: NSIS installers
-  - `SlipStream-GUI-Windows-x64.exe`
-  - `SlipStream-GUI-Windows-x86.exe`
+  - `Stream Gate-GUI-Windows-x64.exe`
+  - `Stream Gate-GUI-Windows-x86.exe`
 - **Linux**: AppImage and DEB packages
-  - `SlipStream-GUI-Linux-x64.AppImage`
-  - `SlipStream-GUI-Linux-x64.deb`
+  - `Stream Gate-GUI-Linux-x64.AppImage`
+  - `Stream Gate-GUI-Linux-x64.deb`
 
 ### Release Notes
 
@@ -89,8 +89,8 @@ If you need to create a release manually:
 2. Go to GitHub → Releases → Draft a new release
 
 3. Upload the files from `dist/` folder:
-   - `SlipStream GUI-1.0.0.dmg` (macOS)
-   - `SlipStream GUI Setup 1.0.0.exe` (Windows)
+   - `Stream Gate-1.0.0.dmg` (macOS)
+   - `Stream Gate Setup 1.0.0.exe` (Windows)
 
 4. Write release notes and publish
 
@@ -98,7 +98,7 @@ If you need to create a release manually:
 
 ### Build fails in GitHub Actions
 
-- Check that `binaries/slipstream-client-mac-arm64` or `binaries/slipstream-client-mac-intel` has execute permissions
+- Check that `binaries/stream-client-mac-arm64` or `binaries/stream-client-mac-intel` has execute permissions
 - Verify all required files are committed
 - Check the Actions logs for specific errors
 

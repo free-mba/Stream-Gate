@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verifies required SlipStream client binaries exist (and aren't Git LFS pointers).
+ * Verifies required Stream Gate client binaries exist (and aren't Git LFS pointers).
  *
  * Usage:
  *   node scripts/verify-binaries.js --platform win|mac|linux|all
@@ -78,22 +78,22 @@ function main() {
   const p = platform || 'all';
 
   const required = [];
-  if (p === 'win') required.push('slipstream-client-win.exe');
+  if (p === 'win') required.push('Stream Gate-client-win.exe');
   else if (p === 'mac') {
     // If arch is specified, verify only that target. Otherwise verify both.
     const a = (arch || '').toLowerCase();
-    if (a === 'arm64' || a === 'aarch64') required.push('slipstream-client-mac-arm64');
+    if (a === 'arm64' || a === 'aarch64') required.push('Stream Gate-client-mac-arm64');
     else if (a === 'x64' || a === 'amd64' || a === 'intel' || a === 'x86_64')
-      required.push('slipstream-client-mac-intel');
-    else required.push('slipstream-client-mac-arm64', 'slipstream-client-mac-intel');
+      required.push('Stream Gate-client-mac-intel');
+    else required.push('Stream Gate-client-mac-arm64', 'Stream Gate-client-mac-intel');
   }
-  else if (p === 'linux') required.push('slipstream-client-linux');
+  else if (p === 'linux') required.push('Stream Gate-client-linux');
   else if (p === 'all')
     required.push(
-      'slipstream-client-win.exe',
-      'slipstream-client-mac-arm64',
-      'slipstream-client-mac-intel',
-      'slipstream-client-linux'
+      'Stream Gate-client-win.exe',
+      'Stream Gate-client-mac-arm64',
+      'Stream Gate-client-mac-intel',
+      'Stream Gate-client-linux'
     );
   else {
     throw new Error(`Unknown --platform value: ${String(platform)}`);

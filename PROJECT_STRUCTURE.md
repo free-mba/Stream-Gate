@@ -1,11 +1,11 @@
 # Project Structure
 
-This document describes the structure of the SlipStream GUI project.
+This document describes the structure of the Stream Gate project.
 
 ## Directory Layout
 
 ```
-SlipStream-GUI/
+Stream Gate-GUI/
 ├── .github/                    # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/        # Issue templates
 │   │   ├── bug_report.md
@@ -26,11 +26,11 @@ SlipStream-GUI/
 ├── CONTRIBUTING.md             # Contribution guidelines
 ├── PROJECT_STRUCTURE.md         # This file
 ├── intro.png                   # Intro modal image
-├── binaries/                   # Native SlipStream client binaries (required for build)
-│   ├── slipstream-client-mac-arm64   # macOS (Apple Silicon)
-│   ├── slipstream-client-mac-intel   # macOS (Intel)
-│   ├── slipstream-client-linux       # Linux
-│   └── slipstream-client-win.exe     # Windows
+├── binaries/                   # Native Stream Gate client binaries (required for build)
+│   ├── stream-client-mac-arm64   # macOS (Apple Silicon)
+│   ├── stream-client-mac-intel   # macOS (Intel)
+│   ├── stream-client-linux       # Linux
+│   └── stream-client-win.exe     # Windows
 └── (other files)
 ```
 
@@ -41,7 +41,7 @@ SlipStream-GUI/
 - **main.js**: Electron main process
   - Window management
   - IPC handlers
-  - SlipStream client process management
+  - Stream Gate client process management
   - HTTP proxy server
   - System proxy configuration
 
@@ -72,10 +72,10 @@ SlipStream-GUI/
 
 ### Binaries
 
-- **binaries/slipstream-client-mac-arm64**: macOS SlipStream client (Apple Silicon)
-- **binaries/slipstream-client-mac-intel**: macOS SlipStream client (Intel)
-- **binaries/slipstream-client-linux**: Linux SlipStream client
-- **binaries/slipstream-client-win.exe**: Windows SlipStream client
+- **binaries/stream-client-mac-arm64**: macOS Stream Gate client (Apple Silicon)
+- **binaries/stream-client-mac-intel**: macOS Stream Gate client (Intel)
+- **binaries/stream-client-linux**: Linux Stream Gate client
+- **binaries/stream-client-win.exe**: Windows Stream Gate client
 
 **Note**: These binaries are required for the build process and should be committed to the repository.
 
@@ -100,7 +100,7 @@ When building, the following directories are created:
 
 ## Important Notes
 
-1. **Binaries**: The SlipStream client binaries must be in `binaries/` for the build to work.
+1. **Binaries**: The Stream Gate client binaries must be in `binaries/` for the build to work.
 
 2. **Settings**: User settings are stored in `settings.json` (excluded from git via .gitignore).
 

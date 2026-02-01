@@ -1,14 +1,14 @@
-# Contributing to SlipStream GUI
+# Contributing to Stream Gate
 
-Thank you for your interest in contributing to SlipStream GUI! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Stream Gate! This document provides guidelines and instructions for contributing.
 
 ## Getting Started
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/SlipStreamGUI.git
-   cd SlipStreamGUI
+   git clone https://github.com/YOUR_USERNAME/Stream-Gate.git
+   cd Stream-Gate
    ```
 3. **Install dependencies**:
    ```bash

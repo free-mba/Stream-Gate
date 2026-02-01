@@ -1,7 +1,7 @@
-# SlipStream GUI Architecture
+# Stream Gate Architecture
 
 ## Overview
-SlipStream GUI is an Electron-based application that provides a user-friendly interface for the SlipStream VPN client. It allows users to manage configurations, test DNS servers, and toggle the VPN connection.
+Stream Gate is an Electron-based application that provides a user-friendly interface for the Stream Gate VPN client. It allows users to manage configurations, test DNS servers, and toggle the VPN connection.
 
 ## System Components
 
@@ -18,12 +18,12 @@ SlipStream GUI is an Electron-based application that provides a user-friendly in
     *   `IPCController.js`: Routes IPC messages to appropriate services.
     *   `SettingsService.js`: Manages configuration persistence (`settings.json`).
     *   `WindowService.js`: Manages BrowserWindow lifecycle.
-    *   `ProcessManager.js`: Manages the external SlipStream binary.
+    *   `ProcessManager.js`: Manages the external Stream Gate binary.
     *   `ConnectionService.js`: High-level connection state management.
     *   `DnsService.js`: Handles DNS testing and validation.
 
 ### 3. External Binary
-*   The application bundles the `slipstream-client` binary for different platforms (macOS, Windows, Linux).
+*   The application bundles the `stream-client` binary for different platforms (macOS, Windows, Linux).
 *   It is spawned as a child process when the connection is toggled.
 
 ## Data Flow
