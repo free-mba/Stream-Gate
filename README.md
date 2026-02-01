@@ -67,11 +67,18 @@ Download the latest release for your platform:
 
 > [!CAUTION] 
 > **macOS: App is damaged and can’t be opened?**  
-> If you see the error *"Stream Gate is damaged and can’t be opened"*, run this command in Terminal:  
+>
+> **Method 1 (Easy):**  
+> 1. Open Finder > Applications.
+> 2. **Right-click** (or Control-click) on `Stream Gate`.
+> 3. Select **Open**.
+> 4. Click **Open** in the dialog.
+>
+> **Method 2 (Terminal):**  
+> If the above doesn't work, run in Terminal:  
 > ```bash
 > sudo xattr -cr /Applications/Stream\ Gate.app
 > ```
-> *(Enter your password if prompted)*
 
 ---
 

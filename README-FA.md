@@ -37,11 +37,18 @@
 
 > [!CAUTION] 
 > **حل مشکل اجرا در مک (App is damaged):**  
-> اگر با خطای *"Stream Gate is damaged and can’t be opened"* مواجه شدید، دستور زیر را در ترمینال اجرا کنید:  
+>
+> **روش ۱ (ساده):**  
+> ۱. در فایندر به پوشه Applications بروید.
+> ۲. روی برنامه `Stream Gate` **راست‌کلیک** (یا Control-click) کنید.
+> ۳. گزینه **Open** را بزنید.
+> ۴. در پنجره باز شده دکمه **Open** را کلیک کنید.
+>
+> **روش ۲ (ترمینال):**  
+> اگر روش بالا کار نکرد، دستور زیر را اجرا کنید:  
 > ```bash
 > sudo xattr -cr /Applications/Stream\ Gate.app
 > ```
-> *(در صورت درخواست، رمز عبور سیستم خود را وارد کنید)*
 
 اگر دانلود مستقیم کار نکرد، از صفحه [Releases](https://github.com/free-mba/Stream-Gate/releases/latest) استفاده کنید.
 

@@ -107,6 +107,11 @@ The fix is to remove the quarantine attribute using `sudo`:
 sudo xattr -cr /Applications/Stream\ Gate.app
 ```
 
+**Alternative Fix (No Terminal):**
+1. Right-click the app in Finder.
+2. Select **Open**.
+3. Click **Open** in the prompt.
+
 ### Build fails in GitHub Actions
 
 - Check that `binaries/stream-client-mac-arm64` or `binaries/stream-client-mac-intel` has execute permissions
