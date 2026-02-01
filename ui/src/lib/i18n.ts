@@ -101,7 +101,7 @@ const translations = {
         "DNS Tester": "تست DNS",
         Settings: "تنظیمات",
         Logs: "گزارش‌ها",
-        "GUI Client for Stream Gate": "رابط کاربری اسلیپ‌استریم",
+        "GUI Client for Stream Gate": "رابط کاربری استریم‌گیت",
         "System Logs": "گزارش‌های سیستم",
         "Clear": "پاک کردن",
 

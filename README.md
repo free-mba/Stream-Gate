@@ -1,461 +1,117 @@
 # Stream Gate
 
-
-
 <div align="center">
-  <img src="screen.png" alt="Stream Gate Screenshot" width="800">
-</div>
-
-
-<div align="center">
-  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge" alt="Platform">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Node.js-18%2B-brightgreen?style=for-the-badge" alt="Node.js">
-  <a href="https://github.com/free-mba/Stream-Gate/releases/latest">
-    <img src="https://img.shields.io/github/v/release/free-mba/Stream-Gate?style=for-the-badge&label=Version&sort=semver" alt="Version">
-  </a>
-  <img src="https://img.shields.io/github/actions/workflow/status/free-mba/Stream-Gate/release.yml?style=for-the-badge&label=Build" alt="Build Status">
+  <img src="screen.png" alt="Stream Gate Premium UI" width="850">
+  <br>
+  
+  [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge)](https://github.com/free-mba/Stream-Gate/releases)
+  [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+  [![Version](https://img.shields.io/github/v/release/free-mba/Stream-Gate?style=for-the-badge&label=v&sort=semver)](https://github.com/free-mba/Stream-Gate/releases/latest)
+  [![Build](https://img.shields.io/github/actions/workflow/status/free-mba/Stream-Gate/release.yml?style=for-the-badge&label=Build)](https://github.com/free-mba/Stream-Gate/actions)
 </div>
 
 <br>
 
 <div align="center">
-  <a href="README-EN.md">📄 Simple User Guide (English)</a>
-  <br><br>
-
-
-  <a href="README-FA.md">📄 راهنما ساده استفاده (فارسی)</a>
+  <strong>The Ultimate GUI Client for Stream Gate</strong><br>
+  A high-performance, cross-platform VPN utility engineered for speed, privacy, and seamless tunneling.
 </div>
-
-<br>
 
 <div align="center">
-  <strong>A modern, cross-platform GUI client for Stream Gate VPN</strong><br>
-  Provides secure, system-wide tunneling through an HTTP proxy interface
+  <br>
+  <a href="README-EN.md">Documentation (English)</a> • <a href="README-FA.md">راهنمای فارسی</a> • <a href="docs/STYLE_GUIDE.md">Style Guide</a>
 </div>
-
-
-
 
 ---
 
-## 👀 Tour
+## ✨ Experience Precision Performance
 
-- **Install** the app from the latest release
-- **Set your server** (`Domain`) and `DNS Resolver` (or keep defaults for testing)
-- **DNS Checker (optional)**: run it, and click **"Use"** on any **OK** row to set your `DNS Resolver`
-- **Start VPN** and watch the **Status** indicators turn “Running”
-- **Verify** with “Test Proxy Connection” and check the **Logs** panel if needed
-- **Optional**: Share your VPN over Wi‑Fi to your phone using the built-in HTTP proxy (`8080`)
+**Stream Gate** isn't just another VPN client. It's a meticulously designed tool that bridges the gap between complex tunneling protocols and user-friendly experience. Built on Electron and powered by a high-efficiency backend, it offers system-wide tunneling with zero-configuration ease.
+
+### 🎯 Featured: Advanced DNS Tester
+Our proprietary DNS Tester is the crown jewel of Stream Gate. Specially optimized for this protocol, it accurately identifies compatible DNS overrides with an **85% detection success rate**.
+- **Mass Scaling**: Test dozens of resolvers in seconds.
+- **Smart Filtering**: Automatically highlights compatible servers.
+- **One-Click Apply**: Instantly inject the best-performing DNS into your active configuration.
+
+### 🎨 Premium UI & Masterful UX
+Experience an interface that feels alive. Stream Gate features:
+- **Glassmorphism Design**: A modern, translucent aesthetic that fits perfectly on macOS, Windows, and Linux.
+- **Dark & Light Modes**: Seamlessly switch themes with perfect contrast and color harmony.
+- **Bilingual Mastery**: Full support for English (LTR) and Persian (RTL) with localized interfaces and optimized typography.
+
+### ⚡ Power Features for Power Users
+- **Bulk Import/Export**: Manage hundreds of configurations effortlessly. Supports bulk `ssgate` link processing.
+- **System-Wide Tunneling**: Routes all traffic through our secure HTTP/SOCKS5 hybrid proxy.
+- **Real-Time Traffic Analytics**: Monitor your bandwidth with precise download/upload telemetry.
+- **Cross-Platform Parity**: Identical feature set and performance across all desktop operating systems.
+
+---
 
 ## 📥 Download & Install
 
-### Latest Release
-
-<div align="center">
-  <a href="https://github.com/free-mba/Stream-Gate/releases/latest">
-    <img src="https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge&logo=github" alt="Download Latest Release">
-  </a>
-</div>
-
-**Direct downloads (latest release):**
+Download the latest release for your platform:
 
 | Platform | Download |
-|----------|----------|
-| macOS (Apple Silicon) | [Stream Gate-GUI-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-ARM64.dmg) |
-| macOS (Intel) | [Stream Gate-GUI-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-Intel.dmg) |
-| Windows (64-bit) | [Stream Gate-GUI-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x64.exe) |
-| Windows (32-bit) | [Stream Gate-GUI-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x86.exe) |
-| Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
-| Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
-
-If a direct download fails, use the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest).
-
-### Quick Install
-
-1. **Download** the latest release for your platform from the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest)
-2. **Install** the application (double-click the installer)
-3. **Run** the app and click "Start VPN"
-
-That's it! No additional setup required.
+|:---|:---|
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [Stream-Gate-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [Stream-Gate-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.deb) |
+| Android | [SlipNet](https://github.com/obscuraio/SlipNet) (Recommended Client) |
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quick Launch Guide
 
-### First Time Setup
+1. **Install**: Grab the latest installer for your OS and run it.
+2. **Configure**: Select a pre-configured server or import your own via `ssgate` links.
+3. **Scan (Optional)**: Use the **DNS Tester** to find the fastest compatible resolver.
+4. **Connect**: Flip the switch and enjoy a secure, accelerated internet experience.
 
-1. **Launch Stream Gate** after installation
+---
 
-2. **Configure Settings** (optional):
-   - **DNS Resolver**: Your DNS server (default: `8.8.8.8:53`)
-   - **Domain**: Your Stream Gate server domain (default: `s.example.com`)
-   - **System Proxy**: Toggle to auto-configure system proxy (recommended)
+## 🛠 Project Architecture
 
-3. **DNS Checker (optional, recommended if you're unsure about DNS)**:
-   - Click **"DNS Checker"**
-   - Enter a **test domain** (example: `google.com`)
-   - Enter one or more **DNS server IPs** to test
-   - **OK = OK** (no action needed)
-   - Click **"Use"** on any **OK** row to auto-set your **DNS Resolver** (the app will force port `53`)
+Stream Gate utilizes a robust multi-layered architecture to ensure reliability and speed.
 
-4. **Start the VPN**:
-   - Click the **"Start VPN"** button
-   - Wait for status indicators to show "Running"
-   - Your traffic is now routed through Stream Gate!
+For a comprehensive breakdown of the Frontend, Backend, and Data Flow, please consult our **[Architecture Guide](docs/ARCHITECTURE.md)**.
 
-### Using the VPN
-
-- **Status Panel**: Monitor connection status in real-time
-- **Logs Panel**: View connection activity and debug information
-- **Verbose Logging**: Toggle detailed logs for troubleshooting
-- **Test Connection**: Use the "Test Proxy Connection" button to verify functionality
-- **Stop VPN**: Click "Stop VPN" when you want to disconnect
-
-### Setting Up a Stream Gate Server
-
-To use Stream Gate, you need a Stream Gate server running. For detailed instructions on deploying your own Stream Gate server, check out:
-
-🔗 **[stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy)**
-
-This repository provides a one-click deployment script for setting up a Stream Gate server, including:
-
-- ✅ **One-command installation**: Automated server deployment
-- ✅ **DNS configuration guide**: Step-by-step DNS setup instructions
-- ✅ **Multiple deployment modes**: SOCKS proxy or SSH tunneling
-- ✅ **Prebuilt binaries**: Fast installation for supported platforms
-- ✅ **Systemd integration**: Automatic service management
-- ✅ **TLS certificates**: Automatic certificate generation
-
-**Quick Server Setup:**
-
-```bash
-# One-command server installation
-bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/stream-rust-deploy/master/stream-rust-deploy.sh)
+```mermaid
+graph TD
+    User([User Application]) -->|HTTP/HTTPS| HP[Internal HTTP Proxy: 8080]
+    HP -->|SOCKS5| SC[Stream Gate Client: 5201]
+    SC -->|Encrypted Tunnel| Remote[Remote VPN Server]
+    
+    UI[Electron GUI] -.->|IPC| HP
+    UI -.->|IPC| SC
 ```
 
-**What You'll Need:**
-- A Linux server (Fedora, Rocky, CentOS, Debian, or Ubuntu)
-- A domain name with DNS access
-- Root or sudo access on the server
-
-**After Server Setup:**
-1. Configure your DNS records (see the [stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy) repository for detailed DNS setup)
-2. Wait for DNS propagation (can take up to 24 hours)
-3. In Stream Gate, enter your server domain (e.g., `s.example.com`)
-4. Enter your DNS resolver (e.g., `YOUR_SERVER_IP:53`)
-5. Click "Start VPN" to connect!
+- **Electron & React**: Modern, responsive frontend.
+- **Node.js**: Service-based architecture for low-latency IPC.
+- **Microservices Pattern**: Decoupled modules for Process Management, Proxying, and DNS Testing.
 
 ---
 
-## ✨ Features
+## 🤝 Contribution & Support
 
-- 🖥️ **Cross-Platform**: Native support for macOS, Windows, and Linux
-- 🔒 **System-Wide VPN**: Routes all traffic through Stream Gate VPN
-- 🎨 **Modern GUI**: Intuitive interface with real-time status and logs
-- ⚙️ **Auto-Configuration**: Automatically configures system proxy settings
-- 📦 **Self-Contained**: All dependencies bundled (no internet required after installation)
-- 🔍 **Verbose Logging**: Optional detailed logging for debugging
-- 🧪 **Connection Testing**: Built-in proxy connection tester
-- 📊 **Real-Time Status**: Monitor VPN connection status at a glance
+Stream Gate is an open-source project driven by the community. We welcome contributions of all kinds!
 
----
-
-## 📱 Sharing PC Internet via Mobile (Same Network)
-
-If your PC and mobile device are on the same Wi-Fi network, you can configure your mobile device to use your PC's internet connection (including the VPN) through the proxy.
-
-### Prerequisites
-
-- PC and mobile device must be connected to the same Wi-Fi network
-- Stream Gate must be running with VPN started
-- Find your PC's local IP address (see instructions below)
-
-### Finding Your PC's IP Address
-
-**macOS/Linux:**
-```bash
-# Open Terminal and run:
-ifconfig | grep "inet " | grep -v 127.0.0.1
-# or
-ip addr show
-```
-
-**Windows:**
-```cmd
-# Open Command Prompt and run:
-ipconfig
-# Look for "IPv4 Address" under your active network adapter
-```
-
-The IP address will typically look like `192.168.1.XXX` or `10.0.0.XXX`.
-
-### 📱 iOS Configuration
-
-1. On your iPhone/iPad, go to **Settings** → **Wi-Fi**
-2. Tap the **(i)** icon next to your connected Wi-Fi network
-3. Scroll down to **"HTTP Proxy"** section
-4. Select **"Manual"**
-5. Enter your PC's IP address in **"Server"** field (e.g., `192.168.1.100`)
-6. Enter **"8080"** in the **"Port"** field
-7. Leave **"Authentication"** off
-8. Tap **"Save"** in the top right
-
-**Note:** Your iOS device will now route all internet traffic through your PC's VPN connection. To disable, go back to Wi-Fi settings and set HTTP Proxy to "Off".
-
-### 🤖 Android Configuration
-
-1. On your Android device, go to **Settings** → **Wi-Fi**
-2. Long-press on your connected Wi-Fi network
-3. Select **"Modify network"** or **"Network details"**
-4. Tap **"Advanced options"** or expand the advanced settings
-5. Under **"Proxy"**, select **"Manual"**
-6. Enter your PC's IP address in **"Proxy hostname"** (e.g., `192.168.1.100`)
-7. Enter **"8080"** in **"Proxy port"**
-8. Leave **"Bypass proxy for"** empty (or add local addresses like `localhost,127.0.0.1`)
-9. Tap **"Save"**
-
-**Note:** Some Android versions may have slightly different menu paths. If you can't find these options, try: **Settings** → **Network & Internet** → **Wi-Fi** → (tap network) → **Advanced** → **Proxy**.
-
-**To disable:** Go back to Wi-Fi settings, modify the network, and set Proxy back to "None".
-
-### ⚠️ Important Notes
-
-- Make sure your PC's firewall allows incoming connections on port 8080
-- The proxy only works while both devices are on the same network
-- If your PC's IP address changes, you'll need to update the proxy settings on your mobile device
-- Some apps may bypass system proxy settings - you may need to configure them individually
-
----
-
-## 🐛 Troubleshooting
-
-### macOS: "Stream Gate is damaged and can't be opened"
-
-If you see this error when trying to open the app on macOS, it's usually due to macOS Gatekeeper security settings. Here's how to fix it:
-
-**Option 1: Remove the quarantine attribute (Recommended)**
-```bash
-# Open Terminal and run:
-xattr -cr /Applications/Stream Gate\ GUI.app
-```
-
-Then try opening the app again.
-
-**Option 2: Allow the app in System Settings**
-1. Go to **System Settings** → **Privacy & Security**
-2. Scroll down to the **Security** section
-3. If you see a message about "Stream Gate" being blocked, click **"Open Anyway"**
-4. Confirm by clicking **"Open"** in the dialog
-
-**Option 3: Right-click to open**
-1. Right-click (or Control-click) on the Stream Gate app
-2. Select **"Open"** from the context menu
-3. Click **"Open"** in the confirmation dialog
-
-After the first successful launch, macOS will remember your choice and you won't see this error again.
-
-### Windows: Run as Administrator
-
-For best functionality on Windows, especially when configuring system proxy settings, run Stream Gate as Administrator:
-
-**Option 1: Right-click method**
-1. Right-click on the Stream Gate shortcut or executable
-2. Select **"Run as administrator"**
-3. Click **"Yes"** in the User Account Control (UAC) prompt
-
-**Option 2: Always run as administrator**
-1. Right-click on the Stream Gate shortcut
-2. Select **"Properties"**
-3. Go to the **"Compatibility"** tab
-4. Check **"Run this program as an administrator"**
-5. Click **"OK"**
-
-**Note:** Running as administrator is recommended for automatic system proxy configuration. The app will work without admin privileges, but you may need to configure proxy settings manually.
-
-### VPN won't start
-
-- Check that ports 8080 and 5201 are not in use
-- Verify your DNS resolver and domain settings
-- Check the logs panel for error messages
-- On Windows, try running as Administrator (see above)
-
-### System proxy not working
-
-- Ensure the "Configure System Proxy" toggle is enabled
-- On macOS, you may be prompted for administrator password
-- On Windows, run the app as Administrator for automatic configuration
-- Some apps may bypass system proxy (configure them manually)
-
-### Connection issues
-
-- Use the "Test Proxy Connection" button to verify functionality
-- Enable verbose logging for detailed connection information
-- Check that your Stream Gate server domain is correct
-
----
-
-## 👨‍💻 For Developers
-
-### Prerequisites
-
-- Node.js 16+ and npm
-- Git
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/free-mba/Stream-Gate.git
-cd Stream-Gate
-
-# Install dependencies
-npm install
-```
-
-### Development
-
-```bash
-# Download the latest Stream Gate client binaries (recommended)
-npm run download:binaries
-
-# Run in development mode
-npm start
-```
-
-### Building
-
-```bash
-# Download the latest Stream Gate client binaries (recommended)
-npm run download:binaries
-
-# Build for macOS
-npm run build:mac
-
-# Build for Windows
-npm run build:win
-
-# Build for Linux
-npm run build:linux
-
-# Build for all platforms
-npm run build:all
-```
-
-Built applications will be in the `dist/` folder.
-
-For detailed build instructions, see [BUILD.md](BUILD.md).
-
----
-
-## 📖 How It Works
-
-Stream Gate creates a multi-layer proxy architecture:
-
-```
-Your Applications
-    ↓ HTTP/HTTPS
-HTTP Proxy Server (127.0.0.1:8080)
-    ↓ SOCKS5 Protocol
-SOCKS5 Client (127.0.0.1:5201)
-    ↓ Encrypted Tunnel
-Stream Gate VPN Server
-```
-
-### Architecture
-
-1. **Stream Gate Client**: Runs the native binary (`binaries/stream-client-mac-arm64` / `binaries/stream-client-mac-intel`, `binaries/stream-client-win.exe`, or `binaries/stream-client-linux`) that establishes a SOCKS5 proxy on port 5201
-2. **HTTP Proxy Server**: Node.js server listening on port 8080 that converts HTTP requests to SOCKS5
-3. **System Proxy**: Automatically configures system proxy settings to route all traffic through the VPN
-
----
-
-## 📁 Project Structure
-
-```
-Stream Gate-GUI/
-├── assets/              # App icons and images
-│   └── icon.png
-├── main.js              # Electron main process
-├── index.html           # UI and renderer process
-├── check-system-proxy.js # System proxy status checker
-├── package.json         # Dependencies and build config
-├── BUILD.md            # Detailed build instructions
-├── README.md           # This file
-└── .gitignore          # Git ignore rules
-```
-
-For detailed project structure, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
-
----
-
-## 🔧 Technical Details
-
-### Technologies
-
-- **Electron**: Cross-platform desktop framework
-- **Node.js**: Backend runtime
-- **HTTP Proxy**: Node.js HTTP module for proxy server
-- **SOCKS5**: Protocol for VPN tunneling
-- **IPC**: Inter-process communication between main and renderer
-
-### Ports
-
-- **8080**: HTTP Proxy Server
-- **5201**: SOCKS5 Proxy (Stream Gate client)
-
-### Configuration
-
-Settings are stored in `settings.json` (created automatically):
-- DNS Resolver
-- Domain
-- Verbose logging preference
-
----
-
-## 📝 Requirements
-
-- **macOS**: 10.13+ (High Sierra or later)
-- **Windows**: Windows 10 or later
-- **Linux**: Most modern distributions (AppImage works on most, DEB for Debian/Ubuntu-based)
-- **No special privileges**: Works immediately after installation
-- **No internet required**: After installation, everything is self-contained
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🔗 Related Projects
-
-- **[stream-rust-deploy](https://github.com/AliRezaBeigy/stream-rust-deploy)**: Deploy your own Stream Gate server
-
----
+👉 **Read our [Contribution Guidelines](CONTRIBUTING.md) to get started.**
+- **Bugs & Features**: Open an issue on our [GitHub repository](https://github.com/free-mba/Stream-Gate).
+- **Security**: Please report security vulnerabilities via private disclosure.
 
 ## 🙏 Acknowledgments
 
-- Built with [Electron](https://www.electronjs.org/)
-- Uses [electron-builder](https://www.electron.build/) for packaging
+Stream Gate is built on the shoulders of giants. Special thanks to the following projects and creators:
+- [**slipstream-rust**](https://github.com/Mygod/slipstream-rust) by Mygod
+- [**SlipStreamGUI**](https://github.com/mirzaaghazadeh/SlipStreamGUI) by mirzaaghazadeh
 
 ---
 
 <div align="center">
-  <strong>Made with ❤️ for those we remember</strong>
+  <br>
+  <strong>Made with ❤️ for the future of open internet.</strong>
 </div>

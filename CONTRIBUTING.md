@@ -1,79 +1,92 @@
 # Contributing to Stream Gate
 
-Thank you for your interest in contributing to Stream Gate! This document provides guidelines and instructions for contributing.
+First off, thanks for taking the time to contribute! 🎉
 
-## Getting Started
+The following is a set of guidelines for contributing to Stream Gate. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/Stream-Gate.git
-   cd Stream-Gate
-   ```
-3. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-4. **Create a branch** for your changes:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+## 📚 Documentation
 
-## Development Workflow
+Before diving into the code, please read our [Architecture Guide](docs/ARCHITECTURE.md) to understand the system design, components, and data flow.
 
-1. Make your changes
-2. Test your changes:
-   ```bash
-   npm start  # Test in development mode
-   ```
-3. Ensure code quality:
-   - Follow existing code style
-   - Test on both macOS and Windows if possible
-   - Check that the app builds successfully
+We also maintain a [Style Guide](docs/STYLE_GUIDE.md) to ensure consistent UI/UX design across the application. Please review it before making frontend changes.
 
-## Submitting Changes
+## 🛠 Development Setup
 
-1. **Commit your changes**:
-   ```bash
-   git commit -m "Add: Description of your changes"
-   ```
+### Prerequisites
 
-2. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+*   **Node.js**: v18 or higher
+*   **npm**: v9 or higher
+*   **Git**
 
-3. **Create a Pull Request** on GitHub
+### Installation
 
-## Code Style
+1.  **Fork** the repository on GitHub.
+2.  **Clone** your fork locally:
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/Stream-Gate.git
+    cd Stream-Gate
+    ```
+3.  **Install dependencies**:
+    ```bash
+    npm install
+    # This installs dependencies for both the Electron main process and the React UI
+    ```
 
-- Use consistent indentation (spaces, not tabs)
-- Follow JavaScript best practices
-- Comment complex logic
-- Keep functions focused and small
+### Running Locally
 
-## Testing
+To start the application in development mode with hot-reloading:
 
-Before submitting:
-- [ ] Test on your platform (macOS/Windows)
-- [ ] Test VPN start/stop functionality
-- [ ] Test system proxy configuration
-- [ ] Verify no console errors
-- [ ] Check that the app builds successfully
+```bash
+npm run dev
+```
 
-## Reporting Issues
+This command will:
+1.  Start the Vite development server for the UI.
+2.  Launch the Electron application pointing to the local Vite server.
 
-When reporting bugs:
-- Include OS version and app version
-- Describe steps to reproduce
-- Include relevant logs
-- Add screenshots if applicable
+### Building
 
-## Feature Requests
+To build the application for production:
 
-For new features:
-- Explain the use case
-- Describe the proposed solution
-- Consider backward compatibility
+```bash
+# Build for your current platform
+npm run build:mac   # For macOS
+npm run build:win   # For Windows
+npm run build:linux # For Linux
+```
 
-Thank you for contributing! 🎉
+## 📂 Project Structure
+
+*   `main.js`: Electron main process entry point.
+*   `services/`: Backend logic (Service Layer Pattern).
+*   `ui/`: React frontend application.
+*   `binaries/`: Pre-compiled binaries for the core VPN engine.
+*   `scripts/`: Build and utility scripts.
+
+## 🧪 Testing
+
+*   **Manual Testing**: Please manually verify your changes.
+    *   Check light/dark mode.
+    *   Check English/Persian (RTL) layouts.
+    *   Verify connection toggling.
+    *   Verify System Proxy settings.
+
+## 🤝 Pull Request Process
+
+1.  Ensure any install or build dependencies are removed before the end of the layer when doing a build.
+2.  Update the README.md with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
+3.  Increase the version numbers in any examples files and the README.md to the new version that this Pull Request would represent.
+4.  You may merge the Pull Request in once you have the sign-off of two other developers, or if you do not have permission to do that, you may request the second reviewer to merge it for you.
+
+## 🐛 Reporting Bugs
+
+Bugs are tracked as GitHub issues. When filing an issue, explain the problem and include additional details to help maintainers reproduce the problem:
+
+*   Use a clear and descriptive title.
+*   Describe the exact steps which reproduce the problem.
+*   Provide specific examples to demonstrate the steps.
+*   Describe the behavior you observed after following the steps.
+*   Explain which behavior you expected to see instead and why.
+*   Include screenshots if possible.
+
+Thank you for contributing!
