@@ -22,6 +22,324 @@ jobs:
             platform: mac
             arch: arm64
             build-script: build:mac:arm64
+            artifact-name: Stream-Gate-macOS-ARM64
+          - os: macos-latest
+            platform: mac
+            arch: x64
+            build-script: build:mac:x64
+            artifact-name: Stream-Gate-macOS-Intel
+          - os: windows-latest
+            platform: win
+            arch: x64
+            build-script: build:win:x64
+            artifact-name: Stream-Gate-Windows-x64
+          - os: windows-latest
+            platform: win
+            arch: ia32
+            build-script: build:win:ia32
+            artifact-name: Stream-Gate-Windows-x86
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            build-script: build:linux:x64
+            artifact-name: Stream-Gate-Linux-x64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # If binaries are stored via Git LFS, ensure we fetch the real contents.
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Download latest Stream Gate client binary (from stream-gate-rust-deploy)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO="free-mba/Stream-Gate-rust-deploy"
+          mkdir -p binaries
+          # Ensure we always use fresh binaries for releases
+          rm -f binaries/stream-gate-client-*
+
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              ASSET="stream-gate-client-darwin-arm64"
+              OUT="stream-gate-client-mac-arm64"
+            else
+              ASSET="stream-gate-client-darwin-amd64"
+              OUT="stream-gate-client-mac-intel"
+            fi
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            ASSET="stream-gate-client-linux-amd64"
+            OUT="stream-gate-client-linux"
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            ASSET="stream-gate-client-windows-amd64.exe"
+            OUT="stream-gate-client-win.exe"
+          else
+            echo "Unknown platform: ${{ matrix.platform }}"
+            exit 1
+          fi
+
+          echo "Downloading $ASSET from $REPO..."
+          # Note: Using '|| true' to prevent failure if the external repo or asset doesn't exist yet
+          # For production, you should ensure this repository exists or remove this step if binaries are pre-bundled
+          gh release download --repo "$REPO" --pattern "$ASSET" --dir binaries || echo "Warning: Could not download binary from $REPO"
+          
+          if [ -f "binaries/$ASSET" ]; then
+            mv "binaries/$ASSET" "binaries/$OUT"
+          else
+            echo "Warning: Binary $ASSET not found, skipping move."
+          fi
+          
+          ls -lh binaries/ || true
+
+      - name: Verify required Stream Gate client binaries
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            node scripts/verify-binaries.js --platform mac --arch "${{ matrix.arch }}" || true
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            node scripts/verify-binaries.js --platform win || true
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            node scripts/verify-binaries.js --platform linux || true
+          else
+            echo "Unknown platform: ${{ matrix.platform }}"
+            exit 1
+          fi
+
+      - name: Install system dependencies for Linux
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot dpkg-dev
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set execute permissions for binaries
+        if: matrix.platform == 'mac' || matrix.platform == 'linux'
+        run: |
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              chmod +x binaries/stream-gate-client-mac-arm64 || true
+            else
+              chmod +x binaries/stream-gate-client-mac-intel || true
+            fi
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            chmod +x binaries/stream-gate-client-linux || true
+          fi
+
+      - name: Build application
+        run: npm run ${{ matrix.build-script }}
+        continue-on-error: false
+
+      - name: List build artifacts
+        shell: bash
+        run: |
+          echo "=== Build output directory ==="
+          ls -lh dist/ || echo "No dist directory found"
+          echo ""
+          echo "=== All files in dist (recursive) ==="
+          find dist -type f || echo "No files found"
+
+      - name: Upload macOS ARM64 artifact
+        if: matrix.platform == 'mac' && matrix.arch == 'arm64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist/*.dmg
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload macOS Intel artifact
+        if: matrix.platform == 'mac' && matrix.arch == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist/*.dmg
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Windows x64 artifact
+        if: matrix.platform == 'win' && matrix.arch == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            dist/*.exe
+            dist/**/*.exe
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Windows x86 artifact
+        if: matrix.platform == 'win' && matrix.arch == 'ia32'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            dist/*.exe
+            dist/**/*.exe
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload Linux x64 artifact
+        if: matrix.platform == 'linux' && matrix.arch == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+          retention-days: 1
+          if-no-files-found: error
+
+
+  create-release:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download macOS ARM64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Stream-Gate-macOS-ARM64
+          path: release/macos
+        continue-on-error: true
+
+      - name: Download macOS Intel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Stream-Gate-macOS-Intel
+          path: release/macos
+        continue-on-error: true
+
+      - name: Download Windows x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Stream-Gate-Windows-x64
+          path: release/windows/x64
+        continue-on-error: true
+
+      - name: Download Windows x86 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Stream-Gate-Windows-x86
+          path: release/windows/x86
+        continue-on-error: true
+
+      - name: Download Linux x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Stream-Gate-Linux-x64
+          path: release/linux
+        continue-on-error: true
+
+      - name: Move Windows artifacts to release folder
+        shell: bash
+        run: |
+          mkdir -p release/final
+          
+          # Move macOS
+          if [ -d release/macos ]; then
+             mv release/macos/*.dmg release/final/ 2>/dev/null || true
+          fi
+          
+          # Move Windows
+          if [ -d release/windows/x64 ]; then
+            for f in release/windows/x64/*.exe; do
+              [ -e "$f" ] || continue
+              mv "$f" "release/final/Stream-Gate-Windows-x64.exe"
+              break
+            done
+          fi
+          if [ -d release/windows/x86 ]; then
+            for f in release/windows/x86/*.exe; do
+              [ -e "$f" ] || continue
+              mv "$f" "release/final/Stream-Gate-Windows-x86.exe"
+              break
+            done
+          fi
+          
+          # Move Linux - Normalize formatting
+          if [ -d release/linux ]; then
+             mv release/linux/*.AppImage "release/final/Stream-Gate-Linux-x64.AppImage" 2>/dev/null || true
+             mv release/linux/*.deb "release/final/Stream-Gate-Linux-x64.deb" 2>/dev/null || true
+          fi
+          
+          echo "=== Final Release Artifacts ==="
+          ls -lh release/final/
+
+      - name: Extract version from tag or input
+        id: get_version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🎉 Stream Gate v${{ steps.get_version.outputs.VERSION }}
+
+            ### 📥 Downloads
+
+            | Platform | File |
+            |----------|------|
+            | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-ARM64.dmg) |
+            | macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-Intel.dmg) |
+            | Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x64.exe) |
+            | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x86.exe) |
+            | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.AppImage) |
+            | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.deb) |
+
+            ### ✨ What's New
+
+            ${{ github.event_name == 'workflow_dispatch' && 'Manual release triggered via GitHub Actions' || format('See the [changelog](https://github.com/{0}/compare/v{1}...main) for details.', github.repository, steps.get_version.outputs.VERSION) }}
+
+            ### 🚀 Quick Start
+
+            1. Download the installer for your platform
+            2. Install the application
+            3. Launch Stream Gate
+            4. Click "Connect"
+
+            ### 📖 Documentation
+
+            For setup instructions and troubleshooting, see the [README](https://github.com/${{ github.repository }}#readme).
+
+            ---
+
+            ${{ github.event_name == 'push' && format('**Full Changelog**: https://github.com/{0}/compare/v{1}...main', github.repository, steps.get_version.outputs.VERSION) || '' }}
+          files: |
+            release/final/*
+          draft: ${{ contains(steps.get_version.outputs.VERSION, '-beta') }}
+          prerelease: ${{ contains(steps.get_version.outputs.VERSION, '-beta') }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+            arch: arm64
+            build-script: build:mac:arm64
             artifact-name: Stream Gate-GUI-macOS-ARM64
           - os: macos-latest
             platform: mac
