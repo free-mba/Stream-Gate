@@ -215,14 +215,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Stream-Gate-macOS-ARM64
-          path: release/macos
+          path: release/macos/arm64
         continue-on-error: true
 
       - name: Download macOS Intel artifact
         uses: actions/download-artifact@v4
         with:
           name: Stream-Gate-macOS-Intel
-          path: release/macos
+          path: release/macos/intel
         continue-on-error: true
 
       - name: Download Windows x64 artifact
@@ -246,14 +246,27 @@ jobs:
           path: release/linux
         continue-on-error: true
 
-      - name: Move Windows artifacts to release folder
+      - name: Move artifacts to release folder
         shell: bash
         run: |
           mkdir -p release/final
           
-          # Move macOS
-          if [ -d release/macos ]; then
-             mv release/macos/*.dmg release/final/ 2>/dev/null || true
+          # Move macOS ARM64
+          if [ -d release/macos/arm64 ]; then
+             for f in release/macos/arm64/*.dmg; do
+               [ -e "$f" ] || continue
+               mv "$f" "release/final/Stream-Gate-macOS-ARM64.dmg"
+               break
+             done
+          fi
+
+          # Move macOS Intel
+          if [ -d release/macos/intel ]; then
+             for f in release/macos/intel/*.dmg; do
+               [ -e "$f" ] || continue
+               mv "$f" "release/final/Stream-Gate-macOS-Intel.dmg"
+               break
+             done
           fi
           
           # Move Windows

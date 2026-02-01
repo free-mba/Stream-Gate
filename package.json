@@ -1,6 +1,6 @@
 {
   "name": "stream-gate",
-  "version": "1.0.53",
+  "version": "0.0.2",
   "description": "Stream Gate - VPN Client with HTTP Proxy",
   "main": "main.js",
   "scripts": {
