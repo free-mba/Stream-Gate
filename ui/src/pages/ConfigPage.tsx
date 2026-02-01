@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Edit, Check, Globe } from "lucide-react";
+import { Plus, Trash2, Edit, Check, Globe, Share2, Download, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Config {
@@ -25,6 +25,10 @@ export default function ConfigPage() {
     // Form State
     const [formData, setFormData] = useState<Partial<Config>>({});
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+    const [importText, setImportText] = useState("");
+    const [sharedId, setSharedId] = useState<string | null>(null);
+    const [isExported, setIsExported] = useState(false);
 
     const confirmDelete = async () => {
         if (!deletingId) return;
@@ -108,6 +112,51 @@ export default function ConfigPage() {
         setIsDialogOpen(true);
     };
 
+    const handleShare = (config: Config, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            const data = { ...config };
+            delete (data as any).id;
+
+            // Handle UTF-8 for base64 (to support emojis)
+            const json = JSON.stringify(data);
+            const base64 = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+                String.fromCharCode(parseInt(p1, 16))
+            ));
+
+            const shareLink = `ssgate:${config.remark}//${base64}`;
+            navigator.clipboard.writeText(shareLink);
+
+            setSharedId(config.id);
+            setTimeout(() => setSharedId(null), 2000);
+        } catch (err) {
+            console.error('Failed to share:', err);
+        }
+    };
+
+    const handleExportAll = async () => {
+        const result = await ipc?.invoke('export-configs');
+        if (result?.success) {
+            navigator.clipboard.writeText(result.data);
+            setIsExported(true);
+            setTimeout(() => setIsExported(false), 2000);
+        }
+    };
+
+    const handleImport = async () => {
+        if (!importText.trim()) return;
+        const result = await ipc?.invoke('import-configs', importText);
+        if (result?.success) {
+            alert(`Imported ${result.count} configurations successfully!${result.errors ? ` (${result.errors} errors)` : ""}`);
+            setIsImportDialogOpen(false);
+            setImportText("");
+            // Refresh settings
+            ipc?.invoke('get-settings').then(setSettings);
+        } else {
+            alert("Failed to import: " + result.error);
+        }
+    };
+
     const configs = Array.isArray(settings.configs) ? settings.configs : [];
 
     return (
@@ -117,10 +166,20 @@ export default function ConfigPage() {
                     <h2 className="text-3xl font-bold tracking-tight">Configurations</h2>
                     <p className="text-muted-foreground">Manage your VPN connections.</p>
                 </div>
-                <Button onClick={() => openValidForm()} className="gap-2 shadow-lg shadow-primary/20">
-                    <Plus className="w-4 h-4" />
-                    Add Config
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setIsImportDialogOpen(true)} className="gap-2 border-white/10 hover:bg-white/5">
+                        <Upload className="w-4 h-4" />
+                        Import
+                    </Button>
+                    <Button variant="outline" onClick={handleExportAll} className={cn("gap-2 border-white/10 transition-all duration-300", isExported ? "bg-green-500/20 border-green-500/50 text-green-400" : "hover:bg-white/5")}>
+                        {isExported ? <Check className="w-4 h-4 animate-in zoom-in duration-300" /> : <Download className="w-4 h-4" />}
+                        {isExported ? "Copied!" : "Export All"}
+                    </Button>
+                    <Button onClick={() => openValidForm()} className="gap-2 shadow-lg shadow-primary/20">
+                        <Plus className="w-4 h-4" />
+                        Add Config
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -155,6 +214,16 @@ export default function ConfigPage() {
                                 </div>
 
                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity pt-2">
+                                    <Button size="icon" variant="ghost" title="Share"
+                                        className={cn("h-8 w-8 transition-all duration-300", sharedId === config.id ? "bg-green-500/20" : "hover:bg-white/10")}
+                                        onClick={(e) => handleShare(config, e)}
+                                    >
+                                        {sharedId === config.id ? (
+                                            <Check className="w-4 h-4 text-green-400 animate-in zoom-in duration-300" />
+                                        ) : (
+                                            <Share2 className="w-4 h-4 text-green-400" />
+                                        )}
+                                    </Button>
                                     <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-white/10" onClick={(e) => { e.stopPropagation(); openValidForm(config); }}>
                                         <Edit className="w-4 h-4 text-blue-400" />
                                     </Button>
@@ -175,6 +244,29 @@ export default function ConfigPage() {
                     </div>
                 )}
             </div>
+
+            {/* Import Dialog */}
+            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+                <DialogContent className="sm:max-w-xl bg-card/95 backdrop-blur-xl border-white/10">
+                    <DialogHeader>
+                        <DialogTitle>Import Configurations</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <Label>Paste ssgate links (one per line)</Label>
+                        <textarea
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            className="w-full h-48 bg-black/20 border border-white/10 rounded-xl p-4 font-mono text-xs focus:ring-1 focus:ring-primary outline-none transition-all"
+                            placeholder="ssgate:MyConfig//eyJyZW1hcmsiOiJNeSBDb25maWcuLi4="
+                        />
+                        <p className="text-[10px] text-muted-foreground">Each line should start with <code>ssgate:name//</code> followed by base64 data.</p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsImportDialogOpen(false)} className="border-white/10 hover:bg-white/5">Cancel</Button>
+                        <Button onClick={handleImport} className="bg-primary hover:bg-primary/90">Import Configs</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Edit/Add Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

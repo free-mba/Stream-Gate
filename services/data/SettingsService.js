@@ -237,11 +237,80 @@ class SettingsService {
   }
 
   /**
-   * Export settings (for backup/debugging)
-   * @returns {string} JSON string of settings
+   * Export all configs as ssgate:name//base64 strings
+   * @returns {string} String with one config format per line
    */
-  export() {
-    return JSON.stringify(this.settings, null, 2);
+  exportConfigs() {
+    const configs = this.settings.configs || [];
+    return configs.map(config => {
+      const remark = config.remark || 'Imported';
+      const data = { ...config };
+      delete data.id; // Don't export local ID
+      const base64 = Buffer.from(JSON.stringify(data)).toString('base64');
+      return `ssgate:${remark}//${base64}`;
+    }).join('\n');
+  }
+
+  /**
+   * Import configurations from strings
+   * @param {string} importData - Multi-line string of ssgate format
+   * @returns {Object} Result of import
+   */
+  importConfigs(importData) {
+    if (!importData || typeof importData !== 'string') {
+      return { success: false, error: 'Invalid import data' };
+    }
+
+    const lines = importData.split('\n').map(l => l.trim()).filter(l => l.startsWith('ssgate:'));
+    const importedConfigs = [];
+    let errorCount = 0;
+
+    for (const line of lines) {
+      try {
+        const parts = line.split('//');
+        if (parts.length < 2) {
+          errorCount++;
+          continue;
+        }
+
+        const prefix = parts[0]; // ssgate:Remark
+        const base64 = parts.slice(1).join('//'); // The rest is base64
+        const remark = prefix.replace(/^ssgate:/, '') || 'Imported';
+
+        const json = Buffer.from(base64, 'base64').toString('utf8');
+        const configData = JSON.parse(json);
+
+        // Basic validation
+        if (!configData.domain) {
+          errorCount++;
+          continue;
+        }
+
+        const newConfig = {
+          id: require('crypto').randomUUID(),
+          remark: configData.remark || remark,
+          domain: configData.domain,
+          country: configData.country || '🏳️',
+          socks: configData.socks || {}
+        };
+
+        importedConfigs.push(newConfig);
+      } catch (err) {
+        this.logger.error('Failed to parse config line', err);
+        errorCount++;
+      }
+    }
+
+    if (importedConfigs.length > 0) {
+      const currentConfigs = Array.isArray(this.settings.configs) ? this.settings.configs : [];
+      this.save({ configs: [...currentConfigs, ...importedConfigs] });
+    }
+
+    return {
+      success: true,
+      count: importedConfigs.length,
+      errors: errorCount
+    };
   }
 }
 

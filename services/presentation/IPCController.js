@@ -80,6 +80,8 @@ class IPCController {
     ipcMain.handle('set-verbose', this._handleSetVerbose.bind(this));
     ipcMain.handle('set-socks5-auth', this._handleSetSocks5Auth.bind(this));
     ipcMain.handle('save-settings', this._handleSaveSettings.bind(this));
+    ipcMain.handle('import-configs', this._handleImportConfigs.bind(this));
+    ipcMain.handle('export-configs', this._handleExportConfigs.bind(this));
 
     // System proxy management
     ipcMain.handle('toggle-system-proxy', this._handleToggleSystemProxy.bind(this));
@@ -216,6 +218,30 @@ class IPCController {
     try {
       this.settingsService.save(settings);
       return { success: true, settings: this.settingsService.getAll() };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Handle import-configs
+   * @private
+   */
+  _handleImportConfigs(event, importData) {
+    try {
+      return this.settingsService.importConfigs(importData);
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Handle export-configs
+   * @private
+   */
+  _handleExportConfigs() {
+    try {
+      return { success: true, data: this.settingsService.exportConfigs() };
     } catch (err) {
       return { success: false, error: err.message };
     }
