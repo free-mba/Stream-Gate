@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
+@import './assets/fonts/vazirmatn.css';
 
 @tailwind base;
 @tailwind components;

@@ -13,7 +13,7 @@
 <br>
 
 <div align="center">
-  <strong>The Ultimate GUI Client for Stream Gate</strong><br>
+  <strong>The Ultimate GUI Client for SlipStream</strong><br>
   A high-performance, cross-platform VPN utility engineered for speed, privacy, and seamless tunneling.
 </div>
 
