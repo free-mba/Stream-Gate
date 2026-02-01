@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "cd ui && npm run dev",
     "download:binaries": "node scripts/download-binaries.js",
     "clean:binaries": "node -e \"const fs=require('fs'); fs.rmSync('binaries',{recursive:true,force:true}); console.log('✅ Removed ./binaries');\"",
     "verify:binaries": "node scripts/verify-binaries.js --platform all",

@@ -190,10 +190,16 @@ app.on('window-all-closed', () => {
   }
 });
 
+let isQuitting = false;
+
 app.on('before-quit', (event) => {
+  if (isQuitting) return;
+
   // Prevent immediate quit to allow cleanup
   event.preventDefault();
+
   cleanup().finally(() => {
+    isQuitting = true;
     app.quit();
   });
 });

@@ -392,39 +392,51 @@
 
         .button {
             width: 100%;
-            padding: 10px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.02em;
         }
 
         .button:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .button-start {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
+            background-size: 200% auto;
             color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .button-start:hover:not(:disabled) {
+            background-position: right center;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
         }
 
         .button-stop {
-            background: #f44336;
+            background-image: linear-gradient(135deg, #ff6b6b 0%, #ee0979 50%, #ff6b6b 100%);
+            background-size: 200% auto;
             color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .button-stop:hover:not(:disabled) {
+            background-position: right center;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+            box-shadow: 0 10px 20px rgba(238, 9, 121, 0.4);
         }
 
         .info {
@@ -1339,7 +1351,8 @@
                         IP:Port)</li>
                     <li><strong>Domain:</strong> Your SlipStream server domain address</li>
                     <li><strong>Authoritative Mode:</strong> Use <code>--authoritative</code> flag instead of
-                        <code>--resolver</code> for direct authoritative resolution.</li>
+                        <code>--resolver</code> for direct authoritative resolution.
+                    </li>
                     <li><strong>Verbose Logging:</strong> Show detailed connection logs (useful for troubleshooting)
                     </li>
                 </ul>

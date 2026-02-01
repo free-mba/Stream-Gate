@@ -5,8 +5,8 @@
  */
 
 const { BrowserWindow, app } = require('electron');
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 class WindowService {
   constructor(logger, electronApp) {
@@ -51,7 +51,20 @@ class WindowService {
     }
 
     this.mainWindow = new BrowserWindow(windowOptions);
-    this.mainWindow.loadFile(path.join(__dirname, '../../index.html'));
+
+    const isDev = process.env.NODE_ENV === 'development';
+    const uiDistPath = path.join(__dirname, '../../ui/dist/index.html');
+
+    if (isDev) {
+      this.logger.info('Loading from Vite dev server...');
+      this.mainWindow.loadURL('http://localhost:5173');
+    } else if (fs.existsSync(uiDistPath)) {
+      this.logger.info('Loading built UI from ui/dist...');
+      this.mainWindow.loadFile(uiDistPath);
+    } else {
+      this.logger.warn('UI build not found, falling back to legacy index.html');
+      this.mainWindow.loadFile(path.join(__dirname, '../../index.html'));
+    }
 
     // Avoid "Object has been destroyed" during shutdown
     this.mainWindow.on('closed', () => {

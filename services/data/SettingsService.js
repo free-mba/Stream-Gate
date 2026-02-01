@@ -7,8 +7,8 @@
  * Migrates legacy settings to userData directory for packaged apps.
  */
 
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 class SettingsService {
   constructor(logger, app) {
@@ -26,7 +26,10 @@ class SettingsService {
       socks5AuthUsername: '',
       socks5AuthPassword: '',
       systemProxyEnabledByApp: false,
-      systemProxyServiceName: ''
+      systemProxyServiceName: '',
+      configs: [], // Array of { id, remark, domain, socks: { username, password }, country }
+      selectedConfigId: null, // ID of the currently selected configuration
+      savedDns: ['8.8.8.8:53', '1.1.1.1:53'] // Custom/Saved DNS list
     };
 
     // Current in-memory settings
@@ -147,6 +150,11 @@ class SettingsService {
       }
       if (typeof this.settings.systemProxyServiceName !== 'string') {
         this.settings.systemProxyServiceName = '';
+      }
+
+      // Ensure configs is an array
+      if (!Array.isArray(this.settings.configs)) {
+        this.settings.configs = [];
       }
 
       // Write to disk

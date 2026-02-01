@@ -8,7 +8,7 @@
  */
 
 const { ipcMain, shell } = require('electron');
-const https = require('https');
+const https = require('node:https');
 
 class IPCController {
   constructor(dependencies) {
@@ -31,7 +31,9 @@ class IPCController {
   _setupLogForwarding() {
     // Forward log messages to renderer
     this.eventEmitter.on('log:message', (data) => {
-      this.windowService.sendToRenderer('slipstream-log', `[${data.level.toUpperCase()}] ${data.message}`);
+      const level = data && data.level ? data.level.toUpperCase() : 'INFO';
+      const message = data && data.message ? data.message : String(data);
+      this.windowService.sendToRenderer('slipstream-log', `[${level}] ${message}`);
     });
 
     this.eventEmitter.on('log:error', (data) => {
@@ -72,6 +74,7 @@ class IPCController {
     ipcMain.handle('set-resolver', this._handleSetResolver.bind(this));
     ipcMain.handle('set-verbose', this._handleSetVerbose.bind(this));
     ipcMain.handle('set-socks5-auth', this._handleSetSocks5Auth.bind(this));
+    ipcMain.handle('save-settings', this._handleSaveSettings.bind(this));
 
     // System proxy management
     ipcMain.handle('toggle-system-proxy', this._handleToggleSystemProxy.bind(this));
@@ -198,6 +201,19 @@ class IPCController {
       socks5AuthUsername: username,
       socks5AuthPassword: password
     };
+  }
+
+  /**
+   * Handle save-settings
+   * @private
+   */
+  _handleSaveSettings(event, settings) {
+    try {
+      this.settingsService.save(settings);
+      return { success: true, settings: this.settingsService.getAll() };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 
   /**
@@ -333,7 +349,7 @@ class IPCController {
   async _handleTestProxy() {
     return new Promise((resolve) => {
       const startTime = Date.now();
-      const http = require('http');
+      const http = require('node:http');
 
       const options = {
         hostname: '127.0.0.1',
