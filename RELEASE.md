@@ -104,7 +104,7 @@ xattr: [Errno 1] Operation not permitted
 The fix is to remove the quarantine attribute using `sudo`:
 
 ```bash
-sudo xattr -cr /Applications/Stream\ Gate.app
+sudo xattr -r -d com.apple.quarantine /Applications/Stream\ Gate.app
 ```
 
 **Alternative Fix (No Terminal):**

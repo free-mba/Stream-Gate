@@ -77,7 +77,7 @@ Download the latest release for your platform:
 > **Method 2 (Terminal):**  
 > If the above doesn't work, run in Terminal:  
 > ```bash
-> sudo xattr -cr /Applications/Stream\ Gate.app
+> sudo xattr -r -d com.apple.quarantine /Applications/Stream\ Gate.app
 > ```
 
 ---

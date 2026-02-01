@@ -47,7 +47,7 @@
 > **روش ۲ (ترمینال):**  
 > اگر روش بالا کار نکرد، دستور زیر را اجرا کنید:  
 > ```bash
-> sudo xattr -cr /Applications/Stream\ Gate.app
+> sudo xattr -r -d com.apple.quarantine /Applications/Stream\ Gate.app
 > ```
 
 اگر دانلود مستقیم کار نکرد، از صفحه [Releases](https://github.com/free-mba/Stream-Gate/releases/latest) استفاده کنید.
