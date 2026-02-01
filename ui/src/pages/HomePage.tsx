@@ -38,20 +38,22 @@ export default function HomePage() {
         };
     }, [ipc]);
 
-    // Simulate traffic when connected
+
+
+    // Handle traffic updates from backend
     useEffect(() => {
-        if (status.isRunning) {
-            const interval = setInterval(() => {
-                setTraffic({
-                    down: Math.floor(Math.random() * 5000), // KB/s
-                    up: Math.floor(Math.random() * 1000)
-                });
-            }, 1000);
-            return () => clearInterval(interval);
-        } else {
-            setTraffic({ down: 0, up: 0 });
-        }
-    }, [status.isRunning]);
+        if (!ipc) return;
+
+        const handleTraffic = (_: any, data: any) => {
+            setTraffic(data);
+        };
+
+        ipc.on('traffic-update', handleTraffic);
+
+        return () => {
+            ipc.removeListener('traffic-update', handleTraffic);
+        };
+    }, [ipc]);
 
     const toggleSystemProxy = async () => {
         if (!ipc) return;
@@ -137,9 +139,12 @@ export default function HomePage() {
         handleDnsChange(formattedDns);
     };
 
-    const formatSpeed = (kb: number) => {
-        if (kb > 1024) return `${(kb / 1024).toFixed(1)} MB/s`;
-        return `${kb} KB/s`;
+    const formatSpeed = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B/s`;
+        const kb = bytes / 1024;
+        if (kb < 1024) return `${kb.toFixed(1)} KB/s`;
+        const mb = kb / 1024;
+        return `${mb.toFixed(1)} MB/s`;
     };
 
     return (

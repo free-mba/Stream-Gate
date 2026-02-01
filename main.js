@@ -9,6 +9,8 @@
 
 const { app } = require('electron');
 
+const APP_NAME = 'Stream Gate';
+
 // Import services
 const EventEmitter = require('./services/core/EventEmitter');
 const Logger = require('./services/core/Logger');
@@ -21,8 +23,9 @@ const DNSService = require('./services/business/DNSService');
 const ConnectionService = require('./services/orchestration/ConnectionService');
 const IPCController = require('./services/presentation/IPCController');
 
-// Set app name for macOS dock
-app.setName('SlipStream GUI');
+// Set app name for macOS dock and menu bar
+app.setName(APP_NAME);
+app.setAboutPanelOptions({ applicationName: APP_NAME, version: app.getVersion() });
 
 // Service containers (will be initialized in app.whenReady)
 let eventEmitter;
@@ -46,7 +49,7 @@ function initializeServices() {
   logger = new Logger(eventEmitter);
 
   // Infrastructure services
-  windowService = new WindowService(logger, app);
+  windowService = new WindowService(logger, app, APP_NAME);
 
   // Data services
   settingsService = new SettingsService(logger, app);

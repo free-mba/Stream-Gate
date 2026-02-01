@@ -57,6 +57,11 @@ class IPCController {
     this.eventEmitter.on('proxy:error', (data) => {
       this.windowService.sendToRenderer('slipstream-error', data);
     });
+
+    // Forward traffic updates
+    this.eventEmitter.on('traffic-update', (data) => {
+      this.windowService.sendToRenderer('traffic-update', data);
+    });
   }
 
   /**

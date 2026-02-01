@@ -28,6 +28,13 @@ class ProxyService {
 
     this.httpProxyServer = null;
     this.socksForwardServer = null;
+
+    // Traffic stats
+    this.bytesUplink = 0;
+    this.bytesDownlink = 0;
+    this.prevUplink = 0;
+    this.prevDownlink = 0;
+    this.trafficInterval = null;
   }
 
   /**
@@ -79,6 +86,61 @@ class ProxyService {
   }
 
   /**
+   * Start traffic monitoring
+   * @private
+   */
+  _startTrafficMonitor() {
+    if (this.trafficInterval) clearInterval(this.trafficInterval);
+
+    this.prevUplink = this.bytesUplink;
+    this.prevDownlink = this.bytesDownlink;
+
+    this.trafficInterval = setInterval(() => {
+      const nowUp = this.bytesUplink;
+      const nowDown = this.bytesDownlink;
+
+      const speedUp = nowUp - this.prevUplink;
+      const speedDown = nowDown - this.prevDownlink;
+
+      this.prevUplink = nowUp;
+      this.prevDownlink = nowDown;
+
+      // Emit even if zero, so UI clears
+      this.eventEmitter.emit('traffic-update', {
+        up: speedUp < 0 ? 0 : speedUp,
+        down: speedDown < 0 ? 0 : speedDown
+      });
+    }, 1000);
+  }
+
+  /**
+   * Stop traffic monitoring
+   * @private
+   */
+  _stopTrafficMonitor() {
+    if (this.trafficInterval) {
+      clearInterval(this.trafficInterval);
+      this.trafficInterval = null;
+    }
+  }
+
+  /**
+   * Increment uplink counter
+   * @param {number} bytes 
+   */
+  _addUplink(bytes) {
+    this.bytesUplink += bytes;
+  }
+
+  /**
+   * Increment downlink counter
+   * @param {number} bytes 
+   */
+  _addDownlink(bytes) {
+    this.bytesDownlink += bytes;
+  }
+
+  /**
    * Start the HTTP proxy server
    * @returns {Promise<void>}
    */
@@ -110,6 +172,7 @@ class ProxyService {
         this.httpProxyServer.listen(HTTP_PROXY_PORT, '0.0.0.0', () => {
           this.logger.info(`HTTP Proxy listening on port ${HTTP_PROXY_PORT}`);
           this.eventEmitter.emit('proxy:started', { type: 'http', port: HTTP_PROXY_PORT });
+          this._startTrafficMonitor();
           resolve();
         });
 
@@ -163,11 +226,20 @@ class ProxyService {
       // Write head data if present
       if (head && head.length > 0) {
         targetSocket.write(head);
+        this._addUplink(head.length);
       }
 
       // Configure sockets
       clientSocket.setNoDelay(true);
       targetSocket.setNoDelay(true);
+
+      // Traffic counting
+      clientSocket.on('data', (chunk) => {
+        this._addUplink(chunk.length);
+      });
+      targetSocket.on('data', (chunk) => {
+        this._addDownlink(chunk.length);
+      });
 
       // Error handlers
       const ignoreCodes = ['ECONNRESET', 'EPIPE', 'ECONNABORTED', 'ECANCELED', 'ETIMEDOUT'];
@@ -222,6 +294,11 @@ class ProxyService {
     };
 
     logRequest(`→ ${req.method} ${req.url}`, false, true);
+
+    // Track request body size (uplink)
+    req.on('data', (chunk) => {
+      this._addUplink(chunk.length);
+    });
 
     // Set timeout
     req.setTimeout(30000, () => {
@@ -286,6 +363,12 @@ class ProxyService {
       try {
         if (!res.headersSent) {
           res.writeHead(proxyRes.statusCode, responseHeaders);
+
+          // Track response body size (downlink)
+          proxyRes.on('data', (chunk) => {
+            this._addDownlink(chunk.length);
+          });
+
           proxyRes.pipe(res);
           logRequest(`📤 Sent response ${proxyRes.statusCode} to client`, false, true);
         } else {
@@ -351,6 +434,16 @@ class ProxyService {
       destination: { host, port }
     }).then((info) => {
       info.socket.write(head);
+      this._addUplink(head.length);
+
+      // Traffic counting
+      socket.on('data', (chunk) => {
+        this._addUplink(chunk.length);
+      });
+      info.socket.on('data', (chunk) => {
+        this._addDownlink(chunk.length);
+      });
+
       info.socket.pipe(socket);
       socket.pipe(info.socket);
     }).catch((err) => {
@@ -486,6 +579,22 @@ class ProxyService {
             // Respond success to SOCKS client
             clientSocket.write(Buffer.from([0x05, 0x00, 0x00, 0x01, 0, 0, 0, 0, 0, 0]));
 
+            // Config sockets
+            clientSocket.setNoDelay(true);
+            httpProxySocket.setNoDelay(true);
+
+            // Traffic counting (Bridge is just a recursive call to HTTP proxy, so we count traffic here too or rely on the HTTP proxy to count it?
+            // If we count here AND in HTTP proxy, we double count locally initiated SOCKS traffic.
+            // But if we use SOCKS stats to display, we want the total.
+            // Since this just pipes to Local HTTP Proxy, the Local HTTP Proxy (via _handleConnect) will count the traffic!
+            // BUT: The data between Client <-> Bridge is what we want to measure if it's external.
+            // However, since we treat everything passing through THIS app instance as "Traffic", and proper HTTP proxy counts it...
+            // Wait, this is `net.connect(HTTP_PROXY_PORT)`. The `httpProxyServer` will receive this connection.
+            // So `_handleConnect` in `httpProxyServer` WILL be called.
+            // And that method counts traffic.
+            // So we DO NOT need to count traffic here, or we will double-count for SOCKS clients.
+            // Correct.
+
             // Pipe bidirectionally
             clientSocket.pipe(httpProxySocket);
             httpProxySocket.pipe(clientSocket);
@@ -537,6 +646,7 @@ class ProxyService {
    * Stop the HTTP proxy server
    */
   stopHttpProxy() {
+    this._stopTrafficMonitor();
     if (this.httpProxyServer) {
       this.logger.info('Stopping HTTP proxy server');
       this.httpProxyServer.close();
@@ -579,7 +689,7 @@ class ProxyService {
    */
   isSocksForwardRunning() {
     return this.socksForwardServer !== null &&
-           this.socksForwardServer.listening;
+      this.socksForwardServer.listening;
   }
 
   /**

@@ -4,7 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Shield, Server } from "lucide-react";
-// import { cn } from "@/lib/utils"; // cn is NOT used in SettingsPage currently.
+import { APP_NAME, APP_VERSION } from "@/lib/constants";
 
 export default function SettingsPage() {
     const ipc = useIpc();
@@ -100,7 +100,7 @@ export default function SettingsPage() {
 
                 {/* Info */}
                 <div className="text-center text-xs text-muted-foreground pt-8">
-                    <p>SlipStream GUI v1.0.53</p>
+                    <p>{`${APP_NAME} ${APP_VERSION}`}</p>
                     <p className="mt-1 opacity-50">Designed with ❤️</p>
                 </div>
 

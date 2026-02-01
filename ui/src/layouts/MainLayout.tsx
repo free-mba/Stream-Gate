@@ -3,6 +3,7 @@ import { Home, Settings, List, Activity, Terminal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { useIpc } from "@/hooks/useIpc";
+import { APP_NAME } from "@/lib/constants";
 
 export default function MainLayout() {
     const [showLogs, setShowLogs] = useState(false);
@@ -49,8 +50,8 @@ export default function MainLayout() {
                         <div className="w-3 h-3 bg-white/20 rounded-full" />
                     </div>
                     <div>
-                        <h1 className="font-bold text-lg tracking-tight leading-none text-white">SlipStream</h1>
-                        <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">GUI Client</span>
+                        <h1 className="font-bold text-lg tracking-tight leading-none text-white">{APP_NAME}</h1>
+                        <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">GUI Client for Slipstream</span>
                     </div>
                 </div>
 

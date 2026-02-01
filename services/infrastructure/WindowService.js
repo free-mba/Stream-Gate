@@ -9,9 +9,10 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 class WindowService {
-  constructor(logger, electronApp) {
+  constructor(logger, electronApp, appName = 'Stream Gate') {
     this.logger = logger;
     this.app = electronApp || app;
+    this.appName = appName;
     this.mainWindow = null;
   }
 
@@ -24,6 +25,7 @@ class WindowService {
     const windowOptions = {
       width: 1200,
       height: 800,
+      title: this.appName,
       resizable: true,
       minWidth: 900,
       minHeight: 600,
@@ -51,6 +53,20 @@ class WindowService {
     }
 
     this.mainWindow = new BrowserWindow(windowOptions);
+
+    // Force-set title after page load (macOS workaround for title override)
+    this.mainWindow.webContents.on('did-finish-load', () => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.setTitle(this.appName);
+      }
+    });
+
+    // Also set title when window is ready to show
+    this.mainWindow.once('ready-to-show', () => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.setTitle(this.appName);
+      }
+    });
 
     const isDev = process.env.NODE_ENV === 'development';
     const uiDistPath = path.join(__dirname, '../../ui/dist/index.html');

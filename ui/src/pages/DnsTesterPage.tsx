@@ -10,6 +10,7 @@ import { Play, Square } from "lucide-react";
 import { useAtom } from "jotai";
 import { dnsResultsAtom, isDnsScanningAtom, dnsProgressAtom } from "@/store";
 import { DnsResultRow } from "@/components/DnsResultRow";
+import { APP_NAME } from "@/lib/constants";
 
 const DEFAULT_DNS_LIST = `1.1.1.1
 1.0.0.1
@@ -150,7 +151,7 @@ export default function DnsTesterPage() {
                                         className="font-mono text-xs bg-black/20 border-white/10 max-w-[250px]"
                                     />
                                     <p className="text-[10px] text-muted-foreground">
-                                        The domain should point to your SlipStream server directly (A Record).
+                                        The domain should point to your {APP_NAME} server directly (A Record).
                                     </p>
                                 </div>
                                 <div className="space-y-2">

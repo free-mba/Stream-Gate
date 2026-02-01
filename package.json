@@ -1,11 +1,12 @@
 {
-  "name": "slipstream-gui",
+  "name": "stream-gate",
   "version": "1.0.53",
-  "description": "SlipStream GUI Client with HTTP Proxy",
+  "description": "Stream Gate - VPN Client with HTTP Proxy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "cd ui && npm run dev",
+    "generate-icons": "node scripts/generate-icons.js && npx electron-icon-builder --input=./assets/icon.png --output=./assets --flatten",
     "download:binaries": "node scripts/download-binaries.js",
     "clean:binaries": "node -e \"const fs=require('fs'); fs.rmSync('binaries',{recursive:true,force:true}); console.log('✅ Removed ./binaries');\"",
     "verify:binaries": "node scripts/verify-binaries.js --platform all",
@@ -33,10 +34,10 @@
   "keywords": [
     "vpn",
     "proxy",
-    "slipstream"
+    "stream-gate"
   ],
   "author": {
-    "name": "SlipStream GUI Contributors",
+    "name": "Stream Gate Contributors",
     "email": "noreply@github.com"
   },
   "license": "MIT",
@@ -50,7 +51,9 @@
   "homepage": "https://github.com/mirzaaghazadeh/SlipStreamGUI#readme",
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "electron-icon-builder": "2.0.1",
+    "sharp": "0.34.5"
   },
   "dependencies": {
     "http-proxy": "1.18.1",
@@ -59,8 +62,8 @@
     "socks-proxy-agent": "^8.0.2"
   },
   "build": {
-    "appId": "com.slipstream.gui",
-    "productName": "SlipStream GUI",
+    "appId": "com.streamgate.gui",
+    "productName": "Stream Gate",
     "publish": null,
     "directories": {
       "output": "dist"
@@ -94,16 +97,19 @@
       ],
       "target": "dmg",
       "category": "public.app-category.utilities",
-      "icon": "assets/icon.png",
+      "icon": "assets/icons/icon.icns",
       "extendInfo": {
-        "NSHighResolutionCapable": true
+        "NSHighResolutionCapable": true,
+        "CFBundleName": "Stream Gate",
+        "CFBundleDisplayName": "Stream Gate",
+        "CFBundleExecutable": "Stream Gate"
       },
       "hardenedRuntime": false,
       "gatekeeperAssess": false
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.png",
+      "icon": "assets/icons/icon.ico",
       "extraResources": [
         {
           "from": "binaries/slipstream-client-win.exe",
@@ -120,8 +126,8 @@
         "deb"
       ],
       "category": "Network",
-      "icon": "assets/icon.png",
-      "maintainer": "SlipStream GUI Contributors <noreply@github.com>",
+      "icon": "assets/icons",
+      "maintainer": "Stream Gate Contributors <noreply@github.com>",
       "extraResources": [
         {
           "from": "binaries/slipstream-client-linux",
