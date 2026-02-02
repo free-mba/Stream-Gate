@@ -44,12 +44,14 @@ class ProxyService {
    */
   _buildSocks5Url() {
     const settings = this.settingsService.getAll();
-    if (!settings.socks5AuthEnabled) return `socks5://127.0.0.1:${SOCKS5_PORT}`;
-    if (!settings.socks5AuthUsername || !settings.socks5AuthPassword) {
-      return `socks5://127.0.0.1:${SOCKS5_PORT}`;
+    let u = 'anonymous';
+    let p = 'anonymous';
+
+    if (settings.socks5AuthEnabled && settings.socks5AuthUsername && settings.socks5AuthPassword) {
+      u = encodeURIComponent(settings.socks5AuthUsername);
+      p = encodeURIComponent(settings.socks5AuthPassword);
     }
-    const u = encodeURIComponent(settings.socks5AuthUsername);
-    const p = encodeURIComponent(settings.socks5AuthPassword);
+
     return `socks5://${u}:${p}@127.0.0.1:${SOCKS5_PORT}`;
   }
 
@@ -80,6 +82,11 @@ class ProxyService {
     if (settings.socks5AuthEnabled && settings.socks5AuthUsername && settings.socks5AuthPassword) {
       config.userId = settings.socks5AuthUsername;
       config.password = settings.socks5AuthPassword;
+    } else {
+      // Force User/Password auth method (0x02) by providing default credentials.
+      // The server rejects NoAuth (0x00), so we must offer 0x02.
+      config.userId = 'anonymous';
+      config.password = 'anonymous';
     }
 
     return config;
