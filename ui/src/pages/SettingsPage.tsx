@@ -174,6 +174,52 @@ export default function SettingsPage() {
                         </div>
                     </CardContent>
                 </Card>
+                {/* DNS Settings */}
+                <Card className="bg-card/40 backdrop-blur border-border">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 leading-none">
+                            <Shield className="w-5 h-5 text-muted-foreground shrink-0" />
+                            <span className="h-5 flex items-center leading-none translate-y-[2px]">{t('DNS Configuration')}</span>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="text-base">{t('Resolve Outbound Externally')}</Label>
+                                <p className="text-sm text-muted-foreground max-w-[80%]">
+                                    {t('Resolve hostname using custom DNS to bypass poisoning.')}
+                                </p>
+                            </div>
+                            <Switch
+                                checked={settings.customDnsEnabled || false}
+                                onCheckedChange={(c) => updateSetting('customDnsEnabled', c)}
+                                className="data-[state=checked]:bg-primary"
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-sm">{t('Primary DNS')}</Label>
+                                <Input
+                                    className="bg-muted border-border font-mono"
+                                    placeholder="8.8.8.8"
+                                    value={settings.primaryDns || ''}
+                                    onChange={(e) => updateSetting('primaryDns', e.target.value)}
+                                    disabled={!settings.customDnsEnabled}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-sm">{t('Secondary DNS')}</Label>
+                                <Input
+                                    className="bg-muted border-border font-mono"
+                                    placeholder="1.1.1.1"
+                                    value={settings.secondaryDns || ''}
+                                    onChange={(e) => updateSetting('secondaryDns', e.target.value)}
+                                    disabled={!settings.customDnsEnabled}
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
                 {/* Proxy Info */}
                 <Card className="bg-card/40 backdrop-blur border-border">
                     <CardHeader>

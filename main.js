@@ -20,6 +20,7 @@ const ProcessManager = require('./services/business/ProcessManager');
 const ProxyService = require('./services/business/ProxyService');
 const SystemProxyService = require('./services/business/SystemProxyService');
 const DNSService = require('./services/business/DNSService');
+const DnsResolutionService = require('./services/business/DnsResolutionService'); // Custom Resolution
 const ConnectionService = require('./services/orchestration/ConnectionService');
 const IPCController = require('./services/presentation/IPCController');
 
@@ -35,7 +36,8 @@ let settingsService;
 let processManager;
 let proxyService;
 let systemProxyService;
-let dnsService;
+let dnsService; // Tester
+let dnsResolutionService; // Resolution
 let connectionService;
 let ipcController;
 
@@ -65,12 +67,14 @@ function initializeServices() {
   proxyService = new ProxyService(eventEmitter, logger, settingsService);
   systemProxyService = new SystemProxyService(logger, settingsService);
   dnsService = new DNSService(logger);
+  dnsResolutionService = new DnsResolutionService(logger);
 
   // Orchestration service (depends on business services)
   connectionService = new ConnectionService({
     processManager,
     proxyService,
     systemProxyService,
+    dnsResolutionService,
     settingsService,
     eventEmitter,
     logger
@@ -221,6 +225,7 @@ if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
     proxyService,
     systemProxyService,
     dnsService,
+    dnsResolutionService,
     connectionService,
     ipcController
   };

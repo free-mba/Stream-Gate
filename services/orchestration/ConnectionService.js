@@ -15,6 +15,7 @@ class ConnectionService {
     this.processManager = dependencies.processManager;
     this.proxyService = dependencies.proxyService;
     this.systemProxyService = dependencies.systemProxyService;
+    this.dnsResolutionService = dependencies.dnsResolutionService;
     this.settingsService = dependencies.settingsService;
     this.eventEmitter = dependencies.eventEmitter;
     this.logger = dependencies.logger;
@@ -71,18 +72,39 @@ class ConnectionService {
       tunMode = false,
       keepAliveInterval,
       congestionControl,
-      authoritative
+      authoritative,
+      // Custom DNS arguments
+      customDnsEnabled,
+      primaryDns,
+      secondaryDns
     } = options;
 
     // Always use HTTP Proxy mode - TUN mode removed for simplicity
     tunMode = false;
+
+    // Resolve hostname if Custom DNS is enabled
+    let finalDomain = domain;
+    if (customDnsEnabled) {
+      this.logger.info(`Custom DNS enabled. Resolving ${domain} via [${primaryDns}, ${secondaryDns}]...`);
+      this.eventEmitter.emit('log:message', `🔍 Resolving ${domain} via custom DNS...`);
+      try {
+        const resolvedIp = await this.dnsResolutionService.resolve(domain, [primaryDns, secondaryDns]);
+        finalDomain = resolvedIp;
+        this.eventEmitter.emit('log:message', `✅ Resolved ${domain} -> ${resolvedIp}`);
+      } catch (err) {
+        this.logger.error(`Custom DNS resolution failed: ${err.message}`);
+        this.eventEmitter.emit('log:error', `❌ Custom DNS resolution failed: ${err.message}`);
+        throw new Error(`Custom DNS resolution failed: ${err.message}`);
+      }
+    }
 
     try {
       // Store active config for reconnection (Memory Persistence)
       this.activeConfig = { ...options, tunMode };
 
       // Start Stream Gate client
-      await this.processManager.start(resolver, domain, {
+      // Pass finalDomain (IP) instead of original domain if resolved
+      await this.processManager.start(resolver, finalDomain, {
         authoritative,
         keepAliveInterval,
         congestionControl

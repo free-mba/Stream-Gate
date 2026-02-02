@@ -29,7 +29,11 @@ class SettingsService {
       systemProxyServiceName: '',
       configs: [], // Array of { id, remark, domain, socks: { username, password }, country }
       selectedConfigId: null, // ID of the currently selected configuration
-      savedDns: ['8.8.8.8:53', '1.1.1.1:53'] // Custom/Saved DNS list
+      savedDns: ['8.8.8.8:53', '1.1.1.1:53'], // Custom/Saved DNS list
+      // Custom DNS Configuration (Remote/Outbound Resolve)
+      customDnsEnabled: false,
+      primaryDns: '8.8.8.8',
+      secondaryDns: '1.1.1.1'
     };
 
     // Current in-memory settings
@@ -139,7 +143,9 @@ class SettingsService {
       this.settings.authoritative = !!this.settings.authoritative;
       this.settings.verbose = !!this.settings.verbose;
       this.settings.socks5AuthEnabled = !!this.settings.socks5AuthEnabled;
+      this.settings.socks5AuthEnabled = !!this.settings.socks5AuthEnabled;
       this.settings.systemProxyEnabledByApp = !!this.settings.systemProxyEnabledByApp;
+      this.settings.customDnsEnabled = !!this.settings.customDnsEnabled;
 
       // Ensure strings are actually strings
       if (typeof this.settings.socks5AuthUsername !== 'string') {
@@ -150,6 +156,12 @@ class SettingsService {
       }
       if (typeof this.settings.systemProxyServiceName !== 'string') {
         this.settings.systemProxyServiceName = '';
+      }
+      if (typeof this.settings.primaryDns !== 'string') {
+        this.settings.primaryDns = '8.8.8.8';
+      }
+      if (typeof this.settings.secondaryDns !== 'string') {
+        this.settings.secondaryDns = '1.1.1.1';
       }
 
       // Ensure configs is an array

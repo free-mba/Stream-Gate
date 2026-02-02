@@ -29,6 +29,9 @@ export interface Settings {
     theme?: 'light' | 'dark' | 'system';
     keepAliveInterval?: number;
     congestionControl?: 'auto' | 'bbr' | 'dcubic';
+    customDnsEnabled?: boolean;
+    primaryDns?: string;
+    secondaryDns?: string;
 }
 
 export interface Status {
