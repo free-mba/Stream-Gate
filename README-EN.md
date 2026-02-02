@@ -62,6 +62,21 @@ If you’re not sure which DNS Resolver to use (or DNS hasn’t fully propagated
 
 ---
 
+## 🚀 Advanced Networking
+
+You can fine-tune the connection in the **Settings** page:
+
+### Congestion Control
+- **Auto (Default)**: Chooses the best algorithm based on your resolver mode (BBR for Authoritative, DCubic for Recursive).
+- **BBR**: Google's algorithm. Great for unstable/wireless networks.
+- **DCubic**: More aggressive. Good for stable/wired connections.
+
+### QUIC Keep Alive
+- Default is `400` seconds.
+- Lower this (e.g., `30`) if you face frequent disconnects on mobile networks.
+
+---
+
 ## 🖥️ Stream Gate Server Setup
 
 To use Stream Gate, you need a Stream Gate server. You can deploy your own server or use an existing one.

@@ -63,32 +63,30 @@ class ConnectionService {
       return { success: false, message: 'Service is already running' };
     }
 
-    let { resolver, domain, tunMode = false } = options;
+    // STRICT: Expect all configuration to be provided by caller (IPCController)
+    // No fallback to settingsService here.
+    let {
+      resolver,
+      domain,
+      tunMode = false,
+      keepAliveInterval,
+      congestionControl,
+      authoritative
+    } = options;
 
     // Always use HTTP Proxy mode - TUN mode removed for simplicity
     tunMode = false;
 
     try {
-      // Use provided values or fall back to settings
-      if (!resolver || !domain) {
-        resolver = this.settingsService.get('resolver');
-        domain = this.settingsService.get('domain');
-      }
-
-      // Save settings
-      this.settingsService.save({
-        resolver,
-        domain,
-        mode: tunMode ? 'tun' : 'proxy'
-      });
-
-      // Save for reconnection attempts
-      this.lastUsedResolver = resolver;
-      this.lastUsedDomain = domain;
+      // Store active config for reconnection (Memory Persistence)
+      this.activeConfig = { ...options, tunMode };
 
       // Start Stream Gate client
-      const authoritative = this.settingsService.get('authoritative');
-      await this.processManager.start(resolver, domain, { authoritative });
+      await this.processManager.start(resolver, domain, {
+        authoritative,
+        keepAliveInterval,
+        congestionControl
+      });
 
       // Start HTTP proxy
       await this.proxyService.startHttpProxy();
@@ -134,6 +132,7 @@ class ConnectionService {
     // Clear any pending retry attempts
     this._clearRetryTimer();
     this.retryAttempts = 0;
+    this.activeConfig = null; // Clear active config on manual stop
 
     // Stop all services
     this.proxyService.stopAll();
@@ -198,6 +197,21 @@ class ConnectionService {
       return;
     }
 
+    // Don't retry if no active config was set (e.g., failed on first start)
+    if (!this.activeConfig) {
+      this.logger.warn('No active configuration found for reconnection. Aborting retry.');
+      this.eventEmitter.emit(
+        'log:error',
+        `❌ Connection failed and cannot be reconnected (no active config). Please start manually.`
+      );
+      this.isRunning = false;
+      this.eventEmitter.emit('connection:failed', {
+        reason: 'no-active-config',
+        attempts: 0
+      });
+      return;
+    }
+
     // Check if we've exceeded max retry attempts
     if (this.retryAttempts >= this.MAX_RETRY_ATTEMPTS) {
       this.logger.info(
@@ -251,13 +265,10 @@ class ConnectionService {
         // Wait a moment for cleanup
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Try to restart
-        const authoritative = this.settingsService.get('authoritative');
-        await this.processManager.start(
-          this.lastUsedResolver || this.settingsService.get('resolver'),
-          this.lastUsedDomain || this.settingsService.get('domain'),
-          { authoritative }
-        );
+        // Try to restart using stored active config
+        const { resolver, domain, ...opts } = this.activeConfig;
+
+        await this.processManager.start(resolver, domain, opts);
         await this.proxyService.startHttpProxy();
 
         // Also restart SOCKS5 forwarder

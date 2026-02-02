@@ -27,6 +27,8 @@ export interface Settings {
     savedDns: string[];
     language?: 'en' | 'fa';
     theme?: 'light' | 'dark' | 'system';
+    keepAliveInterval?: number;
+    congestionControl?: 'auto' | 'bbr' | 'dcubic';
 }
 
 export interface Status {

@@ -100,7 +100,7 @@ class ProcessManager {
    * @returns {Promise<void>}
    */
   async start(resolver, domain, options = {}) {
-    const { authoritative = false } = options;
+    const { authoritative = false, keepAliveInterval, congestionControl } = options;
 
     const clientPath = this._getClientPath();
     if (!clientPath) {
@@ -129,6 +129,14 @@ class ProcessManager {
       '--domain',
       domain
     ];
+
+    if (keepAliveInterval) {
+      args.push('--keep-alive-interval', keepAliveInterval.toString());
+    }
+
+    if (congestionControl && congestionControl !== 'auto') {
+      args.push('--congestion-control', congestionControl);
+    }
 
     this.logger.info(`Starting Stream Gate client: ${clientPath}`, { args });
 

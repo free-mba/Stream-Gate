@@ -82,7 +82,9 @@ export default function HomePage() {
             const payload = {
                 resolver: settings.resolver,
                 domain: settings.domain,
-                tunMode: settings.mode === 'tun'
+                tunMode: settings.mode === 'tun',
+                keepAliveInterval: settings.keepAliveInterval,
+                congestionControl: settings.congestionControl
             };
             ipc?.invoke('start-service', payload);
         }

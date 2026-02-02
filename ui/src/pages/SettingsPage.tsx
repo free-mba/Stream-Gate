@@ -3,7 +3,8 @@ import { useIpc } from "@/hooks/useIpc";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Shield, Server, Palette } from "lucide-react";
+import { Shield, Server, Palette, Wifi } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { APP_NAME, APP_VERSION } from "@/lib/constants";
 import { useAtom } from "jotai";
 import { languageAtom, themeAtom } from "@/store";
@@ -126,7 +127,53 @@ export default function SettingsPage() {
                         </div>
                     </CardContent>
                 </Card>
-
+                {/* Advanced Networking */}
+                <Card className="bg-card/40 backdrop-blur border-border">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 leading-none">
+                            <Wifi className="w-5 h-5 text-muted-foreground shrink-0" />
+                            <span className="h-5 flex items-center leading-none translate-y-[2px]">{t('Advanced Networking')}</span>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="text-base">{t('Congestion Control')}</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {t('Select TCP/QUIC congestion control algorithm.')}
+                                </p>
+                            </div>
+                            <Select
+                                value={settings.congestionControl || 'auto'}
+                                onValueChange={(v) => updateSetting('congestionControl', v)}
+                            >
+                                <SelectTrigger className="w-[180px] bg-muted border-border">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="auto">Auto</SelectItem>
+                                    <SelectItem value="bbr">BBR</SelectItem>
+                                    <SelectItem value="dcubic">DCubic</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="text-base">{t('QUIC Keep Alive')}</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {t('Interval in seconds (Default: 400).')}
+                                </p>
+                            </div>
+                            <Input
+                                type="number"
+                                className="w-[180px] bg-muted border-border"
+                                placeholder="400"
+                                value={settings.keepAliveInterval || ''}
+                                onChange={(e) => updateSetting('keepAliveInterval', parseInt(e.target.value) || 0)}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
                 {/* Proxy Info */}
                 <Card className="bg-card/40 backdrop-blur border-border">
                     <CardHeader>

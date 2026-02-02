@@ -107,8 +107,29 @@ class IPCController {
    * Handle start-service
    * @private
    */
-  async _handleStartService(event, settings) {
-    return await this.connectionService.start(settings);
+  async _handleStartService(event, payload) {
+    // Gather complete configuration here (Controller responsibility)
+    const config = {
+      resolver: payload.resolver,
+      domain: payload.domain,
+      authoritative: this.settingsService.get('authoritative'), // Global setting
+      keepAliveInterval: payload.keepAliveInterval !== undefined
+        ? payload.keepAliveInterval
+        : this.settingsService.get('keepAliveInterval'),
+      congestionControl: payload.congestionControl !== undefined
+        ? payload.congestionControl
+        : this.settingsService.get('congestionControl'),
+      tunMode: payload.tunMode
+    };
+
+    // Save "Last Used" connection settings (Persistence responsibility)
+    this.settingsService.save({
+      resolver: config.resolver,
+      domain: config.domain,
+      mode: config.tunMode ? 'tun' : 'proxy'
+    });
+
+    return await this.connectionService.start(config);
   }
 
   /**
