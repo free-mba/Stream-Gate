@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIpc } from "@/hooks/useIpc";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, MapPin, Globe, Plus, Power } from "lucide-react";
+import { ArrowUp, ArrowDown, MapPin, Globe, Plus, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectItem } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { Settings, Status, TrafficData, Config } from "@/types";
 import { useTranslation } from "@/lib/i18n";
+import { useAtom } from "jotai";
+import { themeAtom } from "@/store";
 
 import { GlassSelect } from "@/components/ui/GlassSelect";
 
@@ -39,6 +41,9 @@ export default function ConnectionPage() {
     const [newDns, setNewDns] = useState("");
     const [systemProxy, setSystemProxy] = useState(false);
     const [traffic, setTraffic] = useState<TrafficData>({ down: 0, up: 0 });
+    const [theme] = useAtom(themeAtom);
+
+    const isLight = theme === 'light';
 
     useEffect(() => {
         if (!ipc) return;
@@ -175,42 +180,74 @@ export default function ConnectionPage() {
                 </GlassSelect>
             </motion.div>
 
-            {/* Center: The ORB */}
+            {/* Center: Connect Button (Restored V0.0.2 Design) */}
             <div className="relative z-10 my-12">
                 <motion.button
                     onClick={toggleConnection}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={{
-                        boxShadow: isConnected
-                            ? "0 0 60px rgba(37, 99, 235, 0.4), inset 0 0 20px rgba(37, 99, 235, 0.2)"
-                            : "0 0 20px rgba(0,0,0,0.05), inset 0 0 10px rgba(0,0,0,0.05)"
+                    whileHover={isConnected ? "connectedHover" : "hover"}
+                    whileTap="tap"
+                    animate={isConnected ? "connected" : "disconnected"}
+                    variants={{
+                        disconnected: {
+                            background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
+                            borderColor: "rgba(255, 255, 255, 0.1)",
+                            scale: 1,
+                            boxShadow: "0px 10px 30px -10px rgba(37, 99, 235, 0.5)",
+                        },
+                        connected: {
+                            background: isLight ? "#059669" : "rgba(0, 0, 0, 0.4)", // emerald-600 or dark glass
+                            borderColor: "rgba(34, 197, 94, 0.5)",
+                            scale: 1,
+                            boxShadow: "0px 10px 30px -10px rgba(34, 197, 94, 0.2)",
+                        },
+                        connectedHover: {
+                            background: isLight ? "#dc2626" : "rgba(0, 0, 0, 0.6)", // Red background on hover
+                            borderColor: isLight ? "#dc2626" : "rgba(239, 68, 68, 0.5)",
+                            scale: 1.05,
+                            transition: { duration: 0.3, ease: "easeOut" }
+                        },
+                        hover: {
+                            scale: 1.05,
+                            transition: { duration: 0.3, ease: "easeOut" }
+                        },
+                        tap: { scale: 0.95 }
                     }}
-                    transition={{ duration: 0.5 }}
                     className={cn(
-                        "w-64 h-64 rounded-full flex flex-col items-center justify-center relative backdrop-blur-md border transition-colors duration-500",
-                        isConnected
-                            ? "bg-primary/10 border-primary/50 dark:bg-black/40"
-                            : "bg-background/80 border-foreground/10 shadow-sm dark:bg-white/5 dark:border-white/10 dark:shadow-none"
+                        "w-56 h-56 rounded-full text-2xl font-bold border-[6px] relative z-10 flex flex-col items-center justify-center gap-3 backdrop-blur-md transition-shadow duration-300"
                     )}
+                    style={{ WebkitTapHighlightColor: "transparent" }}
                 >
-                    {/* Inner Rotating Ring */}
+                    {/* Inner Content - handling specific hover overrides manually for "Stop" state */}
                     <motion.div
-                        animate={{ rotate: isConnected ? 360 : 0 }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                        className={cn(
-                            "absolute inset-2 rounded-full border-[2px] border-dashed",
-                            isConnected ? "border-primary/60" : "border-border/50"
-                        )}
-                    />
-
-                    <div className="flex flex-col items-center gap-2 z-10">
-                        <Power className={cn("w-12 h-12 mb-2 transition-colors duration-500", isConnected ? "text-primary drop-shadow-[0_0_10px_rgba(37,99,235,0.8)]" : "text-muted-foreground")} />
-                        <span className={cn("text-2xl font-bold tracking-widest transition-colors duration-500", isConnected ? "text-foreground" : "text-muted-foreground")}>
-                            {isConnected ? t("CONNECTED") : t("OFFLINE")}
+                        className="flex flex-col items-center gap-3 w-full h-full justify-center rounded-full"
+                    >
+                        <Zap
+                            className={cn(
+                                "w-10 h-10 fill-current transition-colors duration-300",
+                                isConnected ? "text-white" : "text-white/90"
+                            )}
+                        />
+                        <span
+                            className={cn(
+                                "tracking-widest transition-colors duration-300 font-bold",
+                                isConnected ? "text-white" : "text-white"
+                            )}
+                        >
+                            {isConnected ? t("STOP") : t("CONNECT")}
                         </span>
-                        {isConnected && <TimerDisplay />}
-                    </div>
+
+                        {/* Timer only shows when connected */}
+                        {isConnected && (
+                            <div className="text-white transition-colors duration-300">
+                                <TimerDisplay />
+                            </div>
+                        )}
+                    </motion.div>
+
+                    {/* Pulse Ring for Connect State */}
+                    {!isConnected && (
+                        <span className="absolute inset-0 rounded-full border-4 border-white/20 animate-ping opacity-20 duration-[3000ms]" />
+                    )}
                 </motion.button>
             </div>
 
@@ -282,6 +319,12 @@ function TimerDisplay() {
         const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
         return () => clearInterval(interval);
     }, []);
-    const format = (s: number) => new Date(s * 1000).toISOString().substr(11, 8);
-    return <span className="text-xs font-mono opacity-60">{format(elapsed)}</span>;
+    // v0.0.2 format
+    const formatTime = (sec: number) => {
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+    return <span className="text-xs font-normal opacity-80 tracking-normal font-mono">{formatTime(elapsed)}</span>;
 }
