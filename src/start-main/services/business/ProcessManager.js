@@ -1,9 +1,9 @@
 /**
- * ProcessManager - Native binary process lifecycle management
+ * ProcessManager - Native binary process lifecycle management.
  *
- * Single Responsibility: Manage Stream Gate client process
- *
- * Handles spawning, monitoring, and terminating the native Stream Gate binary.
+ * Why: isolates binary process handling behind a single seam so the rest of the
+ * app can start/stop the client without knowing about filesystem layout or
+ * child_process details. This keeps orchestration testable and predictable.
  */
 
 const { spawn } = require('child_process');
@@ -11,10 +11,18 @@ const path = require('path');
 const fs = require('fs');
 
 class ProcessManager {
-  constructor(eventEmitter, logger, app) {
+  /**
+   * @param {Object} deps - Runtime dependencies for process orchestration.
+   * @param {import('../core/EventEmitter')} deps.eventEmitter - App event bus.
+   * @param {import('../core/Logger')} deps.logger - Structured logger.
+   * @param {import('electron').App} deps.app - Electron app instance.
+   * @param {{ resourcesPath: string }} deps.paths - Resolved runtime paths.
+   */
+  constructor({ eventEmitter, logger, app, paths }) {
     this.eventEmitter = eventEmitter;
     this.logger = logger;
     this.app = app;
+    this.paths = paths;
 
     this.process = null;
   }
@@ -28,7 +36,7 @@ class ProcessManager {
     const platform = process.platform;
     const resourcesPath = this.app.isPackaged
       ? path.join(process.resourcesPath)
-      : path.join(__dirname, '../../');
+      : path.join(this.paths.resourcesPath);
 
     if (platform === 'darwin') {
       const preferred =

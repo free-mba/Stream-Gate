@@ -8,6 +8,7 @@
  */
 
 const { app } = require('electron');
+const path = require('path');
 
 const APP_NAME = 'Stream Gate';
 
@@ -63,7 +64,12 @@ function initializeServices() {
   logger.setVerbose(settingsService.get('verbose'));
 
   // Business services
-  processManager = new ProcessManager(eventEmitter, logger, app);
+  processManager = new ProcessManager({
+    eventEmitter,
+    logger,
+    app,
+    paths: { resourcesPath: path.resolve(__dirname, '../../') }
+  });
   proxyService = new ProxyService(eventEmitter, logger, settingsService);
   systemProxyService = new SystemProxyService(logger, settingsService);
   dnsService = new DNSService(logger);

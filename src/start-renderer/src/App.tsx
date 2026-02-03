@@ -1,9 +1,11 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
-import HomePage from "@/pages/HomePage";
-import ConfigPage from "@/pages/ConfigPage";
-import DnsTesterPage from "@/pages/DnsTesterPage";
-import SettingsPage from "@/pages/SettingsPage";
+// Feature Pages
+import ConnectionPage from "@/features/Connection/ConnectionPage";
+import ConfigPage from "@/features/Config/ConfigPage";
+import DnsTesterPage from "@/features/DnsTester/DnsTesterPage";
+import SettingsPage from "@/features/Settings/SettingsPage";
+
 import { useEffect } from "react";
 import { useAtomValue } from "jotai";
 import { languageAtom, themeAtom } from "@/store";
@@ -40,7 +42,7 @@ function App() {
       <HashRouter>
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomePage />} />
+            <Route index element={<ConnectionPage />} />
             <Route path="configs" element={<ConfigPage />} />
             <Route path="dns" element={<DnsTesterPage />} />
             <Route path="settings" element={<SettingsPage />} />

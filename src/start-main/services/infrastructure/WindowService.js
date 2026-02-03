@@ -21,7 +21,7 @@ class WindowService {
    * @returns {BrowserWindow} The created window
    */
   createWindow() {
-    const iconPath = path.join(__dirname, '../../assets', 'icon.png');
+    const iconPath = path.join(__dirname, '../../../../assets', 'icon.png');
     const windowOptions = {
       width: 1200,
       height: 800,
@@ -69,7 +69,7 @@ class WindowService {
     });
 
     const isDev = process.env.NODE_ENV === 'development';
-    const uiDistPath = path.join(__dirname, '../../ui/dist/index.html');
+    const uiDistPath = path.join(__dirname, '../../../../src/start-renderer/dist/index.html');
 
     if (isDev) {
       this.logger.info('Loading from Vite dev server...');
@@ -79,7 +79,7 @@ class WindowService {
       this.mainWindow.loadFile(uiDistPath);
     } else {
       this.logger.warn('UI build not found, falling back to legacy index.html');
-      this.mainWindow.loadFile(path.join(__dirname, '../../index.html'));
+      this.mainWindow.loadFile(path.join(__dirname, '../../../../index.html'));
     }
 
     // Avoid "Object has been destroyed" during shutdown

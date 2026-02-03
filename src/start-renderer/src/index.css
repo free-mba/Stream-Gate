@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import './assets/fonts/vazirmatn.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* =========================================
+       HIGH-LUXURY THEME SYSTEM (Dark Default)
+       Concept: Deep Void & Neon Glass
+       ========================================= */
+
+    /* Background: Rich, deep blue-black for depth */
+    --background: 232 40% 6%;
+    --foreground: 210 20% 98%;
+
+    /* Card: Translucent integration */
+    --card: 232 40% 10%;
+    --card-foreground: 210 20% 98%;
+
+    /* Popover */
+    --popover: 232 40% 12%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Primary: Electric Cyan/Blue - The "Slipstream" Energy */
+    --primary: 190 90% 50%;
+    --primary-foreground: 232 40% 10%;
+
+    /* Secondary: Muted luxury */
+    --secondary: 225 30% 20%;
+    --secondary-foreground: 210 20% 98%;
+
+    /* Muted */
+    --muted: 225 25% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent */
+    --accent: 190 90% 50%;
+    --accent-foreground: 232 40% 10%;
+
+    /* Destructive */
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    /* Borders & Inputs */
+    --border: 225 25% 15%;
+    --input: 225 25% 15%;
+    --ring: 190 90% 50%;
+
+    --radius: 1rem;
+
+    /* --- Glassmorphism Tokens (Dark) --- */
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+    /* Button Glass */
+    --glass-btn-bg: rgba(255, 255, 255, 0.05);
+    --glass-btn-border: rgba(255, 255, 255, 0.1);
+    --glass-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --glass-btn-hover-border: rgba(0, 255, 230, 0.3);
+    --glass-btn-hover-shadow: 0 0 15px rgba(0, 255, 230, 0.2);
+
+    /* Background Pattern Opacity */
+    --bg-pattern-opacity: 0.03;
+  }
+
+  /* =========================================
+     LIGHT THEME (High-Luxury Frost)
+     Concept: Frozen Glass & Crisp Air
+     ========================================= */
+  .light {
+    /* Background: Very subtle cool gray-blue, NOT pure white */
+    --background: 210 30% 96%;
+    --foreground: 222 47% 11%;
+    /* Deep slate for readability */
+
+    /* Card: Frosty white */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary: Vivid Royal Blue - Professional & Energetic */
+    --primary: 221 83% 53%;
+    /* #2563eb */
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary: Soft Gray-Blue */
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent: matching primary for consistency */
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Borders */
+    --border: 214 32% 91%;
+    /* Soft contrast */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 1rem;
+
+    /* --- Glassmorphism Tokens (Light) --- */
+    /* Frosty, airy glass */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+    /* Soft indigo shadow */
+
+    /* Button Glass (Light) */
+    --glass-btn-bg: rgba(255, 255, 255, 0.6);
+    --glass-btn-border: rgba(255, 255, 255, 0.4);
+    --glass-btn-hover-bg: rgba(255, 255, 255, 0.9);
+    --glass-btn-hover-border: rgba(37, 99, 235, 0.3);
+    /* Primary color hint */
+    --glass-btn-hover-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+
+    /* Background Pattern Opacity */
+    --bg-pattern-opacity: 0.05;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Outfit', 'Manrope', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(0, 255, 230, var(--bg-pattern-opacity)) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(120, 50, 255, var(--bg-pattern-opacity)) 0%, transparent 40%);
+    /* Ensure background stays fixed during scroll */
+    background-attachment: fixed;
+  }
+
+  /* RTL Support */
+  :root[lang="fa"] body {
+    font-family: 'Vazirmatn', 'Outfit', sans-serif;
+    letter-spacing: 0 !important;
+  }
+
+  /* Prevent disconnected letters in Persian by overriding all tracking utilities */
+  :root[lang="fa"] * {
+    letter-spacing: 0 !important;
+  }
+
+  /* Override monospace font for Persian to ensure consistent rendering, BUT keep it for logs */
+  :root[lang="fa"] .font-mono:not(.system-logs-container),
+  :root[lang="fa"] code,
+  :root[lang="fa"] pre {
+    font-family: 'Vazirmatn', sans-serif !important;
+  }
+}
+
+/* Glassmorphism Utilities - NOW THEME AWARE */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(var(--muted-foreground) / 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--primary) / 0.5);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(0, 255, 230, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 230, 0.3);
+  }
+}
+
+.animate-glow {
+  animation: pulse-glow 3s infinite;
+}

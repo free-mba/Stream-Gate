@@ -7,6 +7,9 @@
  * - Start/stop VPN connections
  * - Handle auto-reconnection with exponential backoff
  * - Provide connection status
+ *
+ * @see {@link ../../../docs/concepts/Slipstream.md}
+ * @see {@link ../../../docs/concepts/Architecture.md}
  */
 
 class ConnectionService {

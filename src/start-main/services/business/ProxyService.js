@@ -6,6 +6,9 @@
  * Handles:
  * - HTTP proxy server on port 8080
  * - SOCKS5-to-HTTP bridge on port 10809 (for network sharing)
+ *
+ * @see {@link ../../../docs/concepts/SOCKS5.md}
+ * @see {@link ../../../docs/concepts/Architecture.md}
  */
 
 const http = require('http');
