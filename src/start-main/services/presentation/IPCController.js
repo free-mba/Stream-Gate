@@ -99,6 +99,7 @@ class IPCController {
     // Utilities
     ipcMain.handle('test-proxy', this._handleTestProxy.bind(this));
     ipcMain.handle('open-external', this._handleOpenExternal.bind(this));
+    ipcMain.handle('get-logs', this._handleGetLogs.bind(this));
 
     this.logger.info('IPC handlers registered');
   }
@@ -483,6 +484,14 @@ class IPCController {
       this.logger.error('Failed to open external URL:', err);
       return { success: false, error: err.message };
     }
+  }
+
+  /**
+   * Handle get-logs
+   * @private
+   */
+  _handleGetLogs() {
+    return this.logger.getLogs();
   }
 
   /**

@@ -8,9 +8,12 @@
  */
 
 class Logger {
+
   constructor(eventEmitter) {
     this.eventEmitter = eventEmitter;
     this._verboseEnabled = false;
+    this._logs = []; // Store logs in memory
+    this._MAX_LOG_AGE = 2 * 60 * 1000; // 2 minutes in milliseconds
   }
 
   /**
@@ -35,6 +38,7 @@ class Logger {
    * @param {Object} [meta] - Optional metadata
    */
   info(message, meta) {
+    this._addLog('info', message, meta);
     const logEntry = this._formatLog('info', message, meta);
     console.log(logEntry);
 
@@ -53,6 +57,7 @@ class Logger {
    * @param {Error} [error] - Optional error object
    */
   error(message, error) {
+    this._addLog('error', message, error);
     const logEntry = this._formatLog('error', message, error);
     console.error(logEntry);
 
@@ -76,6 +81,7 @@ class Logger {
       return;
     }
 
+    this._addLog('verbose', message, meta);
     const logEntry = this._formatLog('verbose', message, meta);
     console.log(logEntry);
 
@@ -94,6 +100,7 @@ class Logger {
    * @param {Object} [meta] - Optional metadata
    */
   warn(message, meta) {
+    this._addLog('warn', message, meta);
     const logEntry = this._formatLog('warn', message, meta);
     console.warn(logEntry);
 
@@ -104,6 +111,58 @@ class Logger {
       meta,
       timestamp: new Date().toISOString()
     });
+  }
+
+  /**
+   * Add log to internal storage and prune old logs
+   * @private
+   */
+  _addLog(level, message, meta) {
+    const timestamp = Date.now();
+    const entry = {
+      timestamp,
+      iso: new Date(timestamp).toISOString(),
+      level,
+      message,
+      meta: meta instanceof Error ? { message: meta.message, stack: meta.stack } : meta
+    };
+
+    this._logs.push(entry);
+    this._pruneLogs();
+  }
+
+  /**
+   * Remove logs older than MAX_LOG_AGE
+   * @private
+   */
+  _pruneLogs() {
+    const cutoff = Date.now() - this._MAX_LOG_AGE;
+    // Optimization: if the first log is new enough, everything is new enough
+    if (this._logs.length > 0 && this._logs[0].timestamp > cutoff) {
+      return;
+    }
+
+    // Filter out old logs
+    // Using filter is simpler, but if array is huge, splice might be better. 
+    // Given 2 minutes retention, it might not get too huge unless spamming.
+    // We can just find the index where to slice.
+    const splitIndex = this._logs.findIndex(log => log.timestamp > cutoff);
+    if (splitIndex > 0) {
+      this._logs = this._logs.slice(splitIndex);
+    } else if (splitIndex === -1 && this._logs.length > 0 && this._logs[this._logs.length - 1].timestamp <= cutoff) {
+      // All logs are too old
+      this._logs = [];
+    }
+  }
+
+  /**
+   * Get all stored logs
+   * @returns {Array} Array of log objects
+   */
+  getLogs() {
+    // Perform a prune before returning to ensure freshness
+    this._pruneLogs();
+    return this._logs;
   }
 
   /**

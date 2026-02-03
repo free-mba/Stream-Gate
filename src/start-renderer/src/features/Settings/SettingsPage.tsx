@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useIpc } from "@/hooks/useIpc";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Shield, Server, Palette, Wifi, Zap } from "lucide-react";
+import { Shield, Server, Palette, Wifi, Zap, Bug, Copy, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { APP_NAME, APP_VERSION } from "@/lib/constants";
 import { useAtom } from "jotai";
 import { languageAtom, themeAtom } from "@/store";
@@ -46,6 +47,25 @@ export default function SettingsPage() {
     const [lang, setLang] = useAtom(languageAtom);
     const [theme, setTheme] = useAtom(themeAtom);
     const { t } = useTranslation();
+    const [copyingLogs, setCopyingLogs] = useState(false);
+
+    const handleCopyLogs = async () => {
+        if (!ipc) return;
+        try {
+            const logs = await ipc.invoke('get-logs');
+            const element = document.createElement("textarea");
+            element.value = JSON.stringify(logs, null, 2);
+            document.body.appendChild(element);
+            element.select();
+            document.execCommand("copy");
+            document.body.removeChild(element);
+
+            setCopyingLogs(true);
+            setTimeout(() => setCopyingLogs(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy logs', err);
+        }
+    };
 
     useEffect(() => {
         localStorage.setItem('app-language', lang);
@@ -193,6 +213,28 @@ export default function SettingsPage() {
                                 <div className="text-xl font-mono text-primary">0.0.0.0:10809</div>
                             </div>
                             <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                        </div>
+                    </div>
+                </GlassCard>
+
+                {/* Troubleshooting */}
+                <GlassCard>
+                    <SectionHeader icon={Bug} title={t('Troubleshooting')} />
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <Label className="text-base font-medium text-foreground">{t('Debug Logs')}</Label>
+                                <p className="text-sm text-muted-foreground">{t('Copy recent logs (last 2 minutes) for bug reporting.')}</p>
+                            </div>
+                            <Button
+                                variant="outline"
+                                onClick={handleCopyLogs}
+                                disabled={copyingLogs}
+                                className="min-w-[140px]"
+                            >
+                                {copyingLogs ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                                {copyingLogs ? t('Copied') : t('Copy Logs')}
+                            </Button>
                         </div>
                     </div>
                 </GlassCard>
