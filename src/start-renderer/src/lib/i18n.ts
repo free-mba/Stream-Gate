@@ -193,7 +193,7 @@ export function useTranslation() {
 
     const t = (key: keyof typeof translations['en'] | string) => {
         const dict = translations[lang] || translations['en'];
-        return (dict as any)[key] || key;
+        return (dict as Record<string, string>)[key] || key;
     };
 
     return { t, lang, dir: lang === 'fa' ? 'rtl' : 'ltr' };

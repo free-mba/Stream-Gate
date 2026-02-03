@@ -13,13 +13,23 @@ import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { Settings } from "@/types";
 
-const GlassCard = ({ children, className }: any) => (
+interface GlassCardProps {
+    children: React.ReactNode;
+    className?: string;
+}
+
+const GlassCard = ({ children, className }: GlassCardProps) => (
     <div className={cn("glass-panel rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5", className)}>
         {children}
     </div>
 );
 
-const SectionHeader = ({ icon: Icon, title }: any) => (
+interface SectionHeaderProps {
+    icon: React.ElementType;
+    title: string;
+}
+
+const SectionHeader = ({ icon: Icon, title }: SectionHeaderProps) => (
     <div className="flex items-center gap-3 mb-6">
         <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <Icon className="w-5 h-5" />
@@ -28,7 +38,13 @@ const SectionHeader = ({ icon: Icon, title }: any) => (
     </div>
 );
 
-const SettingRow = ({ label, description, children }: any) => (
+interface SettingRowProps {
+    label: string;
+    description?: string;
+    children: React.ReactNode;
+}
+
+const SettingRow = ({ label, description, children }: SettingRowProps) => (
     <div className="flex items-center justify-between py-4 border-b border-border last:border-0">
         <div className="space-y-1">
             <Label className="text-base font-medium text-foreground">{label}</Label>

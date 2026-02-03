@@ -53,12 +53,12 @@ export default function DnsTesterPage() {
 
     useEffect(() => {
         if (!ipc) return;
-        const onProgress = (_: any, data: unknown) => {
+        const onProgress = (_: unknown, data: unknown) => {
             const d = data as { completed: number, total: number };
             setProgress((d.completed / d.total) * 100);
             setStats(d);
         };
-        const onResult = (_: any, res: unknown) => {
+        const onResult = (_: unknown, res: unknown) => {
             const r = res as DnsCheckResult;
             setResults(prev => prev.map(item => item.server === r.server ? { ...item, ...r, stage: 'done' } : item));
         };
