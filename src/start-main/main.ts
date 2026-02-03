@@ -7,46 +7,46 @@
  * Architecture: Service Layer Pattern with Event-Driven Communication
  */
 
-const { app } = require('electron');
-const path = require('path');
+import { app } from 'electron';
+import path from 'node:path';
 
 const APP_NAME = 'Stream Gate';
 
 // Import services
-const EventEmitter = require('./services/core/EventEmitter');
-const Logger = require('./services/core/Logger');
-const WindowService = require('./services/infrastructure/WindowService');
-const SettingsService = require('./services/data/SettingsService');
-const ProcessManager = require('./services/business/ProcessManager');
-const ProxyService = require('./services/business/ProxyService');
-const SystemProxyService = require('./services/business/SystemProxyService');
-const DNSService = require('./services/business/DNSService');
-const DnsResolutionService = require('./services/business/DnsResolutionService'); // Custom Resolution
-const ConnectionService = require('./services/orchestration/ConnectionService');
-const IPCController = require('./services/presentation/IPCController');
+import EventEmitter from './services/core/EventEmitter';
+import Logger from './services/core/Logger';
+import WindowService from './services/infrastructure/WindowService';
+import SettingsService from './services/data/SettingsService';
+import ProcessManager from './services/business/ProcessManager';
+import ProxyService from './services/business/ProxyService';
+import SystemProxyService from './services/business/SystemProxyService';
+import DNSService from './services/business/DNSService';
+import DnsResolutionService from './services/business/DnsResolutionService'; // Custom Resolution
+import ConnectionService from './services/orchestration/ConnectionService';
+import IPCController from './services/presentation/IPCController';
 
 // Set app name for macOS dock and menu bar
 app.setName(APP_NAME);
 app.setAboutPanelOptions({ applicationName: APP_NAME, version: app.getVersion() });
 
 // Service containers (will be initialized in app.whenReady)
-let eventEmitter;
-let logger;
-let windowService;
-let settingsService;
-let processManager;
-let proxyService;
-let systemProxyService;
-let dnsService; // Tester
-let dnsResolutionService; // Resolution
-let connectionService;
-let ipcController;
+let eventEmitter: EventEmitter | undefined;
+let logger: Logger | undefined;
+let windowService: WindowService | undefined;
+let settingsService: SettingsService | undefined;
+let processManager: ProcessManager | undefined;
+let proxyService: ProxyService | undefined;
+let systemProxyService: SystemProxyService | undefined;
+let dnsService: DNSService | undefined; // Tester
+let dnsResolutionService: DnsResolutionService | undefined; // Resolution
+let connectionService: ConnectionService | undefined;
+let ipcController: IPCController | undefined;
 
 /**
  * Initialize all services
  * Services are initialized in dependency order
  */
-function initializeServices() {
+function initializeServices(): void {
   // Core services (no dependencies)
   eventEmitter = new EventEmitter();
   logger = new Logger(eventEmitter);
@@ -101,8 +101,8 @@ function initializeServices() {
   ipcController.registerHandlers();
 
   // Forward connection status changes to renderer
-  connectionService.onStatusChange((status, data) => {
-    windowService.sendToRenderer('status-update', connectionService.getStatus());
+  connectionService?.onStatusChange((status: any, data: any) => {
+    windowService?.sendToRenderer('status-update', connectionService?.getStatus());
   });
 
   logger.info('All services initialized');
@@ -111,8 +111,8 @@ function initializeServices() {
 /**
  * Clean up on app quit
  */
-async function cleanup() {
-  logger.info('Cleaning up before quit...');
+async function cleanup(): Promise<void> {
+  if (logger) logger.info('Cleaning up before quit...');
 
   // Set quitting flag to prevent reconnection
   if (connectionService) {
@@ -129,14 +129,14 @@ async function cleanup() {
     windowService.closeWindow();
   }
 
-  logger.info('Cleanup complete');
+  if (logger) logger.info('Cleanup complete');
 }
 
 /**
  * Install process exit handlers for graceful shutdown
  */
-function installProcessExitHandlers() {
-  const doExit = async (code, reason) => {
+function installProcessExitHandlers(): void {
+  const doExit = async (code: number, reason: string): Promise<void> => {
     try {
       await cleanup();
     } catch (_) { }
@@ -149,12 +149,12 @@ function installProcessExitHandlers() {
   process.on('SIGTERM', () => { void doExit(143, 'SIGTERM'); });
   process.on('SIGHUP', () => { void doExit(129, 'SIGHUP'); });
 
-  process.on('uncaughtException', (err) => {
+  process.on('uncaughtException', (err: any) => {
     console.error('uncaughtException:', err);
     void doExit(1, 'uncaughtException');
   });
 
-  process.on('unhandledRejection', (reason) => {
+  process.on('unhandledRejection', (reason: any) => {
     console.error('unhandledRejection:', reason);
     void doExit(1, 'unhandledRejection');
   });
@@ -171,18 +171,18 @@ app.whenReady().then(async () => {
 
     // Crash-recovery: if we previously enabled system proxy and the app died,
     // attempt to restore the user's system on next start.
-    if (settingsService.get('systemProxyEnabledByApp')) {
+    if (settingsService?.get('systemProxyEnabledByApp')) {
       try {
-        await connectionService.cleanupAndDisableProxyIfNeeded('startup-recovery');
+        await connectionService?.cleanupAndDisableProxyIfNeeded('startup-recovery');
       } catch (_) { }
     }
 
     // Create main window
-    windowService.createWindow();
+    windowService?.createWindow();
 
-    logger.info('Application ready');
+    logger?.info('Application ready');
 
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to initialize application:', err);
     app.quit();
   }
@@ -205,7 +205,7 @@ app.on('window-all-closed', () => {
 
 let isQuitting = false;
 
-app.on('before-quit', (event) => {
+app.on('before-quit', (event: any) => {
   if (isQuitting) return;
 
   // Prevent immediate quit to allow cleanup
@@ -222,7 +222,7 @@ installProcessExitHandlers();
 
 // Export services for debugging (optional)
 if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
-  global.__SERVICES__ = {
+  (global as any).__SERVICES__ = {
     eventEmitter,
     logger,
     windowService,

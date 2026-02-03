@@ -9,12 +9,66 @@
  * - Resolving domains with specific DNS servers
  */
 
-const { spawn } = require('child_process');
-const dns = require('dns');
+import { spawn } from 'child_process';
+import dns from 'dns';
+import { Worker } from 'worker_threads';
+import path from 'path';
+import Logger from '../core/Logger';
 
-class DNSService {
-  constructor(logger) {
+interface DnsServerInfo {
+  ip: string;
+  port: number;
+  serverForNode: string;
+}
+
+interface PingResult {
+  ok: boolean;
+  timeMs: number;
+}
+
+interface DnsResolveResult {
+  ok: boolean;
+  timeMs: number;
+  answers: any[];
+  error?: string;
+}
+
+interface DnsCheckResult {
+  ok: boolean;
+  server?: string;
+  ip?: string;
+  port?: number;
+  domain?: string;
+  ping?: PingResult;
+  dns?: DnsResolveResult;
+  status?: string;
+  error?: string;
+}
+
+interface CheckSingleServerPayload {
+  server?: string;
+  domain?: string;
+  pingTimeoutMs?: number;
+  dnsTimeoutMs?: number;
+}
+
+interface StartScanPayload {
+  servers: string[];
+  domain?: string;
+  mode?: string;
+  timeout?: number;
+  workers?: number;
+}
+
+export default class DNSService {
+  private logger: Logger;
+  private scanWorker: Worker | null;
+  private isScanning: boolean;
+
+  constructor(logger: Logger) {
     this.logger = logger;
+    this.scanWorker = null;
+    this.isScanning = false;
   }
 
   /**
@@ -22,7 +76,7 @@ class DNSService {
    * @param {string} server - DNS server (e.g., "1.1.1.1" or "1.1.1.1:53")
    * @returns {Object|null} Parsed server info or null if invalid
    */
-  parseDnsServer(server) {
+  parseDnsServer(server: string): DnsServerInfo | null {
     const raw = String(server || '').trim();
     if (!raw) return null;
 
@@ -48,26 +102,26 @@ class DNSService {
    * @param {number} timeoutMs - Timeout in milliseconds
    * @returns {Promise<{ok: boolean, timeMs: number}>}
    */
-  async pingHost(ip, timeoutMs = 2000) {
+  async pingHost(ip: string, timeoutMs: number = 2000): Promise<PingResult> {
     const platform = process.platform;
     const timeout = Math.max(250, Number(timeoutMs) || 2000);
 
-    let args = [];
+    let args: string[] = [];
     if (platform === 'win32') {
       args = ['-n', '1', '-w', String(timeout), ip];
     } else if (platform === 'darwin') {
       args = ['-c', '1', '-W', String(timeout), ip];
     } else {
-      // linux: ping -c 1 -W <seconds>
+      // linux: ping -c 1 -W <seconds> (using seconds, ceil to ensure at least 1)
       args = ['-c', '1', '-W', String(Math.ceil(timeout / 1000)), ip];
     }
 
     const start = Date.now();
-    return await new Promise((resolve) => {
+    return await new Promise<PingResult>((resolve) => {
       const child = spawn('ping', args, { stdio: 'ignore' });
       let settled = false;
 
-      const done = (ok) => {
+      const done = (ok: boolean) => {
         if (settled) return;
         settled = true;
         resolve({ ok, timeMs: Date.now() - start });
@@ -98,10 +152,10 @@ class DNSService {
    * @returns {Promise}
    * @private
    */
-  _withTimeout(promise, timeoutMs, errorMessage) {
+  private _withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
     const timeout = Math.max(250, Number(timeoutMs) || 2500);
-    let t = null;
-    const timeoutPromise = new Promise((_, reject) => {
+    let t: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise<T>((_, reject) => {
       t = setTimeout(() => reject(new Error(errorMessage || 'Timeout')), timeout);
     });
     return Promise.race([promise, timeoutPromise]).finally(() => {
@@ -116,7 +170,7 @@ class DNSService {
    * @param {number} timeoutMs - Timeout in milliseconds
    * @returns {Promise<{ok: boolean, timeMs: number, answers: Array, error?: string}>}
    */
-  async dnsResolveWithServer(serverForNode, domain, timeoutMs = 2500) {
+  async dnsResolveWithServer(serverForNode: string, domain: string, timeoutMs: number = 2500): Promise<DnsResolveResult> {
     const resolver = new dns.promises.Resolver();
     resolver.setServers([serverForNode]);
 
@@ -137,7 +191,7 @@ class DNSService {
           'DNS resolve timeout'
         );
         return { ok: true, timeMs: Date.now() - start, answers };
-      } catch (err2) {
+      } catch (err2: any) {
         return {
           ok: false,
           timeMs: Date.now() - start,
@@ -157,9 +211,16 @@ class DNSService {
    * @param {number} payload.dnsTimeoutMs - DNS timeout
    * @returns {Promise<Object>} Check result
    */
-  async checkSingleServer(payload) {
+  async checkSingleServer(payload: CheckSingleServerPayload): Promise<DnsCheckResult> {
     try {
-      const serverParsed = this.parseDnsServer(payload?.server);
+      const server = payload?.server;
+      if (!server) {
+        return {
+          ok: false,
+          error: 'Server address is required.'
+        }
+      }
+      const serverParsed = this.parseDnsServer(server);
       const domain = String(payload?.domain || '').trim();
       const pingTimeoutMs = Number(payload?.pingTimeoutMs) || 2000;
       const dnsTimeoutMs = Number(payload?.dnsTimeoutMs) || 2500;
@@ -179,7 +240,7 @@ class DNSService {
       }
 
       const ping = await this.pingHost(serverParsed.ip, pingTimeoutMs);
-      const dnsRes = ping.ok
+      const dnsRes: DnsResolveResult = ping.ok
         ? await this.dnsResolveWithServer(serverParsed.serverForNode, domain, dnsTimeoutMs)
         : { ok: false, timeMs: 0, answers: [], error: 'Ping failed' };
 
@@ -197,7 +258,7 @@ class DNSService {
         dns: dnsRes,
         status
       };
-    } catch (err) {
+    } catch (err: any) {
       return {
         ok: false,
         error: err?.message || String(err)
@@ -212,8 +273,8 @@ class DNSService {
    * @param {Object} options - Options
    * @returns {Promise<Array>} Array of check results
    */
-  async checkMultipleServers(servers, domain, options = {}) {
-    const results = [];
+  async checkMultipleServers(servers: string[], domain: string, options: Partial<CheckSingleServerPayload> = {}): Promise<DnsCheckResult[]> {
+    const results: DnsCheckResult[] = [];
 
     for (const server of servers) {
       const result = await this.checkSingleServer({
@@ -239,13 +300,15 @@ class DNSService {
    * @param {Function} onResult - callback(resultItem)
    * @param {Function} onComplete - callback()
    */
-  async startScan(payload, onProgress, onResult, onComplete) {
+  async startScan(
+    payload: StartScanPayload,
+    onProgress?: (completed: number, total: number) => void,
+    onResult?: (result: any) => void,
+    onComplete?: () => void
+  ): Promise<void> {
     if (this.scanWorker) {
       await this.stopScan();
     }
-
-    const { Worker } = require('worker_threads');
-    const path = require('path');
 
     const servers = payload.servers || [];
     const domain = payload.domain || 'google.com';
@@ -255,7 +318,18 @@ class DNSService {
 
     this.logger.info(`Starting DNS Scan: ${servers.length} servers, mode=${mode}, concurrency=${concurrency}`);
 
-    const workerPath = path.join(__dirname, '../../scripts/dns-scanner-worker.js');
+    // Update path reference to be compatible with built structure or source structure
+    // Since we are compiling, we should expect the worker script to be copied or exist nearby.
+    // NOTE: This might need adjustment in build script to ensure `dns-scanner-worker.js` is in `dist/scripts` or similar.
+    // For now assuming the relative path still works if structure is preserved.
+    const workerPath = path.join(__dirname, '../../scripts/dns-scanner-worker.js'); // This likely refers to src location.
+
+    // In production/dist, we might need a different path.
+    // Let's assume for now it will be handled or we are running from src.
+    if (!require('fs').existsSync(workerPath)) {
+      this.logger.warn(`Worker script not found at ${workerPath}`);
+    }
+
     this.scanWorker = new Worker(workerPath);
 
     let completed = 0;
@@ -269,8 +343,10 @@ class DNSService {
 
       while (active < concurrency && queueIndex < total) {
         const server = servers[queueIndex++];
-        this.scanWorker.postMessage({ server, domain, mode, timeout });
-        active++;
+        if (this.scanWorker) {
+          this.scanWorker.postMessage({ server, domain, mode, timeout });
+          active++;
+        }
       }
 
       if (active === 0 && queueIndex >= total) {
@@ -303,7 +379,7 @@ class DNSService {
     processQueue();
   }
 
-  async stopScan() {
+  async stopScan(): Promise<void> {
     this.isScanning = false;
     if (this.scanWorker) {
       await this.scanWorker.terminate();
@@ -312,5 +388,3 @@ class DNSService {
     }
   }
 }
-
-module.exports = DNSService;

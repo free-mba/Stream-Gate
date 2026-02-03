@@ -7,11 +7,68 @@
  * Migrates legacy settings to userData directory for packaged apps.
  */
 
-const path = require('node:path');
-const fs = require('node:fs');
+import path from 'node:path';
+import fs from 'node:fs';
+import { App } from 'electron';
+import crypto from 'node:crypto';
+import Logger from '../core/Logger';
 
-class SettingsService {
-  constructor(logger, app) {
+// Define configuration interfaces
+interface SocksAuth {
+  username?: string;
+  password?: string;
+}
+
+interface ConfigItem {
+  id: string;
+  remark: string;
+  domain: string;
+  country?: string;
+  socks?: SocksAuth;
+}
+
+export interface Settings {
+  resolver: string;
+  domain: string;
+  mode: 'proxy' | 'tun';
+  authoritative: boolean;
+  verbose: boolean;
+  socks5AuthEnabled: boolean;
+  socks5AuthUsername?: string;
+  socks5AuthPassword?: string;
+  systemProxyEnabledByApp: boolean;
+  systemProxyServiceName: string;
+  configs: ConfigItem[];
+  selectedConfigId: string | null;
+  savedDns: string[];
+  customDnsEnabled: boolean;
+  primaryDns: string;
+  secondaryDns: string;
+}
+
+interface DnsServerParseResult {
+  ip: string;
+  port: number;
+  serverForNode: string;
+}
+
+interface ImportResult {
+  success: boolean;
+  count?: number;
+  errors?: number | string;
+  error?: string;
+}
+
+export default class SettingsService {
+  private logger: Logger;
+  private app: App;
+  private defaults: Settings;
+  private settings: Settings;
+  private SETTINGS_FILE_BASENAME: string;
+  private SETTINGS_FILE: string | null;
+  private LEGACY_SETTINGS_FILE: string;
+
+  constructor(logger: Logger, app: App) {
     this.logger = logger;
     this.app = app;
 
@@ -49,7 +106,7 @@ class SettingsService {
    * Initialize settings (load from disk)
    * Should be called after app.whenReady()
    */
-  initialize() {
+  initialize(): void {
     try {
       this.ensureSettingsFilePath();
       this.load();
@@ -63,7 +120,7 @@ class SettingsService {
    * Get the settings file path
    * @returns {string} Path to settings file
    */
-  getSettingsFilePath() {
+  getSettingsFilePath(): string {
     try {
       const dir = this.app.getPath('userData');
       try {
@@ -80,7 +137,7 @@ class SettingsService {
    * Ensure settings file path is set
    * @private
    */
-  ensureSettingsFilePath() {
+  private ensureSettingsFilePath(): void {
     if (!this.SETTINGS_FILE) {
       this.SETTINGS_FILE = this.getSettingsFilePath();
     }
@@ -89,9 +146,11 @@ class SettingsService {
   /**
    * Load settings from disk
    */
-  load() {
+  load(): void {
     try {
       this.ensureSettingsFilePath();
+
+      if (!this.SETTINGS_FILE) throw new Error('Settings file path could not be determined');
 
       // One-time migration: if a legacy settings file exists but userData settings doesn't,
       // copy it to userData so packaged apps can persist changes.
@@ -101,7 +160,7 @@ class SettingsService {
           fs.writeFileSync(this.SETTINGS_FILE, legacyData);
           this.logger.info(`Migrated legacy settings from ${this.LEGACY_SETTINGS_FILE}`);
         } catch (err) {
-          this.logger.warn('Settings migration skipped:', err);
+          this.logger.warn(`Settings migration skipped: ${err}`);
         }
       }
 
@@ -127,9 +186,11 @@ class SettingsService {
    * Save current settings to disk
    * @param {Object} overrides - Optional key-value pairs to override
    */
-  save(overrides = {}) {
+  save(overrides: Partial<Settings> = {}): void {
     try {
       this.ensureSettingsFilePath();
+
+      if (!this.SETTINGS_FILE) throw new Error('Settings file path could not be determined');
 
       // Update in-memory settings first
       this.settings = { ...this.settings, ...overrides };
@@ -143,7 +204,7 @@ class SettingsService {
       this.settings.authoritative = !!this.settings.authoritative;
       this.settings.verbose = !!this.settings.verbose;
       this.settings.socks5AuthEnabled = !!this.settings.socks5AuthEnabled;
-      this.settings.socks5AuthEnabled = !!this.settings.socks5AuthEnabled;
+      // Duplicate check removed in TS version
       this.settings.systemProxyEnabledByApp = !!this.settings.systemProxyEnabledByApp;
       this.settings.customDnsEnabled = !!this.settings.customDnsEnabled;
 
@@ -183,7 +244,7 @@ class SettingsService {
    * @param {string} key - Setting key
    * @returns {*} Setting value
    */
-  get(key) {
+  get<K extends keyof Settings>(key: K): Settings[K] {
     return this.settings[key];
   }
 
@@ -192,7 +253,7 @@ class SettingsService {
    * @param {string} key - Setting key
    * @param {*} value - Setting value
    */
-  set(key, value) {
+  set<K extends keyof Settings>(key: K, value: Settings[K]): void {
     this.settings[key] = value;
   }
 
@@ -200,7 +261,7 @@ class SettingsService {
    * Get all settings
    * @returns {Object} All settings
    */
-  getAll() {
+  getAll(): Settings {
     return { ...this.settings };
   }
 
@@ -209,7 +270,7 @@ class SettingsService {
    * @param {string} value - Resolver to validate
    * @returns {boolean} True if valid
    */
-  validateResolver(value) {
+  validateResolver(value: string): boolean {
     const parsed = this.parseDnsServer(value);
     return parsed !== null;
   }
@@ -219,7 +280,7 @@ class SettingsService {
    * @param {string} server - DNS server string (e.g., "1.1.1.1" or "1.1.1.1:53")
    * @returns {Object|null} Parsed server info or null if invalid
    */
-  parseDnsServer(server) {
+  parseDnsServer(server: string): DnsServerParseResult | null {
     const raw = String(server || '').trim();
     if (!raw) return null;
 
@@ -242,7 +303,7 @@ class SettingsService {
   /**
    * Reset settings to defaults
    */
-  resetToDefaults() {
+  resetToDefaults(): void {
     this.settings = { ...this.defaults };
     this.save();
     this.logger.info('Settings reset to defaults');
@@ -252,11 +313,11 @@ class SettingsService {
    * Export all configs as ssgate:name//base64 strings
    * @returns {string} String with one config format per line
    */
-  exportConfigs() {
+  exportConfigs(): string {
     const configs = this.settings.configs || [];
     return configs.map(config => {
       const remark = config.remark || 'Imported';
-      const data = { ...config };
+      const data: Partial<ConfigItem> = { ...config };
       delete data.id; // Don't export local ID
       const base64 = Buffer.from(JSON.stringify(data)).toString('base64');
       return `ssgate:${remark}//${base64}`;
@@ -268,13 +329,13 @@ class SettingsService {
    * @param {string} importData - Multi-line string of ssgate format
    * @returns {Object} Result of import
    */
-  importConfigs(importData) {
+  importConfigs(importData: string): ImportResult {
     if (!importData || typeof importData !== 'string') {
       return { success: false, error: 'Invalid import data' };
     }
 
     const lines = importData.split('\n').map(l => l.trim()).filter(l => l.startsWith('ssgate:'));
-    const importedConfigs = [];
+    const importedConfigs: ConfigItem[] = [];
     let errorCount = 0;
 
     for (const line of lines) {
@@ -290,7 +351,7 @@ class SettingsService {
         const remark = prefix.replace(/^ssgate:/, '') || 'Imported';
 
         const json = Buffer.from(base64, 'base64').toString('utf8');
-        const configData = JSON.parse(json);
+        const configData: Partial<ConfigItem> = JSON.parse(json);
 
         // Basic validation
         if (!configData.domain) {
@@ -298,8 +359,8 @@ class SettingsService {
           continue;
         }
 
-        const newConfig = {
-          id: require('crypto').randomUUID(),
+        const newConfig: ConfigItem = {
+          id: crypto.randomUUID(),
           remark: configData.remark || remark,
           domain: configData.domain,
           country: configData.country || '🏳️',
@@ -325,5 +386,3 @@ class SettingsService {
     };
   }
 }
-
-module.exports = SettingsService;

@@ -6,24 +6,38 @@
  * child_process details. This keeps orchestration testable and predictable.
  */
 
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import { spawn, exec, ChildProcess } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import { App } from 'electron';
+import EventEmitter from '../core/EventEmitter';
+import Logger from '../core/Logger';
 
-class ProcessManager {
-  /**
-   * @param {Object} deps - Runtime dependencies for process orchestration.
-   * @param {import('../core/EventEmitter')} deps.eventEmitter - App event bus.
-   * @param {import('../core/Logger')} deps.logger - Structured logger.
-   * @param {import('electron').App} deps.app - Electron app instance.
-   * @param {{ resourcesPath: string }} deps.paths - Resolved runtime paths.
-   */
-  constructor({ eventEmitter, logger, app, paths }) {
+interface ProcessManagerOptions {
+  eventEmitter: EventEmitter;
+  logger: Logger;
+  app: App;
+  paths: { resourcesPath: string };
+}
+
+interface StartOptions {
+  authoritative?: boolean;
+  keepAliveInterval?: number;
+  congestionControl?: string;
+}
+
+export default class ProcessManager {
+  private eventEmitter: EventEmitter;
+  private logger: Logger;
+  private app: App;
+  private paths: { resourcesPath: string };
+  private process: ChildProcess | null;
+
+  constructor({ eventEmitter, logger, app, paths }: ProcessManagerOptions) {
     this.eventEmitter = eventEmitter;
     this.logger = logger;
     this.app = app;
     this.paths = paths;
-
     this.process = null;
   }
 
@@ -32,7 +46,7 @@ class ProcessManager {
    * @returns {string|null} Path to binary or null if unsupported
    * @private
    */
-  _getClientPath() {
+  private _getClientPath(): string | null {
     const platform = process.platform;
     const resourcesPath = this.app.isPackaged
       ? path.join(process.resourcesPath)
@@ -77,7 +91,7 @@ class ProcessManager {
    * @param {string} clientPath - Path to binary
    * @private
    */
-  _ensureExecutablePermissions(clientPath) {
+  private _ensureExecutablePermissions(clientPath: string): void {
     if ((process.platform === 'darwin' || process.platform === 'linux') && fs.existsSync(clientPath)) {
       try {
         // Check if file is executable, if not, make it executable
@@ -87,7 +101,7 @@ class ProcessManager {
         try {
           fs.chmodSync(clientPath, 0o755);
           this.logger.info(`Automatically set execute permissions on ${path.basename(clientPath)}`);
-        } catch (chmodErr) {
+        } catch (chmodErr: any) {
           // If file system is read-only (e.g. DMG), we can't chmod.
           if (chmodErr.code === 'EROFS') {
             this.logger.warn(`Could not set permissions on read-only filesystem: ${chmodErr.message}`);
@@ -107,7 +121,7 @@ class ProcessManager {
    * @param {boolean} options.authoritative - Use authoritative mode instead of resolver mode
    * @returns {Promise<void>}
    */
-  async start(resolver, domain, options = {}) {
+  async start(resolver: string, domain: string, options: StartOptions = {}): Promise<void> {
     const { authoritative = false, keepAliveInterval, congestionControl } = options;
 
     const clientPath = this._getClientPath();
@@ -153,6 +167,10 @@ class ProcessManager {
       detached: false
     });
 
+    if (!this.process.stdout || !this.process.stderr) {
+      throw new Error('Failed to capture process I/O');
+    }
+
     // Set up output handlers
     this.process.stdout.on('data', (data) => {
       const output = data.toString();
@@ -167,7 +185,6 @@ class ProcessManager {
       // Check for port already in use error
       if (errorStr.includes('Address already in use') || errorStr.includes('EADDRINUSE')) {
         this.logger.warn('Port 5201 is already in use. Trying to kill existing process...');
-        const { exec } = require('child_process');
         exec('lsof -ti:5201 | xargs kill -9 2>/dev/null', (err) => {
           if (!err) {
             this.logger.info('Killed process using port 5201. Please restart the VPN.');
@@ -188,14 +205,19 @@ class ProcessManager {
     // Wait for process to be ready
     return new Promise((resolve, reject) => {
       let settled = false;
-      const settle = (fn, value) => {
+      const settle = (fn: Function, value?: any) => {
         if (settled) return;
         settled = true;
         fn(value);
       };
 
+      if (!this.process) {
+        settle(reject, new Error('Process initialization failed'));
+        return;
+      }
+
       // If spawn fails (e.g., ENOENT), reject instead of crashing/pretending success.
-      this.process.once('error', (err) => {
+      this.process.once('error', (err: any) => {
         const msg = `Stream Gate failed to start: ${err.code || 'ERROR'} ${err.message || String(err)}`;
         this.logger.error(msg);
         this.process = null;
@@ -220,7 +242,7 @@ class ProcessManager {
   /**
    * Stop the Stream Gate client process
    */
-  stop() {
+  stop(): void {
     if (this.process) {
       this.logger.info('Stopping Stream Gate client');
       this.process.kill();
@@ -232,7 +254,7 @@ class ProcessManager {
    * Check if the process is running
    * @returns {boolean}
    */
-  isRunning() {
+  isRunning(): boolean {
     return this.process !== null && !this.process.killed;
   }
 
@@ -240,7 +262,7 @@ class ProcessManager {
    * Get the process instance
    * @returns {ChildProcess|null}
    */
-  getProcess() {
+  getProcess(): ChildProcess | null {
     return this.process;
   }
 
@@ -249,7 +271,7 @@ class ProcessManager {
    * @param {Function} callback - Callback function
    * @returns {Function} Unsubscribe function
    */
-  onOutput(callback) {
+  onOutput(callback: (output: string) => void): () => void {
     return this.eventEmitter.on('process:output', callback);
   }
 
@@ -258,7 +280,7 @@ class ProcessManager {
    * @param {Function} callback - Callback function
    * @returns {Function} Unsubscribe function
    */
-  onError(callback) {
+  onError(callback: (error: string) => void): () => void {
     return this.eventEmitter.on('process:error', callback);
   }
 
@@ -267,9 +289,7 @@ class ProcessManager {
    * @param {Function} callback - Callback function
    * @returns {Function} Unsubscribe function
    */
-  onExit(callback) {
+  onExit(callback: (code: number) => void): () => void {
     return this.eventEmitter.on('process:exit', callback);
   }
 }
-
-module.exports = ProcessManager;

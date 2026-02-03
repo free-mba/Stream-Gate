@@ -6,30 +6,40 @@
  * Uses Strategy Pattern for platform-specific implementations.
  */
 
-const { exec } = require('child_process');
-const { promisify } = require('util');
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import Logger from '../core/Logger';
+import SettingsService from '../data/SettingsService';
 
 const execAsync = promisify(exec);
 const HTTP_PROXY_PORT = 8080;
 
+interface ProxyConfigResult {
+  success: boolean;
+  serviceName?: string;
+}
+
 /**
  * Base class for system proxy configuration
  */
-class BaseSystemProxy {
-  constructor(logger) {
+abstract class BaseSystemProxy {
+  protected logger: Logger;
+
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 
-  async configure() {
-    throw new Error('configure() must be implemented by subclass');
-  }
+  abstract configure(): Promise<ProxyConfigResult>;
+  abstract unconfigure(serviceName?: string): Promise<ProxyConfigResult>;
+  abstract verifyConfiguration(): Promise<boolean>;
 
-  async unconfigure() {
-    throw new Error('unconfigure() must be implemented by subclass');
-  }
-
-  async verifyConfiguration() {
-    throw new Error('verifyConfiguration() must be implemented by subclass');
+  protected async _disableIfMatches(iface: string): Promise<boolean> {
+    // Default empty implementation or specific logic depending on base class needs
+    // Since it was part of MacSystemProxy logic in JS version, but might be useful in others?
+    // Actually, looking at JS code, _disableIfMatches is only in MacSystemProxy.
+    // So I will move it there or keep abstract if intended for all.
+    // JS code didn't define it in Base, only Mac used it.
+    return false;
   }
 }
 
@@ -37,7 +47,7 @@ class BaseSystemProxy {
  * macOS system proxy configuration
  */
 class MacSystemProxy extends BaseSystemProxy {
-  async configure() {
+  async configure(): Promise<ProxyConfigResult> {
     try {
       // Get list of all network services
       const { stdout } = await execAsync('networksetup -listallnetworkservices');
@@ -61,7 +71,7 @@ class MacSystemProxy extends BaseSystemProxy {
             await execAsync(`networksetup -setsecurewebproxystate "${iface}" on`);
             this.logger.info(`System proxy configured via networksetup on ${iface}`);
             return { success: true, serviceName: iface };
-          } catch (err) {
+          } catch (err: any) {
             this.logger.error(`Failed to configure proxy on ${matching}:`, err.message);
             continue;
           }
@@ -78,19 +88,19 @@ class MacSystemProxy extends BaseSystemProxy {
           await execAsync(`networksetup -setsecurewebproxystate "${iface}" on`);
           this.logger.info(`System proxy configured via networksetup on ${iface}`);
           return { success: true, serviceName: iface };
-        } catch (err) {
+        } catch (err: any) {
           this.logger.error(`Failed to configure proxy on ${iface}:`, err.message);
         }
       }
 
       return { success: false };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to list network services:', err.message);
       return { success: false };
     }
   }
 
-  async unconfigure(serviceName) {
+  async unconfigure(serviceName?: string): Promise<ProxyConfigResult> {
     let changed = false;
 
     // Disable proxy on specific service if provided
@@ -124,11 +134,13 @@ class MacSystemProxy extends BaseSystemProxy {
     return { success: changed };
   }
 
-  async _disableIfMatches(iface) {
+  protected async _disableIfMatches(iface: string): Promise<boolean> {
     try {
+      // We need to typecase execAsync return or handle catch properly. 
+      // execAsync returns Promise<{stdout, stderr}>
       const [{ stdout: web }, { stdout: sec }] = await Promise.all([
-        execAsync(`networksetup -getwebproxy "${iface}"`).catch(() => ({ stdout: '' })),
-        execAsync(`networksetup -getsecurewebproxy "${iface}"`).catch(() => ({ stdout: '' }))
+        execAsync(`networksetup -getwebproxy "${iface}"`).catch(() => ({ stdout: '', stderr: '' })),
+        execAsync(`networksetup -getsecurewebproxy "${iface}"`).catch(() => ({ stdout: '', stderr: '' }))
       ]);
 
       const matches =
@@ -145,7 +157,7 @@ class MacSystemProxy extends BaseSystemProxy {
     }
   }
 
-  async verifyConfiguration() {
+  async verifyConfiguration(): Promise<boolean> {
     try {
       const { stdout } = await execAsync('networksetup -listallnetworkservices');
       const services = stdout
@@ -181,18 +193,18 @@ class MacSystemProxy extends BaseSystemProxy {
  * Windows system proxy configuration
  */
 class WindowsSystemProxy extends BaseSystemProxy {
-  async configure() {
+  async configure(): Promise<ProxyConfigResult> {
     try {
       await execAsync(`netsh winhttp set proxy proxy-server="127.0.0.1:${HTTP_PROXY_PORT}"`);
       this.logger.info('System proxy configured via netsh');
       return { success: true, serviceName: 'winhttp' };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to configure proxy via netsh:', err.message);
       return { success: false };
     }
   }
 
-  async unconfigure(serviceName) {
+  async unconfigure(serviceName?: string): Promise<ProxyConfigResult> {
     try {
       // Check if current proxy matches our configuration
       const { stdout } = await execAsync('netsh winhttp show proxy');
@@ -207,13 +219,13 @@ class WindowsSystemProxy extends BaseSystemProxy {
       await execAsync('netsh winhttp reset proxy');
       this.logger.info('System proxy unconfigured via netsh');
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to unconfigure proxy via netsh:', err.message);
       return { success: false };
     }
   }
 
-  async verifyConfiguration() {
+  async verifyConfiguration(): Promise<boolean> {
     try {
       const { stdout } = await execAsync('netsh winhttp show proxy');
       return stdout.includes('127.0.0.1') && stdout.includes(String(HTTP_PROXY_PORT));
@@ -227,7 +239,7 @@ class WindowsSystemProxy extends BaseSystemProxy {
  * Linux system proxy configuration
  */
 class LinuxSystemProxy extends BaseSystemProxy {
-  async configure() {
+  async configure(): Promise<ProxyConfigResult> {
     try {
       // Try GNOME settings first
       await execAsync(`gsettings set org.gnome.system.proxy mode 'manual'`);
@@ -237,14 +249,14 @@ class LinuxSystemProxy extends BaseSystemProxy {
       await execAsync(`gsettings set org.gnome.system.proxy.https port ${HTTP_PROXY_PORT}`);
       this.logger.info('System proxy configured via gsettings');
       return { success: true, serviceName: 'gsettings' };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to configure proxy via gsettings:', err.message);
       this.logger.info('Note: System proxy configuration may require manual setup on Linux');
       return { success: false };
     }
   }
 
-  async unconfigure(serviceName) {
+  async unconfigure(serviceName?: string): Promise<ProxyConfigResult> {
     try {
       // Check if current proxy matches our configuration
       let matches = false;
@@ -256,11 +268,11 @@ class LinuxSystemProxy extends BaseSystemProxy {
           { stdout: httpsHost },
           { stdout: httpsPort }
         ] = await Promise.all([
-          execAsync(`gsettings get org.gnome.system.proxy mode`).catch(() => ({ stdout: '' })),
-          execAsync(`gsettings get org.gnome.system.proxy.http host`).catch(() => ({ stdout: '' })),
-          execAsync(`gsettings get org.gnome.system.proxy.http port`).catch(() => ({ stdout: '' })),
-          execAsync(`gsettings get org.gnome.system.proxy.https host`).catch(() => ({ stdout: '' })),
-          execAsync(`gsettings get org.gnome.system.proxy.https port`).catch(() => ({ stdout: '' }))
+          execAsync(`gsettings get org.gnome.system.proxy mode`).catch(() => ({ stdout: '', stderr: '' })),
+          execAsync(`gsettings get org.gnome.system.proxy.http host`).catch(() => ({ stdout: '', stderr: '' })),
+          execAsync(`gsettings get org.gnome.system.proxy.http port`).catch(() => ({ stdout: '', stderr: '' })),
+          execAsync(`gsettings get org.gnome.system.proxy.https host`).catch(() => ({ stdout: '', stderr: '' })),
+          execAsync(`gsettings get org.gnome.system.proxy.https port`).catch(() => ({ stdout: '', stderr: '' }))
         ]);
 
         const m = String(mode || '');
@@ -273,7 +285,7 @@ class LinuxSystemProxy extends BaseSystemProxy {
         matches =
           m.includes('manual') &&
           ((hh.includes('127.0.0.1') && hp.includes(portStr)) ||
-           (sh.includes('127.0.0.1') && sp.includes(portStr)));
+            (sh.includes('127.0.0.1') && sp.includes(portStr)));
       } catch (_) {
         matches = false;
       }
@@ -285,21 +297,21 @@ class LinuxSystemProxy extends BaseSystemProxy {
       await execAsync(`gsettings set org.gnome.system.proxy mode 'none'`);
       this.logger.info('System proxy unconfigured via gsettings');
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to unconfigure proxy via gsettings:', err.message);
       return { success: false };
     }
   }
 
-  async verifyConfiguration() {
+  async verifyConfiguration(): Promise<boolean> {
     try {
       const { stdout: mode } = await execAsync(`gsettings get org.gnome.system.proxy mode`);
       const { stdout: httpHost } = await execAsync(`gsettings get org.gnome.system.proxy.http host`);
       const { stdout: httpPort } = await execAsync(`gsettings get org.gnome.system.proxy.http port`);
 
       return mode.includes('manual') &&
-             httpHost.includes('127.0.0.1') &&
-             httpPort.includes(String(HTTP_PROXY_PORT));
+        httpHost.includes('127.0.0.1') &&
+        httpPort.includes(String(HTTP_PROXY_PORT));
     } catch (err) {
       return false;
     }
@@ -309,8 +321,12 @@ class LinuxSystemProxy extends BaseSystemProxy {
 /**
  * Main SystemProxyService - Factory for platform-specific implementations
  */
-class SystemProxyService {
-  constructor(logger, settingsService) {
+export default class SystemProxyService {
+  private logger: Logger;
+  private settingsService: SettingsService;
+  private impl: BaseSystemProxy | null;
+
+  constructor(logger: Logger, settingsService: SettingsService) {
     this.logger = logger;
     this.settingsService = settingsService;
 
@@ -332,7 +348,7 @@ class SystemProxyService {
    * Configure system proxy
    * @returns {Promise<{success: boolean, serviceName?: string}>}
    */
-  async configure() {
+  async configure(): Promise<ProxyConfigResult> {
     if (!this.impl) {
       this.logger.warn('System proxy configuration not supported on this platform');
       return { success: false };
@@ -357,7 +373,7 @@ class SystemProxyService {
    * Unconfigure system proxy (only if we configured it)
    * @returns {Promise<{success: boolean}>}
    */
-  async unconfigure() {
+  async unconfigure(): Promise<ProxyConfigResult> {
     if (!this.impl) {
       return { success: false };
     }
@@ -387,7 +403,7 @@ class SystemProxyService {
    * Verify system proxy is configured
    * @returns {Promise<boolean>}
    */
-  async verifyConfiguration() {
+  async verifyConfiguration(): Promise<boolean> {
     if (!this.impl) {
       return false;
     }
@@ -398,7 +414,7 @@ class SystemProxyService {
    * Check if system proxy is enabled by this app
    * @returns {boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return this.settingsService.get('systemProxyEnabledByApp') || false;
   }
 
@@ -406,9 +422,7 @@ class SystemProxyService {
    * Get the active service name
    * @returns {string}
    */
-  getActiveService() {
+  getActiveService(): string {
     return this.settingsService.get('systemProxyServiceName') || '';
   }
 }
-
-module.exports = SystemProxyService;

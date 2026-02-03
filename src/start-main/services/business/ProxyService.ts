@@ -11,20 +11,39 @@
  * @see {@link ../../../docs/concepts/Architecture.md}
  */
 
-const http = require('http');
-const https = require('https');
-const net = require('net');
-const url = require('url');
-const { SocksClient } = require('socks');
-const { SocksProxyAgent } = require('socks-proxy-agent');
+import http from 'http';
+import https from 'https';
+import net from 'net';
+import url from 'url';
+import { SocksClient, SocksProxy } from 'socks';
+import { SocksProxyAgent } from 'socks-proxy-agent';
+import EventEmitter from '../core/EventEmitter';
+import Logger from '../core/Logger';
+import SettingsService, { Settings } from '../data/SettingsService';
 
 // Constants
 const HTTP_PROXY_PORT = 8080;
 const SOCKS5_PORT = 5201;
 const SOCKS5_FORWARD_PORT = 10809;
 
-class ProxyService {
-  constructor(eventEmitter, logger, settingsService) {
+interface TrafficUpdate {
+  up: number;
+  down: number;
+}
+
+export default class ProxyService {
+  private eventEmitter: EventEmitter;
+  private logger: Logger;
+  private settingsService: SettingsService;
+  private httpProxyServer: http.Server | null;
+  private socksForwardServer: net.Server | null;
+  private bytesUplink: number;
+  private bytesDownlink: number;
+  private prevUplink: number;
+  private prevDownlink: number;
+  private trafficInterval: NodeJS.Timeout | null;
+
+  constructor(eventEmitter: EventEmitter, logger: Logger, settingsService: SettingsService) {
     this.eventEmitter = eventEmitter;
     this.logger = logger;
     this.settingsService = settingsService;
@@ -45,7 +64,7 @@ class ProxyService {
    * @returns {string} SOCKS5 URL
    * @private
    */
-  _buildSocks5Url() {
+  private _buildSocks5Url(): string {
     const settings = this.settingsService.getAll();
     let u = 'anonymous';
     let p = 'anonymous';
@@ -64,7 +83,7 @@ class ProxyService {
    * @returns {SocksProxyAgent}
    * @private
    */
-  _getSocksAgent(socksUrl) {
+  private _getSocksAgent(socksUrl: string): SocksProxyAgent {
     // Create new agent each time to pick up auth changes
     return new SocksProxyAgent(socksUrl);
   }
@@ -74,10 +93,10 @@ class ProxyService {
    * @returns {Object} SOCKS5 proxy config
    * @private
    */
-  _getSocksProxyConfig() {
+  private _getSocksProxyConfig(): SocksProxy {
     const settings = this.settingsService.getAll();
-    const config = {
-      host: '127.0.0.1',
+    const config: SocksProxy = {
+      ipaddress: '127.0.0.1',
       port: SOCKS5_PORT,
       type: 5
     };
@@ -99,7 +118,7 @@ class ProxyService {
    * Start traffic monitoring
    * @private
    */
-  _startTrafficMonitor() {
+  private _startTrafficMonitor(): void {
     if (this.trafficInterval) clearInterval(this.trafficInterval);
 
     this.prevUplink = this.bytesUplink;
@@ -127,7 +146,7 @@ class ProxyService {
    * Stop traffic monitoring
    * @private
    */
-  _stopTrafficMonitor() {
+  private _stopTrafficMonitor(): void {
     if (this.trafficInterval) {
       clearInterval(this.trafficInterval);
       this.trafficInterval = null;
@@ -138,7 +157,7 @@ class ProxyService {
    * Increment uplink counter
    * @param {number} bytes 
    */
-  _addUplink(bytes) {
+  private _addUplink(bytes: number): void {
     this.bytesUplink += bytes;
   }
 
@@ -146,7 +165,7 @@ class ProxyService {
    * Increment downlink counter
    * @param {number} bytes 
    */
-  _addDownlink(bytes) {
+  private _addDownlink(bytes: number): void {
     this.bytesDownlink += bytes;
   }
 
@@ -154,7 +173,7 @@ class ProxyService {
    * Start the HTTP proxy server
    * @returns {Promise<void>}
    */
-  async startHttpProxy() {
+  async startHttpProxy(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const socksUrl = this._buildSocks5Url();
@@ -166,7 +185,7 @@ class ProxyService {
 
         // Handle CONNECT requests (HTTPS)
         this.httpProxyServer.on('connect', (req, clientSocket, head) => {
-          this._handleConnect(req, clientSocket, head);
+          this._handleConnect(req, clientSocket as net.Socket, head);
         });
 
         // Handle regular HTTP requests
@@ -176,7 +195,7 @@ class ProxyService {
 
         // Handle WebSocket upgrades
         this.httpProxyServer.on('upgrade', (req, socket, head) => {
-          this._handleUpgrade(req, socket, head);
+          this._handleUpgrade(req, socket as net.Socket, head);
         });
 
         this.httpProxyServer.listen(HTTP_PROXY_PORT, '0.0.0.0', () => {
@@ -190,7 +209,7 @@ class ProxyService {
           this.logger.error('HTTP Proxy error:', err);
           reject(err);
         });
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error('Failed to start HTTP proxy:', err);
         reject(err);
       }
@@ -201,18 +220,18 @@ class ProxyService {
    * Handle CONNECT requests (for HTTPS)
    * @private
    */
-  _handleConnect(req, clientSocket, head) {
+  private _handleConnect(req: http.IncomingMessage, clientSocket: net.Socket, head: Buffer): void {
     const settings = this.settingsService.getAll();
     const requestId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-    const logRequest = (message, isError = false, isVerbose = false) => {
+    const logRequest = (message: string, isError = false, isVerbose = false) => {
       if (isVerbose && !settings.verbose) return;
       const logMsg = `[${requestId}] ${message}`;
       this.logger.info(logMsg);
       this.eventEmitter.emit(isError ? 'proxy:error' : 'proxy:log', logMsg);
     };
 
-    const urlParts = req.url.split(':');
+    const urlParts = (req.url || '').split(':');
     const host = urlParts[0];
     const port = parseInt(urlParts[1] || '443');
 
@@ -241,7 +260,9 @@ class ProxyService {
 
       // Configure sockets
       clientSocket.setNoDelay(true);
-      targetSocket.setNoDelay(true);
+      if (targetSocket instanceof net.Socket) {
+        targetSocket.setNoDelay(true);
+      }
 
       // Traffic counting
       clientSocket.on('data', (chunk) => {
@@ -253,13 +274,13 @@ class ProxyService {
 
       // Error handlers
       const ignoreCodes = ['ECONNRESET', 'EPIPE', 'ECONNABORTED', 'ECANCELED', 'ETIMEDOUT'];
-      clientSocket.on('error', (err) => {
+      clientSocket.on('error', (err: any) => {
         if (!ignoreCodes.includes(err.code)) {
           logRequest(`❌ Client error: ${err.code}`, true);
         }
       });
 
-      targetSocket.on('error', (err) => {
+      targetSocket.on('error', (err: any) => {
         if (!ignoreCodes.includes(err.code)) {
           logRequest(`❌ Target error: ${err.code}`, true);
         }
@@ -281,7 +302,7 @@ class ProxyService {
       targetSocket.pipe(clientSocket, { end: false });
 
       logRequest(`🔗 Tunnel active: ${host}:${port}`, false, true);
-    }).catch((err) => {
+    }).catch((err: any) => {
       logRequest(`❌ CONNECT failed: ${err.message}`, true);
       clientSocket.write(`HTTP/1.1 500 Proxy Error\r\n\r\n${err.message}`);
       clientSocket.end();
@@ -292,11 +313,11 @@ class ProxyService {
    * Handle regular HTTP requests
    * @private
    */
-  _handleRequest(req, res, socksAgent) {
+  private _handleRequest(req: http.IncomingMessage, res: http.ServerResponse, socksAgent: SocksProxyAgent): void {
     const settings = this.settingsService.getAll();
     const requestId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-    const logRequest = (message, isError = false, isVerbose = false) => {
+    const logRequest = (message: string, isError = false, isVerbose = false) => {
       if (isVerbose && !settings.verbose) return;
       const logMsg = `[${requestId}] ${message}`;
       this.logger.info(logMsg);
@@ -320,8 +341,8 @@ class ProxyService {
     });
 
     // Parse URL
-    let targetUrl = req.url;
-    let parsedUrl;
+    let targetUrl = req.url || '/';
+    let parsedUrl: url.UrlWithStringQuery;
 
     if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
       parsedUrl = url.parse(targetUrl);
@@ -332,37 +353,40 @@ class ProxyService {
     }
 
     const isHttps = parsedUrl.protocol === 'https:';
-    const client = isHttps ? https : http;
+    // We cannot construct ClientRequest directly easily via http/https generic, using basic check
 
     // Build request options
-    const options = {
+    const options: https.RequestOptions = {
       hostname: parsedUrl.hostname,
-      port: parsedUrl.port || (isHttps ? 443 : 80),
+      port: (parsedUrl.port ? parseInt(parsedUrl.port) : (isHttps ? 443 : 80)),
       path: parsedUrl.path || '/',
       method: req.method,
       headers: {}
     };
 
     // Copy headers, skipping proxy-specific ones
+    const outgoingHeaders = options.headers as NodeJS.Dict<number | string | string[]>;
     for (const key in req.headers) {
       const lowerKey = key.toLowerCase();
       if (['host', 'proxy-connection', 'proxy-authorization', 'connection', 'upgrade', 'keep-alive'].includes(lowerKey)) {
         continue;
       }
-      options.headers[key] = req.headers[key];
+      outgoingHeaders[key] = req.headers[key];
     }
 
-    options.headers.host = parsedUrl.hostname + (parsedUrl.port ? ':' + parsedUrl.port : '');
+    outgoingHeaders.host = parsedUrl.hostname + (parsedUrl.port ? ':' + parsedUrl.port : '');
     options.agent = socksAgent;
     options.timeout = 30000;
 
     logRequest(`🌐 HTTP ${req.method} ${parsedUrl.hostname}${parsedUrl.path || '/'} via SOCKS5`, false, true);
 
-    const proxyReq = client.request(options, (proxyRes) => {
+    const requestFn = isHttps ? https.request : http.request;
+
+    const proxyReq = requestFn(options, (proxyRes) => {
       logRequest(`📥 Response ${proxyRes.statusCode} from ${parsedUrl.hostname}`, false, true);
 
       // Copy response headers
-      const responseHeaders = {};
+      const responseHeaders: http.OutgoingHttpHeaders = {};
       for (const key in proxyRes.headers) {
         const lowerKey = key.toLowerCase();
         if (!['connection', 'transfer-encoding', 'keep-alive'].includes(lowerKey)) {
@@ -372,7 +396,7 @@ class ProxyService {
 
       try {
         if (!res.headersSent) {
-          res.writeHead(proxyRes.statusCode, responseHeaders);
+          res.writeHead(proxyRes.statusCode || 200, responseHeaders);
 
           // Track response body size (downlink)
           proxyRes.on('data', (chunk) => {
@@ -384,7 +408,7 @@ class ProxyService {
         } else {
           logRequest(`⚠️ Response headers already sent!`, true);
         }
-      } catch (err) {
+      } catch (err: any) {
         logRequest(`❌ Error writing response: ${err.message}`, true);
       }
     });
@@ -398,7 +422,7 @@ class ProxyService {
       proxyReq.destroy();
     });
 
-    proxyReq.on('error', (err) => {
+    proxyReq.on('error', (err: any) => {
       logRequest(`❌ Proxy request error: ${err.message}`, true);
       if (!res.headersSent) {
         res.writeHead(500);
@@ -413,7 +437,7 @@ class ProxyService {
       }
     });
 
-    req.on('error', (err) => {
+    req.on('error', (err: any) => {
       logRequest(`❌ Request error: ${err.message}`, true);
       if (!proxyReq.destroyed) {
         proxyReq.destroy();
@@ -431,8 +455,8 @@ class ProxyService {
    * Handle WebSocket upgrade requests
    * @private
    */
-  _handleUpgrade(req, socket, head) {
-    const urlParts = req.url.split(':');
+  private _handleUpgrade(req: http.IncomingMessage, socket: net.Socket, head: Buffer): void {
+    const urlParts = (req.url || '').split(':');
     const host = urlParts[0];
     const port = parseInt(urlParts[1] || '80');
 
@@ -454,9 +478,12 @@ class ProxyService {
         this._addDownlink(chunk.length);
       });
 
-      info.socket.pipe(socket);
-      socket.pipe(info.socket);
-    }).catch((err) => {
+      // Type checking - socket is usually net.Socket, but could be other things theoretically
+      if (info.socket instanceof net.Socket) {
+        info.socket.pipe(socket);
+        socket.pipe(info.socket);
+      }
+    }).catch((err: any) => {
       this.logger.error('WebSocket upgrade failed:', err);
       socket.end();
     });
@@ -466,7 +493,7 @@ class ProxyService {
    * Start the SOCKS5-to-HTTP forwarder (for network sharing)
    * @returns {Promise<void>}
    */
-  async startSocksForwardProxy() {
+  async startSocksForwardProxy(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         if (this.socksForwardServer) {
@@ -485,12 +512,12 @@ class ProxyService {
           resolve();
         });
 
-        this.socksForwardServer.on('error', (err) => {
+        this.socksForwardServer.on('error', (err: any) => {
           this.logger.error('SOCKS Forwarder error:', err);
           this.eventEmitter.emit('proxy:error', `SOCKS Forwarder error: ${err.message}`);
           reject(err);
         });
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error('Failed to start SOCKS forwarder:', err);
         reject(err);
       }
@@ -501,7 +528,7 @@ class ProxyService {
    * Handle SOCKS5 forward client connection
    * @private
    */
-  _handleSocksForwardClient(clientSocket) {
+  private _handleSocksForwardClient(clientSocket: net.Socket): void {
     const settings = this.settingsService.getAll();
     const requestId = Math.random().toString(36).substr(2, 5);
 
@@ -516,15 +543,16 @@ class ProxyService {
       // Respond with No Auth
       clientSocket.write(Buffer.from([0x05, 0x00]));
 
-      clientSocket.once('data', (request) => {
+      clientSocket.once('data', (data) => {
+        const request = data as Buffer;
         // Connection request
         if (request[0] !== 0x05 || request[1] !== 0x01) {
           clientSocket.destroy();
           return;
         }
 
-        let host;
-        let port;
+        let host: string;
+        let port: number;
         let offset = 4;
         const atyp = request[3];
 
@@ -593,18 +621,6 @@ class ProxyService {
             clientSocket.setNoDelay(true);
             httpProxySocket.setNoDelay(true);
 
-            // Traffic counting (Bridge is just a recursive call to HTTP proxy, so we count traffic here too or rely on the HTTP proxy to count it?
-            // If we count here AND in HTTP proxy, we double count locally initiated SOCKS traffic.
-            // But if we use SOCKS stats to display, we want the total.
-            // Since this just pipes to Local HTTP Proxy, the Local HTTP Proxy (via _handleConnect) will count the traffic!
-            // BUT: The data between Client <-> Bridge is what we want to measure if it's external.
-            // However, since we treat everything passing through THIS app instance as "Traffic", and proper HTTP proxy counts it...
-            // Wait, this is `net.connect(HTTP_PROXY_PORT)`. The `httpProxyServer` will receive this connection.
-            // So `_handleConnect` in `httpProxyServer` WILL be called.
-            // And that method counts traffic.
-            // So we DO NOT need to count traffic here, or we will double-count for SOCKS clients.
-            // Correct.
-
             // Pipe bidirectionally
             clientSocket.pipe(httpProxySocket);
             httpProxySocket.pipe(clientSocket);
@@ -624,14 +640,14 @@ class ProxyService {
           if (!httpProxySocket.destroyed) httpProxySocket.destroy();
         };
 
-        clientSocket.on('error', (err) => {
+        clientSocket.on('error', (err: any) => {
           if (settings.verbose && err.code !== 'ECONNRESET') {
             this.logger.error(`[SOCKS-TO-HTTP-${requestId}] Client socket error:`, err.message);
           }
           cleanup();
         });
 
-        httpProxySocket.on('error', (err) => {
+        httpProxySocket.on('error', (err: any) => {
           if (settings.verbose) {
             this.logger.error(`[SOCKS-TO-HTTP-${requestId}] HTTP Proxy socket error:`, err.message);
           }
@@ -645,7 +661,7 @@ class ProxyService {
       });
     });
 
-    clientSocket.on('error', (err) => {
+    clientSocket.on('error', (err: any) => {
       if (settings.verbose && err.code !== 'ECONNRESET') {
         this.logger.error(`[SOCKS-TO-HTTP-${requestId}] Initial handshaking error:`, err.message);
       }
@@ -655,7 +671,7 @@ class ProxyService {
   /**
    * Stop the HTTP proxy server
    */
-  stopHttpProxy() {
+  stopHttpProxy(): void {
     this._stopTrafficMonitor();
     if (this.httpProxyServer) {
       this.logger.info('Stopping HTTP proxy server');
@@ -668,7 +684,7 @@ class ProxyService {
   /**
    * Stop the SOCKS5 forwarder
    */
-  stopSocksForwardProxy() {
+  stopSocksForwardProxy(): void {
     if (this.socksForwardServer) {
       this.logger.info('Stopping SOCKS5 forwarder');
       this.socksForwardServer.close();
@@ -680,7 +696,7 @@ class ProxyService {
   /**
    * Stop all proxy servers
    */
-  stopAll() {
+  stopAll(): void {
     this.stopHttpProxy();
     this.stopSocksForwardProxy();
   }
@@ -689,7 +705,7 @@ class ProxyService {
    * Check if HTTP proxy is running
    * @returns {boolean}
    */
-  isHttpProxyRunning() {
+  isHttpProxyRunning(): boolean {
     return this.httpProxyServer !== null;
   }
 
@@ -697,7 +713,7 @@ class ProxyService {
    * Check if SOCKS forwarder is running
    * @returns {boolean}
    */
-  isSocksForwardRunning() {
+  isSocksForwardRunning(): boolean {
     return this.socksForwardServer !== null &&
       this.socksForwardServer.listening;
   }
@@ -706,7 +722,7 @@ class ProxyService {
    * Get proxy status
    * @returns {Object}
    */
-  getStatus() {
+  getStatus(): any {
     return {
       httpProxyRunning: this.isHttpProxyRunning(),
       httpProxyPort: HTTP_PROXY_PORT,
@@ -716,5 +732,3 @@ class ProxyService {
     };
   }
 }
-
-module.exports = ProxyService;

@@ -7,9 +7,23 @@
  * consistent formatting and verbosity control.
  */
 
-class Logger {
+import EventEmitter from './EventEmitter';
 
-  constructor(eventEmitter) {
+interface LogEntry {
+  timestamp: number;
+  iso: string;
+  level: string;
+  message: string;
+  meta: any;
+}
+
+export default class Logger {
+  private eventEmitter: EventEmitter;
+  private _verboseEnabled: boolean;
+  private _logs: LogEntry[];
+  private readonly _MAX_LOG_AGE: number;
+
+  constructor(eventEmitter: EventEmitter) {
     this.eventEmitter = eventEmitter;
     this._verboseEnabled = false;
     this._logs = []; // Store logs in memory
@@ -20,7 +34,7 @@ class Logger {
    * Set verbosity level
    * @param {boolean} enabled - Whether verbose logging is enabled
    */
-  setVerbose(enabled) {
+  setVerbose(enabled: boolean): void {
     this._verboseEnabled = !!enabled;
   }
 
@@ -28,7 +42,7 @@ class Logger {
    * Check if verbose logging is enabled
    * @returns {boolean}
    */
-  isVerbose() {
+  isVerbose(): boolean {
     return this._verboseEnabled;
   }
 
@@ -37,7 +51,7 @@ class Logger {
    * @param {string} message - Message to log
    * @param {Object} [meta] - Optional metadata
    */
-  info(message, meta) {
+  info(message: string, meta?: any): void {
     this._addLog('info', message, meta);
     const logEntry = this._formatLog('info', message, meta);
     console.log(logEntry);
@@ -56,7 +70,7 @@ class Logger {
    * @param {string} message - Error message
    * @param {Error} [error] - Optional error object
    */
-  error(message, error) {
+  error(message: string, error?: Error | any): void {
     this._addLog('error', message, error);
     const logEntry = this._formatLog('error', message, error);
     console.error(logEntry);
@@ -76,7 +90,7 @@ class Logger {
    * @param {string} message - Message to log
    * @param {Object} [meta] - Optional metadata
    */
-  verbose(message, meta) {
+  verbose(message: string, meta?: any): void {
     if (!this._verboseEnabled) {
       return;
     }
@@ -99,7 +113,7 @@ class Logger {
    * @param {string} message - Warning message
    * @param {Object} [meta] - Optional metadata
    */
-  warn(message, meta) {
+  warn(message: string, meta?: any): void {
     this._addLog('warn', message, meta);
     const logEntry = this._formatLog('warn', message, meta);
     console.warn(logEntry);
@@ -117,9 +131,9 @@ class Logger {
    * Add log to internal storage and prune old logs
    * @private
    */
-  _addLog(level, message, meta) {
+  private _addLog(level: string, message: string, meta: any): void {
     const timestamp = Date.now();
-    const entry = {
+    const entry: LogEntry = {
       timestamp,
       iso: new Date(timestamp).toISOString(),
       level,
@@ -135,7 +149,7 @@ class Logger {
    * Remove logs older than MAX_LOG_AGE
    * @private
    */
-  _pruneLogs() {
+  private _pruneLogs(): void {
     const cutoff = Date.now() - this._MAX_LOG_AGE;
     // Optimization: if the first log is new enough, everything is new enough
     if (this._logs.length > 0 && this._logs[0].timestamp > cutoff) {
@@ -159,7 +173,7 @@ class Logger {
    * Get all stored logs
    * @returns {Array} Array of log objects
    */
-  getLogs() {
+  getLogs(): LogEntry[] {
     // Perform a prune before returning to ensure freshness
     this._pruneLogs();
     return this._logs;
@@ -169,7 +183,7 @@ class Logger {
    * Format a log entry
    * @private
    */
-  _formatLog(level, message, meta) {
+  private _formatLog(level: string, message: string, meta: any): string {
     const timestamp = new Date().toISOString();
     const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
 
@@ -188,12 +202,10 @@ class Logger {
    * @param {string} channel - IPC channel
    * @param {string} message - Message to send
    */
-  sendToRenderer(channel, message) {
+  sendToRenderer(channel: string, message: any): void {
     this.eventEmitter.emit('renderer:send', {
       channel,
       message
     });
   }
 }
-
-module.exports = Logger;

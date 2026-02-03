@@ -7,11 +7,38 @@
  * from the renderer process to the appropriate backend services.
  */
 
-const { ipcMain, shell } = require('electron');
-const https = require('node:https');
+import { ipcMain, shell, IpcMainInvokeEvent } from 'electron';
+import https from 'node:https';
+import http from 'node:http';
+import ConnectionService from '../orchestration/ConnectionService';
+import SettingsService from '../data/SettingsService';
+import DNSService from '../business/DNSService';
+import WindowService from '../infrastructure/WindowService';
+import SystemProxyService from '../business/SystemProxyService';
+import Logger from '../core/Logger';
+import EventEmitter from '../core/EventEmitter';
+import { checkSystemProxyStatus } from '../../utils/SystemProxyChecker';
 
-class IPCController {
-  constructor(dependencies) {
+interface IPCControllerDependencies {
+  connectionService: ConnectionService;
+  settingsService: SettingsService;
+  dnsService: DNSService;
+  windowService: WindowService;
+  systemProxyService: SystemProxyService;
+  logger: Logger;
+  eventEmitter: EventEmitter;
+}
+
+export default class IPCController {
+  private connectionService: ConnectionService;
+  private settingsService: SettingsService;
+  private dnsService: DNSService;
+  private windowService: WindowService;
+  private systemProxyService: SystemProxyService;
+  private logger: Logger;
+  private eventEmitter: EventEmitter;
+
+  constructor(dependencies: IPCControllerDependencies) {
     this.connectionService = dependencies.connectionService;
     this.settingsService = dependencies.settingsService;
     this.dnsService = dependencies.dnsService;
@@ -28,38 +55,41 @@ class IPCController {
    * Forward log events to renderer
    * @private
    */
-  _setupLogForwarding() {
+  private _setupLogForwarding(): void {
     // Forward log messages to renderer
-    this.eventEmitter.on('log:message', (data) => {
-      const level = data && data.level ? data.level.toUpperCase() : 'INFO';
-      const message = data && data.message ? data.message : String(data);
+    this.eventEmitter.on('log:message', (data: any) => {
+      // Handle data as object or string
+      const dataObj = typeof data === 'object' && data !== null ? data : { message: String(data) };
+      const level = dataObj.level ? String(dataObj.level).toUpperCase() : 'INFO';
+      const message = dataObj.message ? dataObj.message : String(data);
       this.windowService.sendToRenderer('stream-log', `[${level}] ${message}`);
     });
 
-    this.eventEmitter.on('log:error', (data) => {
-      this.windowService.sendToRenderer('stream-error', `[ERROR] ${data.message}`);
+    this.eventEmitter.on('log:error', (data: any) => {
+      const message = typeof data === 'object' && data !== null && 'message' in data ? (data as any).message : String(data);
+      this.windowService.sendToRenderer('stream-error', `[ERROR] ${message}`);
     });
 
     // Forward process output
-    this.eventEmitter.on('process:output', (data) => {
+    this.eventEmitter.on('process:output', (data: any) => {
       this.windowService.sendToRenderer('stream-log', data);
     });
 
-    this.eventEmitter.on('process:error', (data) => {
+    this.eventEmitter.on('process:error', (data: any) => {
       this.windowService.sendToRenderer('stream-error', data);
     });
 
     // Forward proxy logs
-    this.eventEmitter.on('proxy:log', (data) => {
+    this.eventEmitter.on('proxy:log', (data: any) => {
       this.windowService.sendToRenderer('stream-log', data);
     });
 
-    this.eventEmitter.on('proxy:error', (data) => {
+    this.eventEmitter.on('proxy:error', (data: any) => {
       this.windowService.sendToRenderer('stream-error', data);
     });
 
     // Forward traffic updates
-    this.eventEmitter.on('traffic-update', (data) => {
+    this.eventEmitter.on('traffic-update', (data: any) => {
       this.windowService.sendToRenderer('traffic-update', data);
     });
   }
@@ -67,7 +97,7 @@ class IPCController {
   /**
    * Register all IPC handlers
    */
-  registerHandlers() {
+  registerHandlers(): void {
     // Connection management
     ipcMain.handle('start-service', this._handleStartService.bind(this));
     ipcMain.handle('stop-service', this._handleStopService.bind(this));
@@ -108,7 +138,7 @@ class IPCController {
    * Handle start-service
    * @private
    */
-  async _handleStartService(event, payload) {
+  async _handleStartService(event: IpcMainInvokeEvent, payload: any) {
     // Gather complete configuration here (Controller responsibility)
     const config = {
       resolver: payload.resolver,
@@ -116,11 +146,14 @@ class IPCController {
       authoritative: this.settingsService.get('authoritative'), // Global setting
       keepAliveInterval: payload.keepAliveInterval !== undefined
         ? payload.keepAliveInterval
-        : this.settingsService.get('keepAliveInterval'),
+        : this.settingsService.get('keepAliveInterval' as any),
       congestionControl: payload.congestionControl !== undefined
         ? payload.congestionControl
-        : this.settingsService.get('congestionControl'),
-      tunMode: payload.tunMode
+        : this.settingsService.get('congestionControl' as any),
+      tunMode: payload.tunMode,
+      customDnsEnabled: payload.customDnsEnabled, // Pass these through
+      primaryDns: payload.primaryDns,
+      secondaryDns: payload.secondaryDns
     };
 
     // Save "Last Used" connection settings (Persistence responsibility)
@@ -169,11 +202,11 @@ class IPCController {
    * Handle set-authoritative
    * @private
    */
-  _handleSetAuthoritative(event, enable) {
+  _handleSetAuthoritative(event: IpcMainInvokeEvent, enable: boolean) {
     try {
       this.settingsService.save({ authoritative: !!enable });
       return { success: true, enabled: this.settingsService.get('authoritative') };
-    } catch (err) {
+    } catch (err: any) {
       return { success: false, error: err.message };
     }
   }
@@ -182,7 +215,7 @@ class IPCController {
    * Handle set-resolver
    * @private
    */
-  _handleSetResolver(event, payload) {
+  _handleSetResolver(event: IpcMainInvokeEvent, payload: any) {
     try {
       const parsed = this.settingsService.parseDnsServer(payload?.resolver);
       if (!parsed) {
@@ -196,7 +229,7 @@ class IPCController {
       const normalized = `${parsed.ip}:53`;
       this.settingsService.save({ resolver: normalized });
       return { success: true, resolver: normalized };
-    } catch (err) {
+    } catch (err: any) {
       return { success: false, error: err?.message || String(err) };
     }
   }
@@ -205,7 +238,7 @@ class IPCController {
    * Handle set-verbose
    * @private
    */
-  _handleSetVerbose(event, verbose) {
+  _handleSetVerbose(event: IpcMainInvokeEvent, verbose: boolean) {
     this.logger.setVerbose(verbose);
     this.settingsService.save({ verbose });
     return { success: true, verbose: this.logger.isVerbose() };
@@ -215,7 +248,7 @@ class IPCController {
    * Handle set-socks5-auth
    * @private
    */
-  _handleSetSocks5Auth(event, auth) {
+  _handleSetSocks5Auth(event: IpcMainInvokeEvent, auth: any) {
     const enabled = !!auth?.enabled;
     const username = typeof auth?.username === 'string' ? auth.username : this.settingsService.get('socks5AuthUsername');
     const password = typeof auth?.password === 'string' ? auth.password : this.settingsService.get('socks5AuthPassword');
@@ -238,11 +271,11 @@ class IPCController {
    * Handle save-settings
    * @private
    */
-  _handleSaveSettings(event, settings) {
+  _handleSaveSettings(event: IpcMainInvokeEvent, settings: any) {
     try {
       this.settingsService.save(settings);
       return { success: true, settings: this.settingsService.getAll() };
-    } catch (err) {
+    } catch (err: any) {
       return { success: false, error: err.message };
     }
   }
@@ -251,10 +284,10 @@ class IPCController {
    * Handle import-configs
    * @private
    */
-  _handleImportConfigs(event, importData) {
+  _handleImportConfigs(event: IpcMainInvokeEvent, importData: string) {
     try {
       return this.settingsService.importConfigs(importData);
-    } catch (err) {
+    } catch (err: any) {
       return { success: false, error: err.message };
     }
   }
@@ -266,7 +299,7 @@ class IPCController {
   _handleExportConfigs() {
     try {
       return { success: true, data: this.settingsService.exportConfigs() };
-    } catch (err) {
+    } catch (err: any) {
       return { success: false, error: err.message };
     }
   }
@@ -275,7 +308,7 @@ class IPCController {
    * Handle toggle-system-proxy
    * @private
    */
-  async _handleToggleSystemProxy(event, enable) {
+  async _handleToggleSystemProxy(event: IpcMainInvokeEvent, enable: boolean) {
     if (enable) {
       const result = await this.systemProxyService.configure();
       this._sendStatusUpdate();
@@ -292,7 +325,6 @@ class IPCController {
    * @private
    */
   async _handleCheckSystemProxy() {
-    const { checkSystemProxyStatus } = require('../../check-system-proxy');
     const isConfigured = await checkSystemProxyStatus();
     return { configured: isConfigured };
   }
@@ -301,7 +333,7 @@ class IPCController {
    * Handle dns-check-single
    * @private
    */
-  async _handleDNSCheckSingle(event, payload) {
+  async _handleDNSCheckSingle(event: IpcMainInvokeEvent, payload: any) {
     return await this.dnsService.checkSingleServer(payload);
   }
 
@@ -310,8 +342,11 @@ class IPCController {
    * @private
    */
   _handleGetVersion() {
-    const packageJson = require('../../package.json');
-    return packageJson.version;
+    try {
+      return require('../../../../../package.json').version;
+    } catch (e) {
+      return '0.0.0';
+    }
   }
 
   /**
@@ -320,8 +355,7 @@ class IPCController {
    */
   async _handleCheckUpdate() {
     try {
-      const packageJson = require('../../package.json');
-      const currentVersion = packageJson.version;
+      const version = this._handleGetVersion();
 
       return new Promise((resolve) => {
         const options = {
@@ -334,10 +368,10 @@ class IPCController {
           }
         };
 
-        const req = https.request(options, (res) => {
+        const req = https.request(options, (res: any) => {
           let data = '';
 
-          res.on('data', (chunk) => {
+          res.on('data', (chunk: any) => {
             data += chunk;
           });
 
@@ -347,12 +381,12 @@ class IPCController {
                 const release = JSON.parse(data);
                 const latestVersion = release.tag_name.replace(/^v/, '');
 
-                const hasUpdate = this._compareVersions(latestVersion, currentVersion) > 0;
+                const hasUpdate = this._compareVersions(latestVersion, version) > 0;
 
                 resolve({
                   success: true,
                   hasUpdate: hasUpdate,
-                  currentVersion: currentVersion,
+                  currentVersion: version,
                   latestVersion: latestVersion,
                   releaseUrl: release.html_url,
                   releaseNotes: release.body || ''
@@ -363,7 +397,7 @@ class IPCController {
                   error: `GitHub API returned status ${res.statusCode}`
                 });
               }
-            } catch (err) {
+            } catch (err: any) {
               resolve({
                 success: false,
                 error: `Failed to parse response: ${err.message}`
@@ -389,7 +423,7 @@ class IPCController {
 
         req.end();
       });
-    } catch (err) {
+    } catch (err: any) {
       return {
         success: false,
         error: err.message
@@ -404,7 +438,6 @@ class IPCController {
   async _handleTestProxy() {
     return new Promise((resolve) => {
       const startTime = Date.now();
-      const http = require('node:http');
 
       const options = {
         hostname: '127.0.0.1',
@@ -417,9 +450,9 @@ class IPCController {
         timeout: 10000
       };
 
-      const req = http.request(options, (res) => {
+      const req = http.request(options, (res: any) => {
         let data = '';
-        res.on('data', (chunk) => {
+        res.on('data', (chunk: any) => {
           data += chunk;
         });
         res.on('end', () => {
@@ -442,7 +475,7 @@ class IPCController {
               ip: json.origin || 'Unknown',
               responseTime
             });
-          } catch (err) {
+          } catch (err: any) {
             resolve({
               success: false,
               error: `Invalid response from proxy (not JSON). ${String(err?.message || err)}`,
@@ -476,11 +509,11 @@ class IPCController {
    * Handle open-external
    * @private
    */
-  async _handleOpenExternal(event, url) {
+  async _handleOpenExternal(event: IpcMainInvokeEvent, url: string) {
     try {
       await shell.openExternal(url);
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to open external URL:', err);
       return { success: false, error: err.message };
     }
@@ -507,8 +540,8 @@ class IPCController {
    * Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal.
    * @private
    */
-  _compareVersions(v1, v2) {
-    function normalize(v) {
+  _compareVersions(v1: string, v2: string) {
+    function normalize(v: string) {
       const raw = String(v || '').trim().replace(/^v/i, '');
       const noBuild = raw.split('+')[0];
       const [core, prereleaseRaw] = noBuild.split('-', 2);
@@ -524,7 +557,7 @@ class IPCController {
       return { nums, prerelease };
     }
 
-    function compareIdentifiers(a, b) {
+    function compareIdentifiers(a: any, b: any) {
       const an = /^\d+$/.test(a);
       const bn = /^\d+$/.test(b);
       if (an && bn) {
@@ -553,6 +586,9 @@ class IPCController {
     if (!A.prerelease && B.prerelease) return 1;
     if (A.prerelease && !B.prerelease) return -1;
 
+    // Prerelease check
+    if (!A.prerelease || !B.prerelease) return 0; // Should satisfy TS, logic covered above
+
     const len = Math.max(A.prerelease.length, B.prerelease.length);
     for (let i = 0; i < len; i++) {
       const ai = A.prerelease[i];
@@ -568,17 +604,17 @@ class IPCController {
    * Handle dns-scan-start
    * @private
    */
-  async _handleDNSScanStart(event, payload) {
+  async _handleDNSScanStart(event: IpcMainInvokeEvent, payload: any) {
     this.dnsService.startScan(
       payload,
-      (completed, total) => {
+      (completed: any, total: any) => {
         this.windowService.sendToRenderer('dns-scan-progress', { completed, total });
       },
-      (result) => {
+      (result: any) => {
         this.windowService.sendToRenderer('dns-scan-result', result);
       },
       () => {
-        this.windowService.sendToRenderer('dns-scan-complete');
+        this.windowService.sendToRenderer('dns-scan-complete', undefined);
       }
     );
     return { success: true };
@@ -593,5 +629,3 @@ class IPCController {
     return { success: true };
   }
 }
-
-module.exports = IPCController;

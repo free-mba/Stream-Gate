@@ -12,8 +12,62 @@
  * @see {@link ../../../docs/concepts/Architecture.md}
  */
 
-class ConnectionService {
-  constructor(dependencies) {
+import ProcessManager from '../business/ProcessManager';
+import ProxyService from '../business/ProxyService';
+import SystemProxyService from '../business/SystemProxyService';
+import DnsResolutionService from '../business/DnsResolutionService';
+import SettingsService from '../data/SettingsService';
+import EventEmitter from '../core/EventEmitter';
+import Logger from '../core/Logger';
+
+interface ConnectionServiceDependencies {
+  processManager: ProcessManager;
+  proxyService: ProxyService;
+  systemProxyService: SystemProxyService;
+  dnsResolutionService: DnsResolutionService;
+  settingsService: SettingsService;
+  eventEmitter: EventEmitter;
+  logger: Logger;
+}
+
+interface StartOptions {
+  resolver: string;
+  domain: string;
+  tunMode?: boolean;
+  keepAliveInterval?: number;
+  congestionControl?: string;
+  authoritative?: boolean;
+  customDnsEnabled?: boolean;
+  primaryDns?: string;
+  secondaryDns?: string;
+}
+
+interface ConnectionResult {
+  success: boolean;
+  message: string;
+  details?: any;
+}
+
+export default class ConnectionService {
+  private processManager: ProcessManager;
+  private proxyService: ProxyService;
+  private systemProxyService: SystemProxyService;
+  private dnsResolutionService: DnsResolutionService;
+  private settingsService: SettingsService;
+  private eventEmitter: EventEmitter;
+  private logger: Logger;
+
+  private isRunning: boolean;
+  private quitting: boolean;
+  private cleanupInProgress: boolean;
+
+  private RETRY_BASE_INTERVAL: number;
+  private MAX_RETRY_ATTEMPTS: number;
+  private retryAttempts: number;
+  private retryTimer: NodeJS.Timeout | null;
+  private activeConfig: StartOptions | null;
+
+  constructor(dependencies: ConnectionServiceDependencies) {
     // Dependency injection
     this.processManager = dependencies.processManager;
     this.proxyService = dependencies.proxyService;
@@ -33,8 +87,7 @@ class ConnectionService {
     this.MAX_RETRY_ATTEMPTS = 3;
     this.retryAttempts = 0;
     this.retryTimer = null;
-    this.lastUsedResolver = null;
-    this.lastUsedDomain = null;
+    this.activeConfig = null;
 
     // Subscribe to process exit events for auto-reconnection
     this._setupEventListeners();
@@ -44,7 +97,7 @@ class ConnectionService {
    * Set up event listeners for auto-reconnection
    * @private
    */
-  _setupEventListeners() {
+  private _setupEventListeners(): void {
     // Listen for process exit
     this.processManager.onExit((code) => {
       if (this.isRunning && !this.quitting && !this.cleanupInProgress) {
@@ -57,12 +110,9 @@ class ConnectionService {
   /**
    * Start the VPN connection
    * @param {Object} options - Connection options
-   * @param {string} options.resolver - DNS resolver
-   * @param {string} options.domain - Server domain
-   * @param {boolean} options.tunMode - Whether to use TUN mode (not used, always HTTP proxy)
    * @returns {Promise<Object>} Result object
    */
-  async start(options = {}) {
+  async start(options: StartOptions): Promise<ConnectionResult> {
     if (this.isRunning) {
       return { success: false, message: 'Service is already running' };
     }
@@ -87,14 +137,14 @@ class ConnectionService {
 
     // Resolve hostname if Custom DNS is enabled
     let finalDomain = domain;
-    if (customDnsEnabled) {
+    if (customDnsEnabled && primaryDns && secondaryDns) {
       this.logger.info(`Custom DNS enabled. Resolving ${domain} via [${primaryDns}, ${secondaryDns}]...`);
       this.eventEmitter.emit('log:message', `🔍 Resolving ${domain} via custom DNS...`);
       try {
         const resolvedIp = await this.dnsResolutionService.resolve(domain, [primaryDns, secondaryDns]);
         finalDomain = resolvedIp;
         this.eventEmitter.emit('log:message', `✅ Resolved ${domain} -> ${resolvedIp}`);
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error(`Custom DNS resolution failed: ${err.message}`);
         this.eventEmitter.emit('log:error', `❌ Custom DNS resolution failed: ${err.message}`);
         throw new Error(`Custom DNS resolution failed: ${err.message}`);
@@ -108,7 +158,7 @@ class ConnectionService {
       // Start Stream Gate client
       // Pass finalDomain (IP) instead of original domain if resolved
       await this.processManager.start(resolver, finalDomain, {
-        authoritative,
+        authoritative: authoritative || false,
         keepAliveInterval,
         congestionControl
       });
@@ -119,7 +169,7 @@ class ConnectionService {
       // Start SOCKS5 forwarder (non-fatal if it fails)
       try {
         await this.proxyService.startSocksForwardProxy();
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error('Failed to start SOCKS5 forwarder (non-fatal):', err);
         this.eventEmitter.emit('log:error', `Warning: SOCKS5 forwarder failed to start: ${err.message}`);
       }
@@ -136,7 +186,7 @@ class ConnectionService {
       this.eventEmitter.emit('connection:started', result);
       return result;
 
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error('Failed to start service:', err);
       await this.stop();
       return {
@@ -151,7 +201,7 @@ class ConnectionService {
    * Stop the VPN connection
    * @returns {Object} Result object
    */
-  stop() {
+  async stop(): Promise<ConnectionResult> {
     this.isRunning = false;
 
     // Clear any pending retry attempts
@@ -178,7 +228,7 @@ class ConnectionService {
    * @param {string} reason - Reason for cleanup
    * @returns {Promise<void>}
    */
-  async cleanupAndDisableProxyIfNeeded(reason = 'shutdown') {
+  async cleanupAndDisableProxyIfNeeded(reason: string = 'shutdown'): Promise<void> {
     if (this.cleanupInProgress) return;
     this.cleanupInProgress = true;
 
@@ -199,7 +249,7 @@ class ConnectionService {
               setTimeout(() => reject(new Error('cleanup timeout')), timeoutMs)
             )
           ]);
-        } catch (err) {
+        } catch (err: any) {
           this.logger.error(
             `Cleanup: failed to unconfigure system proxy (${reason}) after ${Date.now() - started}ms:`,
             err?.message || err
@@ -215,7 +265,7 @@ class ConnectionService {
    * Attempt reconnection with exponential backoff
    * @private
    */
-  _attemptReconnection() {
+  private _attemptReconnection(): void {
     // Don't retry if user manually stopped or we're quitting
     if (!this.isRunning || this.quitting || this.cleanupInProgress) {
       this.retryAttempts = 0;
@@ -291,30 +341,71 @@ class ConnectionService {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Try to restart using stored active config
-        const { resolver, domain, ...opts } = this.activeConfig;
+        if (this.activeConfig) {
+          const { resolver, domain, ...opts } = this.activeConfig;
 
-        await this.processManager.start(resolver, domain, opts);
-        await this.proxyService.startHttpProxy();
+          // Note: activeConfig stores the UNRESOLVED domain if we passed it initially.
+          // We might want to re-resolve if needed, but start() handles resolution if custom DNS is enabled.
+          // We call start(), but start() takes StartOptions. 'opts' basically matches part of it.
+          // But wait, start() checks `if (this.isRunning)`.
+          // We stopped it above, so `isRunning` is false.
+          // We should just call `this.start(this.activeConfig)`.
+          // However, `_attemptReconnection` logic below manually calls processManager.start etc.
+          // This duplicates logic in start().
+          // Ideally we should call `this.start(this.activeConfig)` but that might re-trigger resolution which is good.
+          // But the original code was:
+          /*
+          const { resolver, domain, ...opts } = this.activeConfig;
+          await this.processManager.start(resolver, domain, opts);
+          await this.proxyService.startHttpProxy();
+          */
+          // It seems it was manually restarting components instead of calling start().
+          // But `start()` does resolution.
+          // If we want to re-resolve, we should call `start()`.
+          // But `start()` resets `retryAttempts = 0`. That would break the retry loop if it fails inside `start`.
+          // If `start` fails, it returns success: false.
+          // So we should try to call `start`, but handle the retry logic.
 
-        // Also restart SOCKS5 forwarder
-        try {
-          await this.proxyService.startSocksForwardProxy();
-        } catch (err) {
-          this.logger.error('Failed to restart SOCKS5 forwarder during reconnection:', err);
+          // Let's stick to the manual restart procedure as in the original code to avoid infinite recursion or state issues,
+          // OR improve it. The original code didn't re-resolve domain on retry if it was custom resolved.
+          // Actually, `activeConfig` stores the options passed to `start`.
+          // If we call `processManager.start`, we are using `domain` from `activeConfig`.
+          // If `start()` resolved it, `activeConfig` still holds the original domain (because we stored `options` before modification? No, wait.
+          // `this.activeConfig = { ...options, tunMode };` happens before resolution in `start()`?
+          // No, `start` has `let { ... } = options`. Then `let finalDomain = domain`. Then resolution updates `finalDomain`.
+          // `this.activeConfig` stores `options`, which has the ORIGINAL `domain`.
+          // So if we just use `domain` from `activeConfig`, we are using the hostname, not the IP.
+          // `processManager.start` expects the domain (or IP).
+          // If we want to re-resolve, we should probably do that.
+          // But for now, let's keep exact original behavior (or close to it) which seemed to just restart processManager.
+
+          await this.processManager.start(resolver, domain, {
+            authoritative: opts.authoritative,
+            keepAliveInterval: opts.keepAliveInterval,
+            congestionControl: opts.congestionControl
+          });
+          await this.proxyService.startHttpProxy();
+
+          try {
+            await this.proxyService.startSocksForwardProxy();
+          } catch (err) {
+            this.logger.error('Failed to restart SOCKS5 forwarder during reconnection:', err);
+          }
+
+          // Success! Reset retry counter
+          this.logger.info('Reconnection successful!');
+          this.eventEmitter.emit(
+            'log:message',
+            `✅ Reconnection successful! (After ${this.retryAttempts} attempt${this.retryAttempts > 1 ? 's' : ''})`
+          );
+          this.retryAttempts = 0;
+          this.isRunning = true; // Make sure to set this back to true
+          this.eventEmitter.emit('connection:reconnected', {
+            attempts: this.retryAttempts
+          });
         }
 
-        // Success! Reset retry counter
-        this.logger.info('Reconnection successful!');
-        this.eventEmitter.emit(
-          'log:message',
-          `✅ Reconnection successful! (After ${this.retryAttempts} attempt${this.retryAttempts > 1 ? 's' : ''})`
-        );
-        this.retryAttempts = 0;
-        this.eventEmitter.emit('connection:reconnected', {
-          attempts: this.retryAttempts
-        });
-
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error(`Reconnection attempt ${this.retryAttempts} failed:`, err.message);
         this.eventEmitter.emit(
           'log:error',
@@ -331,7 +422,7 @@ class ConnectionService {
    * Clear retry timer
    * @private
    */
-  _clearRetryTimer() {
+  private _clearRetryTimer(): void {
     if (this.retryTimer) {
       clearTimeout(this.retryTimer);
       this.retryTimer = null;
@@ -342,7 +433,7 @@ class ConnectionService {
    * Get connection status
    * @returns {Object} Status object
    */
-  getStatus() {
+  getStatus(): any {
     const proxyStatus = this.proxyService.getStatus();
 
     return {
@@ -363,14 +454,14 @@ class ConnectionService {
    * Check if connection is running
    * @returns {boolean}
    */
-  isConnectionRunning() {
+  isConnectionRunning(): boolean {
     return this.isRunning;
   }
 
   /**
    * Set quitting flag (for graceful shutdown)
    */
-  setQuitting() {
+  setQuitting(): void {
     this.quitting = true;
   }
 
@@ -379,7 +470,7 @@ class ConnectionService {
    * @param {Function} callback - Callback function
    * @returns {Function} Unsubscribe function
    */
-  onStatusChange(callback) {
+  onStatusChange(callback: (status: string, data: any) => void): () => void {
     const unsubscribe = [
       this.eventEmitter.on('connection:started', (data) => callback('started', data)),
       this.eventEmitter.on('connection:stopped', (data) => callback('stopped', data)),
@@ -394,5 +485,3 @@ class ConnectionService {
     };
   }
 }
-
-module.exports = ConnectionService;

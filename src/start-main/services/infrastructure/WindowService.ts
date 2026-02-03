@@ -4,12 +4,18 @@
  * Single Responsibility: Manage Electron window creation and communication
  */
 
-const { BrowserWindow, app } = require('electron');
-const path = require('node:path');
-const fs = require('node:fs');
+import { BrowserWindow, app, App, BrowserWindowConstructorOptions } from 'electron';
+import path from 'node:path';
+import fs from 'node:fs';
+import Logger from '../core/Logger';
 
-class WindowService {
-  constructor(logger, electronApp, appName = 'Stream Gate') {
+export default class WindowService {
+  private logger: Logger;
+  private app: App;
+  private appName: string;
+  private mainWindow: BrowserWindow | null;
+
+  constructor(logger: Logger, electronApp?: App, appName: string = 'Stream Gate') {
     this.logger = logger;
     this.app = electronApp || app;
     this.appName = appName;
@@ -20,9 +26,9 @@ class WindowService {
    * Create the main application window
    * @returns {BrowserWindow} The created window
    */
-  createWindow() {
+  createWindow(): BrowserWindow {
     const iconPath = path.join(__dirname, '../../../../assets', 'icon.png');
-    const windowOptions = {
+    const windowOptions: BrowserWindowConstructorOptions = {
       width: 1200,
       height: 800,
       title: this.appName,
@@ -90,7 +96,7 @@ class WindowService {
 
     this.logger.info('Main window created');
 
-    // Uncomment for debugging
+    // Unemployment for debugging
     // this.mainWindow.webContents.openDevTools();
 
     return this.mainWindow;
@@ -100,7 +106,7 @@ class WindowService {
    * Get the main window instance
    * @returns {BrowserWindow|null}
    */
-  getWindow() {
+  getWindow(): BrowserWindow | null {
     return this.mainWindow;
   }
 
@@ -108,7 +114,7 @@ class WindowService {
    * Check if window can receive messages
    * @returns {boolean}
    */
-  canSendToWindow() {
+  canSendToWindow(): boolean {
     return !!(
       this.mainWindow &&
       !this.mainWindow.isDestroyed() &&
@@ -122,14 +128,14 @@ class WindowService {
    * @param {string} channel - IPC channel name
    * @param {*} payload - Data to send
    */
-  sendToRenderer(channel, payload) {
+  sendToRenderer(channel: string, payload?: any): boolean {
     try {
-      if (!this.canSendToWindow()) {
+      if (!this.canSendToWindow() || !this.mainWindow) {
         return false;
       }
       this.mainWindow.webContents.send(channel, payload);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       // Ignore: window is closing/destroyed
       this.logger.verbose(`Failed to send to renderer on channel "${channel}": ${error.message}`);
       return false;
@@ -139,7 +145,7 @@ class WindowService {
   /**
    * Close the main window
    */
-  closeWindow() {
+  closeWindow(): void {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.close();
     }
@@ -149,9 +155,7 @@ class WindowService {
    * Check if window exists and is not destroyed
    * @returns {boolean}
    */
-  isWindowAvailable() {
+  isWindowAvailable(): boolean {
     return this.mainWindow !== null && !this.mainWindow.isDestroyed();
   }
 }
-
-module.exports = WindowService;

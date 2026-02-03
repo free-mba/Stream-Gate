@@ -2,9 +2,10 @@
   "name": "stream-gate",
   "version": "0.0.1",
   "description": "Stream Gate - VPN Client with HTTP Proxy",
-  "main": "src/start-main/main.js",
+  "main": "dist/main/main.js",
   "scripts": {
-    "start": "cd src/start-renderer && npm run build && cd ../.. && electron .",
+    "build:main": "tsc -p src/start-main/tsconfig.json",
+    "start": "npm run build:main && cd src/start-renderer && npm run build && cd ../.. && electron .",
     "dev": "cd src/start-renderer && npm run dev",
     "build:ui": "cd src/start-renderer && npm install && npm run build",
     "postinstall": "cd src/start-renderer && npm install",
@@ -51,10 +52,14 @@
   },
   "homepage": "https://github.com/free-mba/Stream-Gate.git#readme",
   "devDependencies": {
+    "@types/http-proxy": "1.17.17",
+    "@types/ip": "1.1.3",
+    "@types/node": "25.2.0",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
     "electron-icon-builder": "2.0.1",
-    "sharp": "0.34.5"
+    "sharp": "0.34.5",
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "base32-encode": "2.0.0",

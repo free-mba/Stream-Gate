@@ -7,11 +7,15 @@
  * hostnames using trusted upstream resolvers (e.g. 8.8.8.8) before connection.
  */
 
-const dns = require('dns');
-const util = require('util');
+import dns from 'dns';
+import util from 'util';
+import Logger from '../core/Logger';
 
-class DnsResolutionService {
-    constructor(logger) {
+export default class DnsResolutionService {
+    private logger: Logger;
+    private resolve4: (hostname: string) => Promise<string[]>;
+
+    constructor(logger: Logger) {
         this.logger = logger;
         this.resolve4 = util.promisify(dns.resolve4);
     }
@@ -23,7 +27,7 @@ class DnsResolutionService {
      * @returns {Promise<string>} Resolved IPv4 address
      * @throws {Error} If resolution fails
      */
-    async resolve(hostname, servers = []) {
+    async resolve(hostname: string, servers: string[] = []): Promise<string> {
         // If it's already an IP, return it
         if (this._isIp(hostname)) {
             this.logger.verbose(`[DnsResolutionService] ${hostname} is already an IP, skipping resolution.`);
@@ -50,7 +54,7 @@ class DnsResolutionService {
                 // A safer approach for high-concurrency apps would be a pure-JS DNS client like 'native-dns',
                 // but 'dns' module is native and reliable.
                 dns.setServers(validServers);
-            } catch (err) {
+            } catch (err: any) {
                 this.logger.error(`[DnsResolutionService] Failed to set DNS servers: ${err.message}`);
                 // Fallback to system DNS? Or fail? 
                 // If the user explicitly asked for custom DNS, we probably shouldn't silently fallback to system 
@@ -67,7 +71,7 @@ class DnsResolutionService {
                 return ip;
             }
             throw new Error('No DNS records found');
-        } catch (err) {
+        } catch (err: any) {
             this.logger.error(`[DnsResolutionService] Resolution failed for ${hostname}: ${err.message}`);
             throw err;
         }
@@ -77,9 +81,7 @@ class DnsResolutionService {
      * Check if string is an IPv4 address
      * @private
      */
-    _isIp(ip) {
+    private _isIp(ip: string): boolean {
         return /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip);
     }
 }
-
-module.exports = DnsResolutionService;
