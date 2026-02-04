@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useIpc } from "@/hooks/useIpc";
+import { useState } from "react";
+import { ipc } from "@/services/IpcService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -7,6 +7,8 @@ import { Plus, Trash2, Edit, Check, Globe, Share2, Download, Upload } from "luci
 import { cn } from "@/lib/utils";
 import type { Config, Settings } from "@/types";
 import { useTranslation } from "@/lib/i18n";
+import { useAtom } from "jotai";
+import { settingsAtom, fetchSettingsAtom } from "@/store";
 
 interface ImportError {
     success: boolean;
@@ -17,17 +19,20 @@ interface ImportError {
 }
 
 export default function ConfigPage() {
-    const ipc = useIpc();
-    const [settings, setSettings] = useState<Partial<Settings>>({});
+    const [settings, setSettings] = useAtom(settingsAtom);
+    const [, fetchSettings] = useAtom(fetchSettingsAtom);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingConfig, setEditingConfig] = useState<Config | null>(null);
     const [formData, setFormData] = useState<Partial<Config>>({});
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [importText, setImportText] = useState("");
     const [sharedId, setSharedId] = useState<string | null>(null);
     const [isExported, setIsExported] = useState(false);
     const { t } = useTranslation();
+
+    if (!settings) return null;
 
     const confirmDelete = async () => {
         if (!deletingId) return;
@@ -40,15 +45,10 @@ export default function ConfigPage() {
         setDeletingId(null);
     };
 
-    useEffect(() => {
-        if (!ipc) return;
-        ipc.invoke<Settings>('get-settings').then(setSettings);
-    }, [ipc]);
+
 
     const saveSettings = async (newSettings: Partial<Settings>) => {
-        if (!ipc) return;
-        setSettings(newSettings);
-        await ipc.invoke('save-settings', newSettings);
+        await setSettings(newSettings);
     };
 
     const handleSaveConfig = async () => {
@@ -131,13 +131,13 @@ export default function ConfigPage() {
         if (result?.success) {
             setIsImportDialogOpen(false);
             setImportText("");
-            if (ipc) ipc.invoke<Settings>('get-settings').then(setSettings);
+            fetchSettings();
         } else {
             alert("Failed to import: " + (result?.error || "Unknown error"));
         }
     };
 
-    const configs = Array.isArray(settings.configs) ? settings.configs : [];
+    const configs = (Array.isArray(settings?.configs) ? settings?.configs : []) as Config[];
 
     return (
         <div className="h-full flex flex-col p-6 animate-in fade-in duration-500 overflow-hidden">
@@ -162,7 +162,7 @@ export default function ConfigPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-10">
                 {configs.map((config: Config) => {
-                    const isSelected = settings.selectedConfigId === config.id;
+                    const isSelected = settings?.selectedConfigId === config.id;
                     return (
                         <div
                             key={config.id}

@@ -17,10 +17,3 @@ export const dnsResultsAtomsAtom = splitAtom(dnsResultsAtom, (item) => item.serv
 export const isDnsScanningAtom = atom(false);
 export const dnsProgressAtom = atom(0);
 export const dnsScanStatsAtom = atom({ completed: 0, total: 0 });
-
-// App Preferences
-const getInitialLang = (): 'en' | 'fa' => (localStorage.getItem('app-language') as 'en' | 'fa') || 'en';
-const getInitialTheme = (): 'light' | 'dark' | 'system' => (localStorage.getItem('app-theme') as 'light' | 'dark' | 'system') || 'dark';
-
-export const languageAtom = atom<'en' | 'fa'>(getInitialLang());
-export const themeAtom = atom<'light' | 'dark' | 'system'>(getInitialTheme());

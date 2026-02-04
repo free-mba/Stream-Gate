@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useIpc } from "@/hooks/useIpc";
+import { ipc } from "@/services/IpcService";
 import { Button } from "@/components/ui/button";
 import { TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
@@ -14,8 +14,6 @@ import { useAtom } from "jotai";
 import { dnsResultsAtom, dnsResultsAtomsAtom, isDnsScanningAtom, dnsProgressAtom, dnsScanStatsAtom } from "@/store";
 import { DnsResultRow } from "./components/DnsResultRow";
 import type { DnsCheckResult, Settings } from "@/types";
-// import type { IpcRendererEvent } from "electron";
-// Removing unused import
 import { useTranslation } from "@/lib/i18n";
 
 export interface ScanConfig {
@@ -29,7 +27,7 @@ export interface ScanConfig {
 const DEFAULT_SERVERS = `1.1.1.1\n1.0.0.1\n8.8.8.8\n8.8.4.4\n9.9.9.9\n149.112.112.112\n76.76.2.0\n76.76.10.0\n208.67.222.222\n208.67.220.220`;
 
 export default function DnsTesterPage() {
-    const ipc = useIpc();
+
     const { t } = useTranslation();
 
     const [mode, setMode] = useState<'dnstt' | 'stream'>('stream');
@@ -52,7 +50,6 @@ export default function DnsTesterPage() {
     }, [results]);
 
     useEffect(() => {
-        if (!ipc) return;
         const onProgress = (_: unknown, data: unknown) => {
             const d = data as { completed: number, total: number };
             setProgress((d.completed / d.total) * 100);
@@ -73,10 +70,9 @@ export default function DnsTesterPage() {
             ipc.removeListener('dns-scan-result', onResult);
             ipc.removeListener('dns-scan-complete', onComplete);
         };
-    }, [ipc, setResults, setProgress, setStats, setIsRunning]);
+    }, [setResults, setProgress, setStats, setIsRunning]);
 
     const handleStartScan = async () => {
-        if (!ipc) return;
         const servers = serversText.split('\n').map(s => s.trim()).filter(s => s && !s.startsWith('#') && /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(s));
         const uniqueServers = Array.from(new Set(servers));
 
@@ -93,14 +89,11 @@ export default function DnsTesterPage() {
     };
 
     const stopTest = async () => {
-        if (ipc) {
-            await ipc.invoke('dns-scan-stop');
-            setIsRunning(false);
-        }
+        await ipc.invoke('dns-scan-stop');
+        setIsRunning(false);
     };
 
     const handleUse = async (server: string) => {
-        if (!ipc) return;
         const normalized = server.includes(':') ? server : `${server}:53`;
         const settings = await ipc.invoke<Settings>('get-settings');
         await ipc.invoke('save-settings', { ...settings, resolver: normalized });

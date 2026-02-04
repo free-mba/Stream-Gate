@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useIpc } from "@/hooks/useIpc";
+import { ipc } from "@/services/IpcService";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, MapPin, Globe, Plus, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import type { Settings, Status, TrafficData, Config } from "@/types";
+import type { Config } from "@/types";
 import { useTranslation } from "@/lib/i18n";
 import { useAtom } from "jotai";
-import { themeAtom } from "@/store";
+import { themeAtom, statusAtom, trafficAtom, settingsAtom, fetchSettingsAtom } from "@/store";
 
 import { GlassSelect } from "@/components/ui/GlassSelect";
 
@@ -33,41 +33,23 @@ const TrafficCard = ({ label, value, icon: Icon, colorClass }: { label: string, 
 );
 
 export default function ConnectionPage() {
-    const ipc = useIpc();
     const { t } = useTranslation();
-    const [status, setStatus] = useState<Partial<Status>>({});
-    const [settings, setSettings] = useState<Partial<Settings>>({});
+    const [status] = useAtom(statusAtom);
+    const [traffic] = useAtom(trafficAtom);
+    const [settings, setSettings] = useAtom(settingsAtom);
+    const [, fetchSettings] = useAtom(fetchSettingsAtom);
+
     const [addDnsOpen, setAddDnsOpen] = useState(false);
     const [newDns, setNewDns] = useState("");
-    const [systemProxy, setSystemProxy] = useState(false);
-    const [traffic, setTraffic] = useState<TrafficData>({ down: 0, up: 0 });
     const [theme] = useAtom(themeAtom);
 
     const isLight = theme === 'light';
-
-    useEffect(() => {
-        if (!ipc) return;
-        ipc.invoke<Status>('get-status').then((s) => setStatus(s));
-        ipc.invoke<Settings>('get-settings').then((s) => {
-            setSettings(s);
-            setSystemProxy(!!s.systemProxyEnabledByApp);
-        });
-        const handleStatus = (_: unknown, s: unknown) => setStatus(s as Status);
-        const handleTraffic = (_: unknown, data: unknown) => setTraffic(data as TrafficData);
-
-        ipc.on('status-update', handleStatus);
-        ipc.on('traffic-update', handleTraffic);
-        return () => {
-            ipc.removeListener('status-update', handleStatus);
-            ipc.removeListener('traffic-update', handleTraffic);
-        };
-    }, [ipc]);
+    const systemProxy = !!settings?.systemProxyEnabledByApp;
 
     const toggleConnection = () => {
-        if (!ipc) return;
         if (status.isRunning) {
             ipc.invoke('stop-service');
-        } else {
+        } else if (settings) {
             const payload = {
                 resolver: settings.resolver,
                 domain: settings.domain,
@@ -80,40 +62,34 @@ export default function ConnectionPage() {
     };
 
     const toggleSystemProxy = async () => {
-        if (!ipc) return;
-        const newState = !systemProxy;
-        setSystemProxy(newState);
-        await ipc.invoke('toggle-system-proxy', newState);
-        const updated = await ipc.invoke<Settings>('get-settings');
-        setSystemProxy(!!updated.systemProxyEnabledByApp);
+        await ipc.invoke('toggle-system-proxy', !systemProxy);
+        fetchSettings(); // Refresh settings to reflect system proxy state change from backend
     };
 
     const handleConfigChange = async (configId: string) => {
-        const config = settings.configs?.find((c: Config) => c.id === configId);
-        if (config && ipc) {
-            await ipc.invoke('save-settings', {
-                ...settings,
+        const config = settings?.configs?.find((c: Config) => c.id === configId);
+        if (config) {
+            await setSettings({
                 selectedConfigId: configId,
                 domain: config.domain,
                 socks5AuthUsername: config.socks?.username || "",
                 socks5AuthPassword: config.socks?.password || "",
                 socks5AuthEnabled: !!(config.socks?.username && config.socks?.password)
             });
-            setSettings((prev) => ({ ...prev, selectedConfigId: configId }));
         }
     };
 
     const handleDnsChange = async (val: string) => {
-        await ipc?.invoke('set-resolver', val);
-        setSettings((prev) => ({ ...prev, resolver: val }));
+        await ipc.invoke('set-resolver', val);
+        await setSettings({ resolver: val });
     };
 
     const handleAddDns = async () => {
-        if (!newDns) return;
+        if (!newDns || !settings) return;
         const formattedDns = newDns.includes(':') ? newDns : `${newDns}:53`;
         const newSavedDns = Array.from(new Set([formattedDns, ...(settings.savedDns || [])]));
-        await ipc?.invoke('save-settings', { ...settings, savedDns: newSavedDns });
-        setSettings((prev) => ({ ...prev, savedDns: newSavedDns }));
+
+        await setSettings({ savedDns: newSavedDns });
         setAddDnsOpen(false);
         setNewDns("");
         handleDnsChange(formattedDns);
@@ -128,10 +104,10 @@ export default function ConnectionPage() {
     };
 
     const isConnected = !!status.isRunning;
-    const configs = settings.configs || [];
-    const savedDns = settings.savedDns || [];
+    const configs = settings?.configs || [];
+    const savedDns = settings?.savedDns || [];
     const COMMON_DNS = ["1.1.1.1:53", "1.0.0.1:53", "8.8.8.8:53", "8.8.4.4:53", "9.9.9.9:53"];
-    const currentResolver = settings.resolver || "8.8.8.8:53";
+    const currentResolver = settings?.resolver || "8.8.8.8:53";
     const dnsOptions = Array.from(new Set([currentResolver, ...savedDns, ...COMMON_DNS]));
 
     return (
@@ -157,7 +133,7 @@ export default function ConnectionPage() {
                 animate={{ y: 0, opacity: 1 }}
                 className="absolute top-6 w-full max-w-2xl flex justify-between gap-4 z-20 px-4"
             >
-                <GlassSelect value={settings.selectedConfigId || ""} onValueChange={handleConfigChange} placeholder={t("Config")} icon={MapPin}>
+                <GlassSelect value={settings?.selectedConfigId || ""} onValueChange={handleConfigChange} placeholder={t("Config")} icon={MapPin}>
                     {configs.map((c: Config) => (
                         <SelectItem key={c.id} value={c.id}>
                             <span className="flex items-center gap-2">

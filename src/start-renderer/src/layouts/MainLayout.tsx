@@ -3,7 +3,7 @@ import { Home, Settings, List, Activity, Terminal, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import { useIpc } from "@/hooks/useIpc";
+import { ipc } from "@/services/IpcService";
 import { APP_NAME } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n";
 import type { IpcRendererEvent } from "electron";
@@ -12,12 +12,10 @@ export default function MainLayout() {
     const [showLogs, setShowLogs] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
     const location = useLocation();
-    const ipc = useIpc();
     const logsEndRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
 
     useEffect(() => {
-        if (!ipc) return;
         const handleLog = (_: IpcRendererEvent, msg: unknown) => setLogs(prev => [...prev, String(msg)]);
         ipc.on('stream-log', handleLog);
         ipc.on('stream-error', handleLog);
@@ -25,7 +23,7 @@ export default function MainLayout() {
             ipc.removeListener('stream-log', handleLog);
             ipc.removeListener('stream-error', handleLog);
         };
-    }, [ipc]);
+    }, []);
 
     useEffect(() => {
         if (showLogs && logsEndRef.current) logsEndRef.current.scrollIntoView({ behavior: "smooth" });
