@@ -51,29 +51,16 @@ export interface TrafficData {
 
 export interface DnsCheckResult {
     server: string;
-    stage?: 'checking' | 'done' | 'failed' | 'queued';
+    stage: 'checking' | 'done' | 'failed' | 'queued';
     status: string;
 
-    // Legacy properties
-    ping?: { ok: boolean; timeMs: number; error?: string };
-    dns?: { ok: boolean; timeMs: number; answers: string[]; error?: string };
+    // Flattened & Derived properties for UI
+    latency: number;
+    score: number;
+    maxScore: number;
+    details: string;
+    isCompatible: boolean;
 
-    // Worker scan properties
-    success?: boolean;
-    elapsed?: number;
-    message?: string;
-    data?: {
-        score: number;
-        maxScore: number;
-        isCompatible: boolean;
-        details: string;
-        stats?: {
-            avgTime: number;
-            maxTime: number;
-            stdDev: number;
-        }
-    };
-
+    // Error tracking
     error?: string;
-    ok?: boolean;
 }
