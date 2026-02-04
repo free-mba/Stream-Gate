@@ -39,7 +39,9 @@ export default function SettingsPage() {
 
                 <CoreBehavior
                     updateSetting={updateSetting}
+                    mode={settings.mode}
                     authoritative={settings.authoritative || false}
+                    verbose={settings.verbose || false}
                 />
 
                 <AdvancedNetworking
