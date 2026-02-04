@@ -215,3 +215,14 @@
 .animate-glow {
   animation: pulse-glow 3s infinite;
 }
+
+/* 
+   macOS Electron Scroll Lag Fix 
+   Forces GPU composition on scrollable containers to smooth out scrolling
+*/
+.overflow-auto,
+.overflow-y-auto,
+.overflow-scroll,
+.overflow-y-scroll {
+  transform: translate3d(0, 0, 0);
+}

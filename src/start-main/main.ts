@@ -12,6 +12,13 @@ import path from 'node:path';
 
 const APP_NAME = 'Stream Gate';
 
+// Fix for macOS specific scroll lag and visual glitches (Electron v28+)
+// This must be called before app is ready
+if (process.platform === 'darwin') {
+  app.disableHardwareAcceleration();
+}
+
+
 // Import services
 import EventEmitter from './services/core/EventEmitter';
 import Logger from './services/core/Logger';
