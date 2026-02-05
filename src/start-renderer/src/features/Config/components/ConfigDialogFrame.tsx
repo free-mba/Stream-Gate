@@ -28,7 +28,7 @@ export const ConfigDialogFrame = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className={cn("glass-panel border-border text-foreground", maxWidthClass)}>
+            <DialogContent className={cn("bg-background border-border text-foreground shadow-2xl", maxWidthClass)}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>

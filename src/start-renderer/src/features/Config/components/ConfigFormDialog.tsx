@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/lib/i18n";
 import type { Config } from "@/types";
 import { ConfigDialogFrame } from "./ConfigDialogFrame";
-import { Tag, Globe, User, Lock, Flag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -58,12 +57,12 @@ export const ConfigFormDialog = ({
 
     const footer = (
         <div className="flex w-full justify-end gap-2 pt-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-accent/50 rounded-full px-6 transition-all">
+            <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-accent/50 rounded-lg px-6 transition-all">
                 {t("Cancel")}
             </Button>
             <Button
                 onClick={() => onSave(formData)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
             >
                 {t("Save")}
             </Button>
@@ -71,8 +70,7 @@ export const ConfigFormDialog = ({
     );
 
     const inputWrapperClass = "relative group transition-all duration-300";
-    const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors";
-    const inputClass = "pl-10 h-11 bg-background/20 border-border/40 focus:border-primary/50 focus:ring-primary/20 focus:bg-background/40 transition-all duration-300 backdrop-blur-md rounded-xl";
+    const inputClass = "h-11 bg-muted/30 border-border/40 focus:border-primary/50 focus:ring-primary/20 focus:bg-background/60 transition-all duration-300 rounded-lg";
 
     return (
         <ConfigDialogFrame
@@ -97,17 +95,15 @@ export const ConfigFormDialog = ({
                             </Label>
                             <div className="grid grid-cols-4 gap-3">
                                 <div className={cn(inputWrapperClass, "col-span-1")}>
-                                    <Flag className={iconClass} />
                                     <Input
                                         value={formData.country || ""}
                                         onChange={e => updateField("country", e.target.value)}
                                         placeholder="🏳️"
-                                        className={cn(inputClass, "text-center pr-3 placeholder:opacity-50")}
+                                        className={cn(inputClass, "text-center placeholder:opacity-50")}
                                         maxLength={10}
                                     />
                                 </div>
                                 <div className={cn(inputWrapperClass, "col-span-3")}>
-                                    <Tag className={iconClass} />
                                     <Input
                                         value={formData.remark || ""}
                                         onChange={e => updateField("remark", e.target.value)}
@@ -124,7 +120,6 @@ export const ConfigFormDialog = ({
                                 {t("Connection")}
                             </Label>
                             <div className={inputWrapperClass}>
-                                <Globe className={iconClass} />
                                 <Input
                                     value={formData.domain || ""}
                                     onChange={e => updateField("domain", e.target.value)}
@@ -146,7 +141,6 @@ export const ConfigFormDialog = ({
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={inputWrapperClass}>
-                                    <User className={iconClass} />
                                     <Input
                                         value={formData.socks?.username || ""}
                                         onChange={e => updateField("socks-username", e.target.value)}
@@ -155,7 +149,6 @@ export const ConfigFormDialog = ({
                                     />
                                 </div>
                                 <div className={inputWrapperClass}>
-                                    <Lock className={iconClass} />
                                     <Input
                                         type="password"
                                         value={formData.socks?.password || ""}

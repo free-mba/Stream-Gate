@@ -79,15 +79,30 @@ export default class WindowService {
     // Navigate from dist/main/main.mjs -> root -> src/start-renderer/dist
     const uiDistPath = path.join(__dirname, '../../src/start-renderer/dist/index.html');
 
+    // Helper to load built files
+    const loadBuiltFiles = () => {
+      if (fs.existsSync(uiDistPath)) {
+        this.logger.info('Loading built UI from ui/dist...');
+        this.mainWindow?.loadFile(uiDistPath);
+      } else {
+        this.logger.warn('UI build not found, falling back to legacy index.html');
+        this.mainWindow?.loadFile(path.join(__dirname, '../../index.html'));
+      }
+    };
+
     if (isDev) {
       this.logger.info('Loading from Vite dev server...');
-      this.mainWindow.loadURL('http://localhost:5173');
-    } else if (fs.existsSync(uiDistPath)) {
-      this.logger.info('Loading built UI from ui/dist...');
-      this.mainWindow.loadFile(uiDistPath);
+      // Try dev server, fall back to built files if unavailable
+      this.mainWindow.loadURL('http://localhost:5173').catch((err: Error) => {
+        if (err.message.includes('ERR_CONNECTION_REFUSED')) {
+          this.logger.warn('Vite dev server not running, falling back to built files...');
+          loadBuiltFiles();
+        } else {
+          this.logger.error('Failed to load dev server', err);
+        }
+      });
     } else {
-      this.logger.warn('UI build not found, falling back to legacy index.html');
-      this.mainWindow.loadFile(path.join(__dirname, '../../index.html'));
+      loadBuiltFiles();
     }
 
     // Avoid "Object has been destroyed" during shutdown

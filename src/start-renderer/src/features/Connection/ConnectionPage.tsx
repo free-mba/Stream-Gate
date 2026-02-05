@@ -20,9 +20,9 @@ const TrafficCard = ({ label, value, icon: Icon, colorClass }: { label: string, 
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel rounded-2xl p-4 flex items-center gap-4 w-40 sm:w-48"
+        className="glass-panel rounded-lg p-4 flex items-center gap-4 w-40 sm:w-48"
     >
-        <div className={cn("p-2.5 rounded-xl bg-background/50 backdrop-blur-md border border-border", colorClass)}>
+        <div className={cn("p-2.5 rounded-md bg-background/50 backdrop-blur-md border border-border", colorClass)}>
             <Icon className="w-5 h-5" />
         </div>
         <div className="flex flex-col">
@@ -249,7 +249,7 @@ export default function ConnectionPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={cn(
-                        "w-full max-w-xs justify-between px-4 py-0 h-14 rounded-xl flex items-center gap-3 transition-all duration-300",
+                        "w-full max-w-xs justify-between px-4 py-0 h-14 rounded-lg flex items-center gap-3 transition-all duration-300",
                         systemProxy
                             ? "bg-primary/10 border-primary/40 shadow-sm"
                             : "bg-background/40 border-foreground/10 shadow-sm hover:bg-background/60 hover:shadow-md hover:-translate-y-[1px] dark:bg-white/5 dark:border-white/10"

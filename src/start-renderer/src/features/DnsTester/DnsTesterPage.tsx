@@ -89,7 +89,7 @@ export default function DnsTesterPage() {
             />
 
             {/* Results Table Container */}
-            <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden relative">
+            <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-lg overflow-hidden relative">
                 <div className="flex items-center justify-between p-3 border-b border-border bg-background/40 backdrop-blur-md z-10">
                     <div className="flex items-center gap-4">
                         <div className="text-xs font-mono font-medium text-primary tracking-wider animate-pulse">

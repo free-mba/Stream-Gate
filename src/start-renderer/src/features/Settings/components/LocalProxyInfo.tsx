@@ -11,7 +11,7 @@ export const LocalProxyInfo = memo(function LocalProxyInfo() {
         <GlassCard>
             <SectionHeader icon={Server} title={t('Local Ports')} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-background/50 border border-border flex items-center justify-between">
+                <div className="p-4 rounded-lg bg-background/50 border border-border flex items-center justify-between">
                     <div className="space-y-1">
                         <div className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">{t('HTTP Proxy')}</div>
                         <div className="text-xl font-mono text-primary">127.0.0.1:8080</div>

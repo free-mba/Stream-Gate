@@ -170,11 +170,27 @@
   }
 }
 
-/* Glassmorphism Utilities - NOW THEME AWARE */
+/* =========================================
+   PERFORMANCE GUIDELINES (STRICT RULES)
+   =========================================
+   DO NOT USE these CSS properties - they cause severe lag on macOS/Electron:
+   
+   ❌ backdrop-filter: blur()     - GPU killer, causes constant recomposition
+   ❌ filter: blur() on large areas
+   ❌ mix-blend-mode on animated elements
+   ❌ Heavy box-shadows with large spread on many elements
+   ❌ transform: scale() combined with blur effects
+   
+   SAFE ALTERNATIVES:
+   ✅ Use solid semi-transparent backgrounds instead of blur
+   ✅ Use pre-blurred background images if blur effect is needed
+   ✅ Keep animations simple (opacity, transform without blur)
+   ========================================= */
+
+/* Glassmorphism Utilities - PERFORMANCE OPTIMIZED */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* REMOVED: backdrop-filter: blur(16px) - causes severe macOS lag */
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }

@@ -17,7 +17,7 @@ export const DnsControls = memo(({ isRunning, progress, onStart, onStop }: DnsCo
     const { t } = useTranslation();
 
     return (
-        <div className="glass-panel rounded-xl p-5 mb-6 space-y-5 shrink-0">
+        <div className="glass-panel rounded-lg p-5 mb-6 space-y-5 shrink-0">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <DnsGeneralSettings />
                 <DnsPerformanceSettings />

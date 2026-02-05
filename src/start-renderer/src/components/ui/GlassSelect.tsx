@@ -20,7 +20,7 @@ export const GlassSelect = ({
     return (
         <Select {...props}>
             <SelectTrigger className={cn(
-                "glass-button h-12 min-w-[160px] border-white/10 text-foreground/90 rounded-xl px-4 font-medium transition-all hover:border-primary/50 focus:ring-0 focus:ring-offset-0",
+                "glass-button h-12 min-w-[160px] border-white/10 text-foreground/90 rounded-lg px-4 font-medium transition-all hover:border-primary/50 focus:ring-0 focus:ring-offset-0",
                 triggerClassName
             )}>
                 <div className="flex items-center gap-2.5 overflow-hidden">
@@ -31,7 +31,7 @@ export const GlassSelect = ({
                 </div>
             </SelectTrigger>
             <SelectContent className={cn(
-                "glass-panel border-white/10 text-foreground rounded-xl overflow-hidden backdrop-blur-2xl",
+                "glass-panel border-white/10 text-foreground rounded-lg overflow-hidden backdrop-blur-2xl",
                 contentClassName
             )}>
                 {children}

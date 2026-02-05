@@ -40,7 +40,7 @@ export const ConfigCard = ({
     return (
         <div
             className={cn(
-                "relative group transition-all duration-300 outline-none rounded-2xl p-6 border-2",
+                "relative group transition-all duration-300 outline-none rounded-lg p-6 border-2",
                 isSelected
                     ? "border-primary bg-primary/10 shadow-lg shadow-primary/5"
                     : "border-transparent glass-panel backdrop-blur-md hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5"
@@ -49,7 +49,7 @@ export const ConfigCard = ({
             <button
                 type="button"
                 onClick={() => onSelect(config)}
-                className="absolute inset-0 w-full h-full rounded-2xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 z-0"
+                className="absolute inset-0 w-full h-full rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 z-0"
                 aria-label={`Select ${config.remark} config`}
             />
 
