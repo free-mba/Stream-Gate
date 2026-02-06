@@ -2,7 +2,7 @@
 
 <div align="center">
   <strong>Stream Gate Plus User Guide</strong><br>
-  An optimized GUI for connecting to Stream Gate VPN
+  An optimized GUI client for connecting to Slipstream Plus servers
 </div>
 
 ---
@@ -10,8 +10,8 @@
 ## 👀 Quick Tour (Plus Version)
 
 - **Download & install** the app from the Releases page
-- **Set your server** (`Domain`) and **DNS Resolver** (if needed)
-- **Plus Optimized Core**: Uses a high-performance Rust core with enhanced BBR+ congestion control.
+- **Set your server** (`Domain`) and **DNS Resolver** (e.g., `8.8.8.8:53`)
+- **Slipstream Plus Core**: Uses a high-performance Rust core with enhanced BBR+ congestion control.
 - **DNS Checker (optional)**: run it, and click **"Use"** on any **OK** row to set your `DNS Resolver`
 - **Start VPN** with the **"Start VPN"** button and make sure statuses show **Running**
 - **Verify** with **"Test Proxy Connection"** and check Logs if needed
@@ -42,8 +42,8 @@ If a direct download fails, use the [Releases page](https://github.com/free-mba/
 
 1. Open **Stream Gate**
 2. (Optional) Configure:
-   - **DNS Resolver**: your DNS server (default: `8.8.8.8:53`)
-   - **Domain**: your Stream Gate server domain (default: `s.example.com`)
+   - **DNS Resolver**: a public DNS server (default: `8.8.8.8:53`)
+   - **Domain**: your Slipstream Plus server domain (example: `s.example.com`)
    - **System Proxy**: enable auto system proxy configuration (recommended)
 3. Click **"Start VPN"**
 4. Wait until statuses show **Running**
@@ -78,9 +78,9 @@ You can fine-tune the connection in the **Settings** page:
 
 ---
 
-## 🖥️ Stream Gate Plus Server Setup
+## 🖥️ Slipstream Plus Server Setup
 
-To use Stream Gate Plus, you need an optimized server.
+To use Slipstream Plus, you need an optimized server.
 
 ### Optimized server install (one command)
 

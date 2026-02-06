@@ -10,7 +10,7 @@ This document outlines the modular architecture for refactoring `main.js` follow
 ┌─────────────────────────────────────────────────────────────────┐
 │                         main.js (Orchestrator)                   │
 │  - Initializes all services                                      │
-│  - Wires up dependencies                                         │
+│  - Wires up dependencies for Slipstream Plus                     │
 │  - Handles app lifecycle                                         │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -99,9 +99,10 @@ class SettingsService {
   get(key)
   set(key, value)
   getAll()
-  validateResolver(value)
-  migrateLegacySettings()
-}
+  validateResolver(value) {
+    // Only accept IPv4:port format (e.g., 8.8.8.8:53)
+    return this.DNSService.validate(value);
+  }
 ```
 
 **Dependencies**: None (infrastructure only)

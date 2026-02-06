@@ -4,7 +4,7 @@
 
 ## 🏗 High-Level Overview
 
-Stream Gate is a modern, cross-platform GUI for the Stream Gate VPN client. It is built using **Electron** for the desktop shell and **React** for the user interface. The application follows a **Service Layer Pattern** in the backend (Electron Main process) to decouple business logic from the presentation layer.
+Stream Gate is a modern, cross-platform GUI client for the Slipstream Plus VPN engine. It is built using **Vite** + **React** for the frontend and a **Rust** backend (via **Bun** in the current modular Electron structure during migration). The application follows a **Service Layer Pattern** to decouple business logic from the presentation layer.
 
 ### Technology Stack
 

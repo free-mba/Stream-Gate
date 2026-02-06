@@ -1,6 +1,6 @@
 # Electron to Tauri Migration Plan
 
-> **Stream Gate VPN Client**
+> **Stream Gate (Client for Slipstream Plus)**
 > Comprehensive step-by-step migration from Electron + TypeScript to Tauri + Rust
 
 ---

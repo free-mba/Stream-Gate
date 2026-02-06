@@ -1,6 +1,6 @@
-# Slipstream
+# Slipstream Plus
 
-**Slipstream** is the core VPN engine powering Stream Gate. It is a custom protocol designed for high-throughput, low-latency network tunneling, particularly optimized for unstable network environments.
+**Slipstream Plus** is the high-performance VPN engine powering Stream Gate. It is an optimized version of the original protocol, designed for maximum throughput in highly restrictive environments.
 
 ## How it Works
 
@@ -10,11 +10,11 @@ Slipstream operates by creating a [QUIC](./Quic.md) tunnel to a remote server. I
 
 1.  **Multiple Streams**: Multiplexes connection streams to maximize bandwidth usage unlike standard TCP.
 2.  **Obfuscation**: Uses TLS-like handshakes to blend in with normal HTTPS traffic.
-3.  **Resilience**: Capable of switching underlying connections without dropping the tunnel.
+3.  **BBR+ Congestion Control**: Enhanced congestion control for better stability on unstable networks.
 
 ## Integration in Stream Gate
 
-The Stream Gate GUI does not implement the protocol itself. Instead, it manages the `stream-client` binary:
+**Stream Gate** is the official GUI client for Slipstream Plus. It does not implement the protocol itself but manages the optimized `stream-client` binary:
 1.  The GUI generates a config based on user input.
 2.  It spawns `stream-client` as a child process.
 3.  `stream-client` opens a local [SOCKS5](./SOCKS5.md) port.

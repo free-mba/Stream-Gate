@@ -13,7 +13,7 @@
 <br>
 
 <div align="center">
-  <strong>The Ultimate GUI Client for SlipStream</strong><br>
+  <strong>The Ultimate GUI Client for Slipstream Plus</strong><br>
   A high-performance, cross-platform VPN utility engineered for speed, privacy, and seamless tunneling.
 </div>
 
@@ -26,7 +26,7 @@
 
 ## ✨ Experience Precision Performance
 
-**Stream Gate** isn't just another VPN client. It's a meticulously designed tool that bridges the gap between complex tunneling protocols and user-friendly experience. Built on Electron and powered by a high-efficiency backend, it offers system-wide tunneling with zero-configuration ease.
+**Stream Gate** isn't just another VPN client. It's a meticulously designed tool that bridges the gap between the complex Slipstream Plus protocol and a user-friendly experience. Built with Vite and powered by a high-efficiency Rust backend (via Bun), it offers system-wide tunneling with zero-configuration ease.
 
 ### 🎯 Featured: Advanced DNS Tester
 Our proprietary DNS Tester is the crown jewel of Stream Gate. Specially optimized for this protocol, it accurately identifies compatible DNS overrides with an **85% detection success rate**.

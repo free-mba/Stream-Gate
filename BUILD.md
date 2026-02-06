@@ -1,10 +1,10 @@
-# Building Stream Gate VPN GUI
+# Building Stream Gate (Client for Slipstream Plus)
 
 ## Quick Start
 
 1. **Install dependencies** (one-time setup):
 ```bash
-npm install
+bun install
 ```
 
 This will download:
@@ -16,29 +16,29 @@ This will download:
 
 For macOS:
 ```bash
-npm run build:mac
+bun run build:mac
 ```
 
 For Windows:
 ```bash
-npm run build:win
+bun run build:win
 ```
 
 For both platforms:
 ```bash
-npm run build:all
+bun run build:all
 ```
 
 3. **Output**: Built applications will be in the `dist/` folder:
-   - macOS: `Stream Gate VPN-1.0.0.dmg`
-   - Windows: `Stream Gate VPN Setup 1.0.0.exe`
+   - macOS: `Stream-Gate-macOS-1.0.0.dmg`
+   - Windows: `Stream-Gate-Windows-Setup-1.0.0.exe`
 
 ## What Gets Bundled
 
 The built applications are **completely self-contained**:
-- ✅ Electron runtime
+- ✅ Electron runtime (during migration)
 - ✅ All Node.js dependencies
-- ✅ Stream Gate client binaries (Mac & Windows)
+- ✅ Slipstream Plus client binaries (Mac & Windows)
 - ✅ No internet connection required to run
 
 Users can install and use the app without any additional downloads or setup.
@@ -47,7 +47,7 @@ Users can install and use the app without any additional downloads or setup.
 
 To test the app during development:
 ```bash
-npm start
+bun start
 ```
 
 ## Distribution
@@ -63,7 +63,7 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 4. ✅ **Everything works automatically - no manual actions needed!**
 
 **What's Hidden from Users:**
-- ✅ `binaries/Stream Gate-client-mac-arm64` / `binaries/Stream Gate-client-mac-intel` / `binaries/Stream Gate-client-win.exe` are bundled inside the app
+- ✅ `binaries/stream-client` is bundled inside the app
 - ✅ Users never see these files
 - ✅ No terminal commands needed
 - ✅ No chmod or permission setup needed
@@ -73,16 +73,13 @@ The built DMG (macOS) and EXE (Windows) installers can be distributed directly t
 
 ### Build fails with permission errors
 - The app automatically sets execute permissions on first run
-- For development: `chmod +x binaries/Stream Gate-client-mac-arm64` (or `binaries/Stream Gate-client-mac-intel`)
+- For development: `chmod +x binaries/stream-client`
 
 ### Missing dependencies
-- Run `npm install` again
+- Run `bun install` again
 - Check that all dependencies in `package.json` are installed
 
-### App doesn't find Stream Gate client
-- Make sure the binaries are present under `binaries/`:
-  - `binaries/Stream Gate-client-mac-arm64`
-  - `binaries/Stream Gate-client-mac-intel`
-  - `binaries/Stream Gate-client-win.exe`
+### App doesn't find client binary
+- Make sure the binaries are present under `binaries/`
 - Check the build logs to see if files were copied correctly
 - The app automatically finds binaries in the Resources folder when packaged

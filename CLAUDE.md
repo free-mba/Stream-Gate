@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Stream Gate is a cross-platform desktop VPN client built with Electron. It creates a multi-layer proxy architecture where user applications connect to an HTTP proxy (port 8080), which forwards to a SOCKS5 client (port 5201), which tunnels through an encrypted connection to a Stream Gate VPN server.
+Stream Gate is a cross-platform desktop VPN client built with Vite and React (orchestrated by Electron during migration). It creates a multi-layer proxy architecture where user applications connect to an HTTP proxy (port 8080), which forwards to an optimized SOCKS5 client (port 5201), which tunnels through an encrypted connection to a Slipstream Plus VPN server.
 
 **Technology Stack:**
 - Electron 28.0.0 (desktop framework)
@@ -41,7 +41,7 @@ npm run build:all            # Build for all platforms
 dist/                        # Contains built installers
 ```
 
-**Note:** Build commands have pre-hooks that automatically verify binaries exist. The download script fetches from `free-mba/Stream Gate-rust-deploy` releases on GitHub.
+**Note:** Build commands have pre-hooks that automatically verify binaries exist. The download script fetches from `Fox-Fig/slipstream-rust-plus-deploy` releases on GitHub.
 
 ## Architecture
 
@@ -54,7 +54,7 @@ HTTP Proxy Server (Node.js http-proxy)
     ↓ SOCKS5 Protocol (127.0.0.1:5201)
 SOCKS5 Client (Stream Gate-client binary)
     ↓ Encrypted Tunnel
-Stream Gate VPN Server
+Slipstream Plus VPN Server
 ```
 
 ### Main Process Architecture (main.js)
