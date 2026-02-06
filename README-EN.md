@@ -99,7 +99,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/Fox-Fig/slipstream-rust-plus-d
 1. Configure your DNS records (see [slipstream-rust-plus-deploy](https://github.com/Fox-Fig/slipstream-rust-plus-deploy))
 2. Wait for DNS propagation (can take up to 24 hours)
 3. In Stream Gate, enter your domain (example: `s.example.com`)
-4. Enter your DNS resolver (example: `YOUR_SERVER_IP:53`)
+4. Enter your DNS resolver (example: `8.8.8.8:53`)
 5. Click **"Start VPN"**
 
 ---

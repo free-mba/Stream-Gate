@@ -51,11 +51,8 @@ jobs:
           # If binaries are stored via Git LFS, ensure we fetch the real contents.
           lfs: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
 
       - name: Download latest Stream Gate client binary (from slipstream-rust-deploy)
         shell: bash
@@ -104,14 +101,11 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" == "mac" ]; then
-            node scripts/verify-binaries.js --platform mac --arch "${{ matrix.arch }}" || true
+            bun run scripts/verify-binaries.js --platform mac --arch "${{ matrix.arch }}"
           elif [ "${{ matrix.platform }}" == "win" ]; then
-            node scripts/verify-binaries.js --platform win || true
+            bun run scripts/verify-binaries.js --platform win
           elif [ "${{ matrix.platform }}" == "linux" ]; then
-            node scripts/verify-binaries.js --platform linux || true
-          else
-            echo "Unknown platform: ${{ matrix.platform }}"
-            exit 1
+            bun run scripts/verify-binaries.js --platform linux
           fi
 
       - name: Install system dependencies for Linux
@@ -121,7 +115,7 @@ jobs:
           sudo apt-get install -y fakeroot dpkg-dev
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Set execute permissions for binaries
         if: matrix.platform == 'mac' || matrix.platform == 'linux'
@@ -137,7 +131,7 @@ jobs:
           fi
 
       - name: Build application
-        run: npm run ${{ matrix.build-script }}
+        run: bun run ${{ matrix.build-script }}
         continue-on-error: false
 
       - name: List build artifacts

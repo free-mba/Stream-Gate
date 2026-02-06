@@ -17,26 +17,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Verify project structure
         shell: bash
         run: |
           echo "Checking project files..."
-          test -f main.js || exit 1
-          test -f index.html || exit 1
           test -f package.json || exit 1
           echo "✅ All required files present"
 
-      - name: Check syntax
-        run: node -c main.js
+      - name: Build main
+        run: bun run build:main
 
       - name: Verify binaries exist
         shell: bash
