@@ -1,28 +1,16 @@
 #!/usr/bin/env node
 /**
- * Download latest Stream Gate client binaries from:
- *   https://github.com/mirzaaghazadeh/slipstream-rust-deploy/releases/latest
- *
- * Usage:
- *   node scripts/download-binaries.js
- *   node scripts/download-binaries.js --platform mac --arch arm64
- *   node scripts/download-binaries.js --platform mac --arch x64
- *   node scripts/download-binaries.js --platform win
- *   node scripts/download-binaries.js --platform linux
- *
- * Notes:
- * - Writes into ./binaries/
- * - Overwrites existing files
- * - Uses GitHub API; optionally set GH_TOKEN to avoid rate limits
+ * Download latest Stream Gate client binaries.
+ * 
+ * This version uses the /releases/latest/download/ proxy to avoid API limits
+ * and connectivity issues with api.github.com.
  */
 
 const fs = require('fs');
 const path = require('path');
-const { pipeline } = require('stream/promises');
-const { Readable } = require('stream');
+const { execSync } = require('child_process');
 
-const UPSTREAM_REPO = 'mirzaaghazadeh/slipstream-rust-deploy';
-const API_LATEST = `https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest`;
+const UPSTREAM_REPO = 'Fox-Fig/slipstream-rust-plus-deploy';
 
 function parseArgs(argv) {
   const args = { platform: 'all', arch: null };
@@ -39,39 +27,35 @@ function parseArgs(argv) {
   return args;
 }
 
-function headers() {
-  const h = {
-    'User-Agent': 'slipstream-binary-downloader',
-    Accept: 'application/vnd.github+json'
-  };
-  if (process.env.GH_TOKEN) h.Authorization = `Bearer ${process.env.GH_TOKEN}`;
-  return h;
-}
-
-async function fetchJson(url) {
-  const res = await fetch(url, { headers: headers() });
-  if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
-  return await res.json();
-}
-
 async function downloadToFile(url, destPath) {
-  const res = await fetch(url, {
-    headers: {
-      ...headers(),
-      // Some GH endpoints respond better with a generic accept here.
-      Accept: 'application/octet-stream'
-    },
-    redirect: 'follow'
-  });
-  if (!res.ok) throw new Error(`Download failed (${res.status}) for ${url}`);
-  if (!res.body) throw new Error(`No response body for ${url}`);
-
   await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
 
-  const tmp = `${destPath}.tmp`;
-  const fileStream = fs.createWriteStream(tmp);
-  await pipeline(Readable.fromWeb(res.body), fileStream);
-  await fs.promises.rename(tmp, destPath);
+  const MAX_RETRIES = 5;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    // -k: insecure, -L: follow redirects, -f: fail on 4xx/5xx, -s: silent
+    // --retry: curl's internal retry mechanism
+    const command = `curl -k -L -f -s --retry 5 --retry-delay 5 --connect-timeout 20 -o "${destPath}" "${url}"`;
+    try {
+      // eslint-disable-next-line no-console
+      console.log(`📡 [Attempt ${attempt}/${MAX_RETRIES}] Downloading: ${url}`);
+      execSync(command, { stdio: 'inherit' });
+
+      if (fs.existsSync(destPath) && fs.statSync(destPath).size > 100000) {
+        return;
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(`⚠️  Attempt ${attempt} failed: ${err.message}`);
+      if (attempt < MAX_RETRIES) {
+        const delay = attempt * 3000;
+        // eslint-disable-next-line no-console
+        console.log(`⏳ Waiting ${delay}ms before next attempt...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  throw new Error(`Failed to download ${url} after ${MAX_RETRIES} attempts.`);
 }
 
 function wantTargets(platform, arch) {
@@ -84,8 +68,11 @@ function wantTargets(platform, arch) {
     else if (a === 'x64' || a === 'amd64' || a === 'intel' || a === 'x86_64') targets.push('mac-intel');
     else targets.push('mac-arm64', 'mac-intel');
   } else if (p === 'win') targets.push('win');
-  else if (p === 'linux') targets.push('linux');
-  else if (p === 'all') targets.push('mac-arm64', 'mac-intel', 'linux', 'win');
+  else if (p === 'linux') {
+    if (a === 'arm64' || a === 'aarch64') targets.push('linux-arm64');
+    else targets.push('linux-amd64');
+  }
+  else if (p === 'all') targets.push('mac-arm64', 'mac-intel', 'linux-amd64', 'linux-arm64', 'win');
   else throw new Error(`Unknown --platform value: ${String(platform)}`);
 
   return targets;
@@ -97,8 +84,10 @@ function mappingForTarget(t) {
       return { assetName: 'slipstream-client-darwin-arm64', outName: 'stream-client-mac-arm64' };
     case 'mac-intel':
       return { assetName: 'slipstream-client-darwin-amd64', outName: 'stream-client-mac-intel' };
-    case 'linux':
+    case 'linux-amd64':
       return { assetName: 'slipstream-client-linux-amd64', outName: 'stream-client-linux' };
+    case 'linux-arm64':
+      return { assetName: 'slipstream-client-linux-arm64', outName: 'stream-client-linux-arm64' };
     case 'win':
       return { assetName: 'slipstream-client-windows-amd64.exe', outName: 'stream-client-win.exe' };
     default:
@@ -108,29 +97,19 @@ function mappingForTarget(t) {
 
 async function main() {
   const { platform, arch } = parseArgs(process.argv);
-  const release = await fetchJson(API_LATEST);
-
-  const tag = release?.tag_name || 'latest';
-  const assets = Array.isArray(release?.assets) ? release.assets : [];
-  if (!assets.length) throw new Error(`No assets found in ${UPSTREAM_REPO} release (${tag})`);
-
   const outDir = path.resolve(process.cwd(), 'binaries');
   await fs.promises.mkdir(outDir, { recursive: true });
 
   const targets = wantTargets(platform, arch);
   for (const t of targets) {
     const { assetName, outName } = mappingForTarget(t);
-    const asset = assets.find((a) => a && a.name === assetName);
-    if (!asset || !asset.browser_download_url) {
-      throw new Error(`Missing asset "${assetName}" in ${UPSTREAM_REPO} release (${tag})`);
-    }
+    const url = `https://github.com/${UPSTREAM_REPO}/releases/latest/download/${assetName}`;
 
     const dest = path.join(outDir, outName);
     // eslint-disable-next-line no-console
-    console.log(`⬇️  ${assetName} -> binaries/${outName} (release: ${tag})`);
-    await downloadToFile(asset.browser_download_url, dest);
+    console.log(`⬇️  ${assetName} -> binaries/${outName}`);
+    await downloadToFile(url, dest);
 
-    // Explicitly set executable permissions for Mac/Linux binaries
     if (process.platform !== 'win32' && !outName.endsWith('.exe')) {
       await fs.promises.chmod(dest, 0o755);
     }
@@ -145,4 +124,3 @@ main().catch((err) => {
   console.error(`❌ Failed to download binaries:\n${err?.message || String(err)}`);
   process.exit(1);
 });
-
