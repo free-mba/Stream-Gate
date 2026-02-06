@@ -1,16 +1,17 @@
 # Simple English Guide
 
 <div align="center">
-  <strong>Stream Gate User Guide</strong><br>
-  A simple GUI for connecting to Stream Gate VPN
+  <strong>Stream Gate Plus User Guide</strong><br>
+  An optimized GUI for connecting to Stream Gate VPN
 </div>
 
 ---
 
-## 👀 Quick Tour
+## 👀 Quick Tour (Plus Version)
 
 - **Download & install** the app from the Releases page
 - **Set your server** (`Domain`) and **DNS Resolver** (if needed)
+- **Plus Optimized Core**: Uses a high-performance Rust core with enhanced BBR+ congestion control.
 - **DNS Checker (optional)**: run it, and click **"Use"** on any **OK** row to set your `DNS Resolver`
 - **Start VPN** with the **"Start VPN"** button and make sure statuses show **Running**
 - **Verify** with **"Test Proxy Connection"** and check Logs if needed
@@ -23,17 +24,17 @@
 ### Download & Install
 
 1. Go to the latest release on GitHub:
-   - [Releases (latest)](https://github.com/free-mba/Stream-Gate/releases/latest)
-2. Direct downloads (latest release):
+   - [Releases (v1.0.0)](https://github.com/free-mba/Stream-Gate/releases/latest)
+2. Direct downloads (v1.0.0):
 
 | Platform | Download |
 |----------|----------|
-| macOS (Apple Silicon) | [Stream Gate-GUI-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-ARM64.dmg) |
-| macOS (Intel) | [Stream Gate-GUI-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-Intel.dmg) |
-| Windows (64-bit) | [Stream Gate-GUI-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x64.exe) |
-| Windows (32-bit) | [Stream Gate-GUI-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x86.exe) |
-| Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
-| Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [Stream-Gate-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [Stream-Gate-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.deb) |
 
 If a direct download fails, use the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest).
 
@@ -68,7 +69,7 @@ You can fine-tune the connection in the **Settings** page:
 
 ### Congestion Control
 - **Auto (Default)**: Chooses the best algorithm based on your resolver mode (BBR for Authoritative, DCubic for Recursive).
-- **BBR**: Google's algorithm. Great for unstable/wireless networks.
+- **BBR+ (Enhanced)**: The specialized Plus version algorithm. Great for unstable/wireless networks.
 - **DCubic**: More aggressive. Good for stable/wired connections.
 
 ### QUIC Keep Alive
@@ -77,14 +78,14 @@ You can fine-tune the connection in the **Settings** page:
 
 ---
 
-## 🖥️ Stream Gate Server Setup
+## 🖥️ Stream Gate Plus Server Setup
 
-To use Stream Gate, you need a Stream Gate server. You can deploy your own server or use an existing one.
+To use Stream Gate Plus, you need an optimized server.
 
-### Simple server install (one command)
+### Optimized server install (one command)
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/Stream Gate-rust-deploy/master/Stream Gate-rust-deploy.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/Fox-Fig/slipstream-rust-plus-deploy/master/slipstream-rust-plus-deploy.sh)
 ```
 
 ### Server prerequisites
@@ -95,7 +96,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/AliRezaBeigy/Stream Gate-rust-
 
 ### After server setup
 
-1. Configure your DNS records (see [Stream Gate-rust-deploy](https://github.com/AliRezaBeigy/Stream Gate-rust-deploy))
+1. Configure your DNS records (see [slipstream-rust-plus-deploy](https://github.com/Fox-Fig/slipstream-rust-plus-deploy))
 2. Wait for DNS propagation (can take up to 24 hours)
 3. In Stream Gate, enter your domain (example: `s.example.com`)
 4. Enter your DNS resolver (example: `YOUR_SERVER_IP:53`)
@@ -142,8 +143,6 @@ Your IP will usually look like `192.168.1.XXX` or `10.0.0.XXX`.
 7. Leave **Authentication** off
 8. Tap **Save**
 
-To disable later: set **HTTP Proxy** back to **Off**.
-
 ### Android
 
 1. **Settings** → **Wi‑Fi**
@@ -154,15 +153,6 @@ To disable later: set **HTTP Proxy** back to **Off**.
 6. **Proxy hostname** = your PC IP (example: `192.168.1.100`)
 7. **Proxy port** = `8080`
 8. Tap **Save**
-
-To disable later: set Proxy back to **None**.
-
-### ⚠️ Important notes
-
-- Ensure your firewall allows inbound connections on port `8080`
-- This only works while both devices are on the same network
-- If your PC IP changes, update the phone proxy settings
-- Some apps may ignore system proxy settings and need per-app configuration
 
 ---
 
@@ -199,7 +189,7 @@ To disable later: set Proxy back to **None**.
 This is usually Gatekeeper quarantine. Fix:
 
 ```bash
-xattr -cr /Applications/Stream Gate\ GUI.app
+xattr -cr /Applications/Stream\ Gate\ Plus.app
 ```
 
 ### VPN won’t start
@@ -209,16 +199,8 @@ xattr -cr /Applications/Stream Gate\ GUI.app
 - Check Logs for errors
 - On Windows, run as Administrator
 
-### System proxy not working
-
-- Make sure “Configure System Proxy” is enabled
-- On macOS, you may be asked for admin password
-- On Windows, run as Administrator
-- Some apps may bypass system proxy
-
 ---
 
 <div align="center">
   <strong>Made for those we remember</strong>
 </div>
-
