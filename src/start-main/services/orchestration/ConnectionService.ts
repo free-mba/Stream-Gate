@@ -31,7 +31,7 @@ interface ConnectionServiceDependencies {
 }
 
 interface StartOptions {
-  resolver: string;
+  resolvers: string[];
   domain: string;
   tunMode?: boolean;
   keepAliveInterval?: number;
@@ -60,6 +60,7 @@ export default class ConnectionService {
   private isRunning: boolean;
   private quitting: boolean;
   private cleanupInProgress: boolean;
+  private isRestarting: boolean;
 
   private RETRY_BASE_INTERVAL: number;
   private MAX_RETRY_ATTEMPTS: number;
@@ -81,6 +82,7 @@ export default class ConnectionService {
     this.isRunning = false;
     this.quitting = false;
     this.cleanupInProgress = false;
+    this.isRestarting = false;
 
     // Auto-reconnection state
     this.RETRY_BASE_INTERVAL = 30000; // 30 seconds
@@ -100,9 +102,11 @@ export default class ConnectionService {
   private _setupEventListeners(): void {
     // Listen for process exit
     this.processManager.onExit((code) => {
-      if (this.isRunning && !this.quitting && !this.cleanupInProgress) {
-        this.logger.info('Stream client process died unexpectedly. Attempting automatic reconnection...');
+      if (this.isRunning && !this.quitting && !this.cleanupInProgress && !this.isRestarting) {
+        this.logger.info(`Stream client process died unexpectedly (code ${code}). Attempting automatic reconnection...`);
         this._attemptReconnection();
+      } else if (this.isRestarting) {
+        this.logger.verbose('Process exited during intentional restart, skipping redundant reconnection trigger.');
       }
     });
   }
@@ -120,7 +124,7 @@ export default class ConnectionService {
     // STRICT: Expect all configuration to be provided by caller (IPCController)
     // No fallback to settingsService here.
     let {
-      resolver,
+      resolvers,
       domain,
       tunMode = false,
       keepAliveInterval,
@@ -157,10 +161,11 @@ export default class ConnectionService {
 
       // Start Stream Gate client
       // Pass finalDomain (IP) instead of original domain if resolved
-      await this.processManager.start(resolver, finalDomain, {
+      await this.processManager.start(resolvers[0] || '8.8.8.8:53', finalDomain, {
         authoritative: authoritative || false,
         keepAliveInterval,
-        congestionControl
+        congestionControl,
+        resolvers: resolvers
       });
 
       // Start HTTP proxy
@@ -334,75 +339,81 @@ export default class ConnectionService {
         );
 
         // Stop existing services cleanly
-        this.proxyService.stopAll();
-        this.processManager.stop();
+        this.isRestarting = true;
+        try {
+          this.proxyService.stopAll();
+          this.processManager.stop();
 
-        // Wait a moment for cleanup
-        await new Promise(resolve => setTimeout(resolve, 1000));
+          // Wait a moment for cleanup
+          await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Try to restart using stored active config
-        if (this.activeConfig) {
-          const { resolver, domain, ...opts } = this.activeConfig;
+          // Try to restart using stored active config
+          if (this.activeConfig) {
+            const { resolvers, domain, ...opts } = this.activeConfig;
 
-          // Note: activeConfig stores the UNRESOLVED domain if we passed it initially.
-          // We might want to re-resolve if needed, but start() handles resolution if custom DNS is enabled.
-          // We call start(), but start() takes StartOptions. 'opts' basically matches part of it.
-          // But wait, start() checks `if (this.isRunning)`.
-          // We stopped it above, so `isRunning` is false.
-          // We should just call `this.start(this.activeConfig)`.
-          // However, `_attemptReconnection` logic below manually calls processManager.start etc.
-          // This duplicates logic in start().
-          // Ideally we should call `this.start(this.activeConfig)` but that might re-trigger resolution which is good.
-          // But the original code was:
-          /*
-          const { resolver, domain, ...opts } = this.activeConfig;
-          await this.processManager.start(resolver, domain, opts);
-          await this.proxyService.startHttpProxy();
-          */
-          // It seems it was manually restarting components instead of calling start().
-          // But `start()` does resolution.
-          // If we want to re-resolve, we should call `start()`.
-          // But `start()` resets `retryAttempts = 0`. That would break the retry loop if it fails inside `start`.
-          // If `start` fails, it returns success: false.
-          // So we should try to call `start`, but handle the retry logic.
+            // Note: activeConfig stores the UNRESOLVED domain if we passed it initially.
+            // We might want to re-resolve if needed, but start() handles resolution if custom DNS is enabled.
+            // We call start(), but start() takes StartOptions. 'opts' basically matches part of it.
+            // But wait, start() checks `if (this.isRunning)`.
+            // We stopped it above, so `isRunning` is false.
+            // We should just call `this.start(this.activeConfig)`.
+            // However, `_attemptReconnection` logic below manually calls processManager.start etc.
+            // This duplicates logic in start().
+            // Ideally we should call `this.start(this.activeConfig)` but that might re-trigger resolution which is good.
+            // But the original code was:
+            /*
+            const { resolver, domain, ...opts } = this.activeConfig;
+            await this.processManager.start(resolver, domain, opts);
+            await this.proxyService.startHttpProxy();
+            */
+            // It seems it was manually restarting components instead of calling start().
+            // But `start()` does resolution.
+            // If we want to re-resolve, we should call `start()`.
+            // But `start()` resets `retryAttempts = 0`. That would break the retry loop if it fails inside `start`.
+            // If `start` fails, it returns success: false.
+            // So we should try to call `start`, but handle the retry logic.
 
-          // Let's stick to the manual restart procedure as in the original code to avoid infinite recursion or state issues,
-          // OR improve it. The original code didn't re-resolve domain on retry if it was custom resolved.
-          // Actually, `activeConfig` stores the options passed to `start`.
-          // If we call `processManager.start`, we are using `domain` from `activeConfig`.
-          // If `start()` resolved it, `activeConfig` still holds the original domain (because we stored `options` before modification? No, wait.
-          // `this.activeConfig = { ...options, tunMode };` happens before resolution in `start()`?
-          // No, `start` has `let { ... } = options`. Then `let finalDomain = domain`. Then resolution updates `finalDomain`.
-          // `this.activeConfig` stores `options`, which has the ORIGINAL `domain`.
-          // So if we just use `domain` from `activeConfig`, we are using the hostname, not the IP.
-          // `processManager.start` expects the domain (or IP).
-          // If we want to re-resolve, we should probably do that.
-          // But for now, let's keep exact original behavior (or close to it) which seemed to just restart processManager.
+            // Let's stick to the manual restart procedure as in the original code to avoid infinite recursion or state issues,
+            // OR improve it. The original code didn't re-resolve domain on retry if it was custom resolved.
+            // Actually, `activeConfig` stores the options passed to `start`.
+            // If we call `processManager.start`, we are using `domain` from `activeConfig`.
+            // If `start()` resolved it, `activeConfig` still holds the original domain (because we stored `options` before modification? No, wait.
+            // `this.activeConfig = { ...options, tunMode };` happens before resolution in `start()`?
+            // No, `start` has `let { ... } = options`. Then `let finalDomain = domain`. Then resolution updates `finalDomain`.
+            // `this.activeConfig` stores `options`, which has the ORIGINAL `domain`.
+            // So if we just use `domain` from `this.activeConfig`, we are using the hostname, not the IP.
+            // `processManager.start` expects the domain (or IP).
+            // If we want to re-resolve, we should probably do that.
+            // But for now, let's keep exact original behavior (or close to it) which seemed to just restart processManager.
 
-          await this.processManager.start(resolver, domain, {
-            authoritative: opts.authoritative,
-            keepAliveInterval: opts.keepAliveInterval,
-            congestionControl: opts.congestionControl
-          });
-          await this.proxyService.startHttpProxy();
+            await this.processManager.start(resolvers[0] || '8.8.8.8:53', domain, {
+              authoritative: opts.authoritative,
+              keepAliveInterval: opts.keepAliveInterval,
+              congestionControl: opts.congestionControl,
+              resolvers: resolvers
+            });
+            await this.proxyService.startHttpProxy();
 
-          try {
-            await this.proxyService.startSocksForwardProxy();
-          } catch (err) {
-            this.logger.error('Failed to restart SOCKS5 forwarder during reconnection:', err);
+            try {
+              await this.proxyService.startSocksForwardProxy();
+            } catch (err) {
+              this.logger.error('Failed to restart SOCKS5 forwarder during reconnection:', err);
+            }
+
+            // Success! Reset retry counter
+            this.logger.info('Reconnection successful!');
+            this.eventEmitter.emit(
+              'log:message',
+              `✅ Reconnection successful! (After ${this.retryAttempts} attempt${this.retryAttempts > 1 ? 's' : ''})`
+            );
+            this.retryAttempts = 0;
+            this.isRunning = true; // Make sure to set this back to true
+            this.eventEmitter.emit('connection:reconnected', {
+              attempts: this.retryAttempts
+            });
           }
-
-          // Success! Reset retry counter
-          this.logger.info('Reconnection successful!');
-          this.eventEmitter.emit(
-            'log:message',
-            `✅ Reconnection successful! (After ${this.retryAttempts} attempt${this.retryAttempts > 1 ? 's' : ''})`
-          );
-          this.retryAttempts = 0;
-          this.isRunning = true; // Make sure to set this back to true
-          this.eventEmitter.emit('connection:reconnected', {
-            attempts: this.retryAttempts
-          });
+        } finally {
+          this.isRestarting = false;
         }
 
       } catch (err: any) {

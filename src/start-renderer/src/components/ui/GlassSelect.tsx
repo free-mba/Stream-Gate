@@ -31,7 +31,7 @@ export const GlassSelect = ({
                 </div>
             </SelectTrigger>
             <SelectContent className={cn(
-                "glass-panel border-white/10 text-foreground rounded-lg overflow-hidden backdrop-blur-2xl",
+                "glass-panel border-white/10 text-foreground rounded-lg overflow-hidden",
                 contentClassName
             )}>
                 {children}

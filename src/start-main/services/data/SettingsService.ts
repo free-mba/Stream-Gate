@@ -28,7 +28,7 @@ interface ConfigItem {
 }
 
 export interface Settings {
-  resolver: string;
+  resolvers: string[];
   domain: string;
   mode: 'proxy' | 'tun';
   authoritative: boolean;
@@ -41,6 +41,10 @@ export interface Settings {
   configs: ConfigItem[];
   selectedConfigId: string | null;
   savedDns: string[];
+  language?: 'en' | 'fa';
+  theme?: 'light' | 'dark' | 'system';
+  keepAliveInterval?: number;
+  congestionControl?: 'auto' | 'bbr' | 'dcubic';
   customDnsEnabled: boolean;
   primaryDns: string;
   secondaryDns: string;
@@ -74,7 +78,7 @@ export default class SettingsService {
 
     // Default settings
     this.defaults = {
-      resolver: '8.8.8.8:53',
+      resolvers: ['8.8.8.8:53'],
       domain: 's.example.com',
       mode: 'proxy',
       authoritative: false,
@@ -270,7 +274,10 @@ export default class SettingsService {
    * @param {string} value - Resolver to validate
    * @returns {boolean} True if valid
    */
-  validateResolver(value: string): boolean {
+  validateResolver(value: string | string[]): boolean {
+    if (Array.isArray(value)) {
+      return value.every(v => this.parseDnsServer(v) !== null);
+    }
     const parsed = this.parseDnsServer(value);
     return parsed !== null;
   }
@@ -364,7 +371,7 @@ export default class SettingsService {
           remark: configData.remark || remark,
           domain: configData.domain,
           country: configData.country || '🏳️',
-          socks: configData.socks || {}
+          socks: configData.socks || {},
         };
 
         importedConfigs.push(newConfig);

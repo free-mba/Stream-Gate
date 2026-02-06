@@ -23,21 +23,21 @@ export const ConfigFormDialog = ({
 }: ConfigFormDialogProps) => {
     const { t } = useTranslation();
 
-    const initFormData = useCallback(() => {
+    const initFormData = useCallback((): Partial<Config> => {
         if (editingConfig) {
             return {
                 ...editingConfig,
                 socks: {
                     username: editingConfig.socks?.username || "",
                     password: editingConfig.socks?.password || "",
-                }
+                },
             };
         }
         return {
             country: "🏳️",
             remark: "",
             domain: "",
-            socks: { username: "", password: "" }
+            socks: { username: "", password: "" },
         };
     }, [editingConfig]);
 
@@ -46,10 +46,10 @@ export const ConfigFormDialog = ({
     const updateField = (field: keyof Config | "socks-username" | "socks-password", value: string) => {
         setFormData(prev => {
             if (field === "socks-username") {
-                return { ...prev, socks: { ...(prev.socks || {}), username: value } };
+                return { ...prev, socks: { ...prev.socks, username: value } };
             }
             if (field === "socks-password") {
-                return { ...prev, socks: { ...(prev.socks || {}), password: value } };
+                return { ...prev, socks: { ...prev.socks, password: value } };
             }
             return { ...prev, [field]: value };
         });
@@ -78,7 +78,7 @@ export const ConfigFormDialog = ({
             onOpenChange={onOpenChange}
             title={editingConfig ? t("Edit Configuration") : t("New Configuration")}
             footer={footer}
-            maxWidth="md"
+            maxWidth="sm"
         >
             <AnimatePresence mode="wait">
                 <motion.div

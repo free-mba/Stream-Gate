@@ -51,17 +51,17 @@
 
     --radius: 1rem;
 
-    /* --- Glassmorphism Tokens (Dark) --- */
-    --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    /* --- Solid UI Tokens (Replacing Glass) --- */
+    --glass-bg: hsl(232, 40%, 12%);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.3);
 
-    /* Button Glass */
-    --glass-btn-bg: rgba(255, 255, 255, 0.05);
-    --glass-btn-border: rgba(255, 255, 255, 0.1);
-    --glass-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    /* Button Solid */
+    --glass-btn-bg: hsl(225, 25%, 15%);
+    --glass-btn-border: rgba(255, 255, 255, 0.08);
+    --glass-btn-hover-bg: hsl(225, 25%, 18%);
     --glass-btn-hover-border: rgba(0, 255, 230, 0.3);
-    --glass-btn-hover-shadow: 0 0 15px rgba(0, 255, 230, 0.2);
+    --glass-btn-hover-shadow: 0 0 10px rgba(0, 255, 230, 0.15);
 
     /* Background Pattern Opacity */
     --bg-pattern-opacity: 0.03;
@@ -114,20 +114,17 @@
 
     --radius: 1rem;
 
-    /* --- Glassmorphism Tokens (Light) --- */
-    /* Frosty, airy glass */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-    /* Soft indigo shadow */
+    /* --- Solid UI Tokens (Light) --- */
+    --glass-bg: hsl(0, 0%, 100%);
+    --glass-border: hsl(214, 32%, 91%);
+    --glass-shadow: 0 4px 12px 0 rgba(31, 38, 135, 0.05);
 
-    /* Button Glass (Light) */
-    --glass-btn-bg: rgba(255, 255, 255, 0.6);
-    --glass-btn-border: rgba(255, 255, 255, 0.4);
-    --glass-btn-hover-bg: rgba(255, 255, 255, 0.9);
-    --glass-btn-hover-border: rgba(37, 99, 235, 0.3);
-    /* Primary color hint */
-    --glass-btn-hover-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+    /* Button Solid (Light) */
+    --glass-btn-bg: hsl(214, 32%, 91%);
+    --glass-btn-border: rgba(0, 0, 0, 0.05);
+    --glass-btn-hover-bg: hsl(214, 32%, 85%);
+    --glass-btn-hover-border: rgba(37, 99, 235, 0.2);
+    --glass-btn-hover-shadow: 0 2px 10px rgba(37, 99, 235, 0.1);
 
     /* Background Pattern Opacity */
     --bg-pattern-opacity: 0.05;
@@ -187,10 +184,9 @@
    ✅ Keep animations simple (opacity, transform without blur)
    ========================================= */
 
-/* Glassmorphism Utilities - PERFORMANCE OPTIMIZED */
+/* UI Panel Utilities - PERFORMANCE OPTIMIZED */
 .glass-panel {
   background: var(--glass-bg);
-  /* REMOVED: backdrop-filter: blur(16px) - causes severe macOS lag */
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }

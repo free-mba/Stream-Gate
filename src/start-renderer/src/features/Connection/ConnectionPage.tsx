@@ -1,8 +1,9 @@
+import * as React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ipc } from "@/services/IpcService";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, MapPin, Globe, Plus, Zap } from "lucide-react";
+import { ArrowUp, ArrowDown, MapPin, Globe, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -13,16 +14,17 @@ import { useAtom } from "jotai";
 import { themeAtom, statusAtom, trafficAtom, settingsAtom, fetchSettingsAtom } from "@/store";
 
 import { GlassSelect } from "@/components/ui/GlassSelect";
+import { GlassMultiSelect } from "@/components/ui/GlassMultiSelect";
 
 const MotionButton = motion(Button);
 
-const TrafficCard = ({ label, value, icon: Icon, colorClass }: { label: string, value: string, icon: React.ElementType, colorClass: string }) => (
+const TrafficCard = React.memo(({ label, value, icon: Icon, colorClass }: { label: string, value: string, icon: React.ElementType, colorClass: string }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass-panel rounded-lg p-4 flex items-center gap-4 w-40 sm:w-48"
     >
-        <div className={cn("p-2.5 rounded-md bg-background/50 backdrop-blur-md border border-border", colorClass)}>
+        <div className={cn("p-2.5 rounded-md bg-background/50 border border-border", colorClass)}>
             <Icon className="w-5 h-5" />
         </div>
         <div className="flex flex-col">
@@ -30,12 +32,40 @@ const TrafficCard = ({ label, value, icon: Icon, colorClass }: { label: string, 
             <span className="text-lg font-mono font-medium tracking-tight text-foreground">{value}</span>
         </div>
     </motion.div>
-);
+));
+
+const TrafficDisplay = React.memo(({ isConnected }: { isConnected: boolean }) => {
+    const { t } = useTranslation();
+    const [traffic] = useAtom(trafficAtom);
+
+    const formatSpeed = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B/s`;
+        const kb = bytes / 1024;
+        if (kb < 1024) return `${kb.toFixed(1)} KB/s`;
+        const mb = kb / 1024;
+        return `${mb.toFixed(1)} MB/s`;
+    };
+
+    return (
+        <AnimatePresence mode="wait">
+            {isConnected && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex gap-4 justify-center w-full"
+                >
+                    <TrafficCard label={t("Download")} value={formatSpeed(traffic.down)} icon={ArrowDown} colorClass="text-emerald-500 shadow-sm" />
+                    <TrafficCard label={t("Upload")} value={formatSpeed(traffic.up)} icon={ArrowUp} colorClass="text-blue-500 shadow-sm" />
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+});
 
 export default function ConnectionPage() {
     const { t } = useTranslation();
     const [status] = useAtom(statusAtom);
-    const [traffic] = useAtom(trafficAtom);
     const [settings, setSettings] = useAtom(settingsAtom);
     const [, fetchSettings] = useAtom(fetchSettingsAtom);
 
@@ -51,7 +81,7 @@ export default function ConnectionPage() {
             ipc.invoke('stop-service');
         } else if (settings) {
             const payload = {
-                resolver: settings.resolver,
+                resolvers: settings.resolvers || [],
                 domain: settings.domain,
                 tunMode: settings.mode === 'tun',
                 keepAliveInterval: settings.keepAliveInterval,
@@ -79,36 +109,35 @@ export default function ConnectionPage() {
         }
     };
 
-    const handleDnsChange = async (val: string) => {
-        await ipc.invoke('set-resolver', val);
-        await setSettings({ resolver: val });
+    const handleDnsToggle = async (val: string) => {
+        const currentResolvers = settings?.resolvers || [];
+        const newResolvers = currentResolvers.includes(val)
+            ? currentResolvers.filter(r => r !== val)
+            : [...currentResolvers, val];
+
+        await setSettings({ resolvers: newResolvers });
     };
 
     const handleAddDns = async () => {
         if (!newDns || !settings) return;
         const formattedDns = newDns.includes(':') ? newDns : `${newDns}:53`;
         const newSavedDns = Array.from(new Set([formattedDns, ...(settings.savedDns || [])]));
+        const newResolvers = Array.from(new Set([formattedDns, ...(settings.resolvers || [])]));
 
-        await setSettings({ savedDns: newSavedDns });
+        await setSettings({ savedDns: newSavedDns, resolvers: newResolvers });
         setAddDnsOpen(false);
         setNewDns("");
-        handleDnsChange(formattedDns);
-    };
-
-    const formatSpeed = (bytes: number) => {
-        if (bytes < 1024) return `${bytes} B/s`;
-        const kb = bytes / 1024;
-        if (kb < 1024) return `${kb.toFixed(1)} KB/s`;
-        const mb = kb / 1024;
-        return `${mb.toFixed(1)} MB/s`;
     };
 
     const isConnected = !!status.isRunning;
     const configs = settings?.configs || [];
     const savedDns = settings?.savedDns || [];
-    const COMMON_DNS = ["1.1.1.1:53", "1.0.0.1:53", "8.8.8.8:53", "8.8.4.4:53", "9.9.9.9:53"];
-    const currentResolver = settings?.resolver || "8.8.8.8:53";
-    const dnsOptions = Array.from(new Set([currentResolver, ...savedDns, ...COMMON_DNS]));
+    const currentResolvers = settings?.resolvers || ["8.8.8.8:53"];
+
+    const dnsOptions = React.useMemo(() => {
+        const COMMON_DNS = ["1.1.1.1:53", "1.0.0.1:53", "8.8.8.8:53", "8.8.4.4:53", "9.9.9.9:53"];
+        return Array.from(new Set([...currentResolvers, ...savedDns, ...COMMON_DNS]));
+    }, [currentResolvers, savedDns]);
 
     return (
         <div className="relative flex flex-col items-center justify-center min-h-[calc(100vh-2rem)] w-full p-6 overflow-hidden">
@@ -144,16 +173,15 @@ export default function ConnectionPage() {
                     ))}
                 </GlassSelect>
 
-                <GlassSelect value={currentResolver} onValueChange={handleDnsChange} placeholder={t("DNS")} icon={Globe}>
-                    {dnsOptions.map((d: string) => (
-                        <SelectItem key={d} value={d} className="font-mono text-xs">{d}</SelectItem>
-                    ))}
-                    <div className="p-1 border-t border-border mt-1">
-                        <Button variant="ghost" size="sm" className="w-full justify-start h-8 text-xs gap-2 text-muted-foreground hover:text-foreground" onClick={(e) => { e.preventDefault(); setAddDnsOpen(true); }}>
-                            <Plus className="w-3 h-3" /> {t("Add Custom")}
-                        </Button>
-                    </div>
-                </GlassSelect>
+                <GlassMultiSelect
+                    values={currentResolvers}
+                    options={dnsOptions}
+                    onToggle={handleDnsToggle}
+                    onAddCustom={() => setAddDnsOpen(true)}
+                    placeholder={t("DNS")}
+                    icon={Globe}
+                    addCustomLabel={t("Add Custom")}
+                />
             </motion.div>
 
             {/* Center: Connect Button (Restored V0.0.2 Design) */}
@@ -189,7 +217,7 @@ export default function ConnectionPage() {
                         tap: { scale: 0.95 }
                     }}
                     className={cn(
-                        "w-56 h-56 rounded-full text-2xl font-bold border-[6px] relative z-10 flex flex-col items-center justify-center gap-3 backdrop-blur-md transition-shadow duration-300"
+                        "w-56 h-56 rounded-full text-2xl font-bold border-[6px] relative z-10 flex flex-col items-center justify-center gap-3 transition-shadow duration-300"
                     )}
                     style={{ WebkitTapHighlightColor: "transparent" }}
                 >
@@ -229,19 +257,7 @@ export default function ConnectionPage() {
 
             {/* Bottom: Stats & System Proxy */}
             <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-lg">
-                <AnimatePresence>
-                    {isConnected && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex gap-4 justify-center w-full"
-                        >
-                            <TrafficCard label={t("Download")} value={formatSpeed(traffic.down)} icon={ArrowDown} colorClass="text-emerald-500 shadow-sm" />
-                            <TrafficCard label={t("Upload")} value={formatSpeed(traffic.up)} icon={ArrowUp} colorClass="text-blue-500 shadow-sm" />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                <TrafficDisplay isConnected={isConnected} />
 
                 <MotionButton
                     onClick={toggleSystemProxy}

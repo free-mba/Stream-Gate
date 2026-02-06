@@ -106,7 +106,7 @@ export default class IPCController {
     // Settings management
     ipcMain.handle('get-settings', this._handleGetSettings.bind(this));
     ipcMain.handle('set-authoritative', this._handleSetAuthoritative.bind(this));
-    ipcMain.handle('set-resolver', this._handleSetResolver.bind(this));
+    ipcMain.handle('set-resolvers', this._handleSetResolvers.bind(this));
     ipcMain.handle('set-verbose', this._handleSetVerbose.bind(this));
     ipcMain.handle('set-socks5-auth', this._handleSetSocks5Auth.bind(this));
     ipcMain.handle('save-settings', this._handleSaveSettings.bind(this));
@@ -141,15 +141,11 @@ export default class IPCController {
   async _handleStartService(event: IpcMainInvokeEvent, payload: any) {
     // Gather complete configuration here (Controller responsibility)
     const config = {
-      resolver: payload.resolver,
+      resolvers: payload.resolvers || [],
       domain: payload.domain,
       authoritative: this.settingsService.get('authoritative'), // Global setting
-      keepAliveInterval: payload.keepAliveInterval !== undefined
-        ? payload.keepAliveInterval
-        : this.settingsService.get('keepAliveInterval' as any),
-      congestionControl: payload.congestionControl !== undefined
-        ? payload.congestionControl
-        : this.settingsService.get('congestionControl' as any),
+      keepAliveInterval: payload.keepAliveInterval ?? this.settingsService.get('keepAliveInterval' as any),
+      congestionControl: payload.congestionControl ?? (payload.config?.congestionControl || 'auto'),
       tunMode: payload.tunMode,
       customDnsEnabled: payload.customDnsEnabled, // Pass these through
       primaryDns: payload.primaryDns,
@@ -158,7 +154,7 @@ export default class IPCController {
 
     // Save "Last Used" connection settings (Persistence responsibility)
     this.settingsService.save({
-      resolver: config.resolver,
+      resolvers: config.resolvers,
       domain: config.domain,
       mode: config.tunMode ? 'tun' : 'proxy'
     });
@@ -212,23 +208,26 @@ export default class IPCController {
   }
 
   /**
-   * Handle set-resolver
+   * Handle set-resolvers
    * @private
    */
-  _handleSetResolver(event: IpcMainInvokeEvent, payload: any) {
+  _handleSetResolvers(event: IpcMainInvokeEvent, payload: { resolvers: string[] }) {
     try {
-      const parsed = this.settingsService.parseDnsServer(payload?.resolver);
-      if (!parsed) {
+      const resolvers = payload?.resolvers;
+      if (!Array.isArray(resolvers) || resolvers.length === 0) {
+        return { success: false, error: 'No resolvers provided' };
+      }
+
+      const valid = resolvers.every(r => this.settingsService.validateResolver(r));
+      if (!valid) {
         return {
           success: false,
-          error: 'Invalid DNS resolver. Use IPv4:port (e.g. 1.1.1.1:53).'
+          error: 'One or more invalid DNS resolvers. Use IPv4:port (e.g. 1.1.1.1:53).'
         };
       }
 
-      // Force port 53 (DNS Checker "Use" button behavior)
-      const normalized = `${parsed.ip}:53`;
-      this.settingsService.save({ resolver: normalized });
-      return { success: true, resolver: normalized };
+      this.settingsService.save({ resolvers });
+      return { success: true, resolvers: this.settingsService.get('resolvers') };
     } catch (err: any) {
       return { success: false, error: err?.message || String(err) };
     }
