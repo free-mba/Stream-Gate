@@ -35,6 +35,37 @@
 | Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
 
 
+### 🪞 Mirrors (v1.0.13)
+
+**GitHub Proxy**
+| Platform | File |
+|:---|:---|
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Windows-x86.exe) |
+| Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Linux-x64.AppImage) |
+| Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Linux-x64.deb) |
+
+**jsDelivr CDN**
+| Platform | File |
+|:---|:---|
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Windows-x86.exe) |
+| Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Linux-x64.AppImage) |
+| Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://cdn.jsdelivr.net/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Linux-x64.deb) |
+
+**Statically CDN**
+| Platform | File |
+|:---|:---|
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Windows-x86.exe) |
+| Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Linux-x64.AppImage) |
+| Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://cdn.statically.io/gh/free-mba/Stream-Gate@v1.0.13/Stream-Gate-Linux-x64.deb) |
 > **حل مشکل اجرا در مک (App is damaged):**  
 >
 > **روش ۱ (ساده):**  

@@ -327,6 +327,7 @@ jobs:
 
             ### 📥 Downloads
 
+            **Primary (GitHub)**
             | Platform | File |
             |----------|------|
             | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-ARM64.dmg) |
@@ -335,6 +336,38 @@ jobs:
             | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x86.exe) |
             | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.AppImage) |
             | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.deb) |
+
+            ### 🪞 Mirrors
+
+            **GitHub Proxy**
+            | Platform | File |
+            |----------|------|
+            | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-ARM64.dmg) |
+            | macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-Intel.dmg) |
+            | Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x64.exe) |
+            | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x86.exe) |
+            | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.AppImage) |
+            | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://github-mirrors.margrop.net/github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.deb) |
+
+            **jsDelivr CDN**
+            | Platform | File |
+            |----------|------|
+            | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-ARM64.dmg) |
+            | macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-Intel.dmg) |
+            | Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x64.exe) |
+            | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x86.exe) |
+            | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.AppImage) |
+            | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://cdn.jsdelivr.net/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.deb) |
+
+            **Statically CDN**
+            | Platform | File |
+            |----------|------|
+            | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-ARM64.dmg) |
+            | macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-macOS-Intel.dmg) |
+            | Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x64.exe) |
+            | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Windows-x86.exe) |
+            | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.AppImage) |
+            | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://cdn.statically.io/gh/${{ github.repository }}@v${{ steps.get_version.outputs.VERSION }}/Stream-Gate-Linux-x64.deb) |
 
             ### ✨ What's New
 
