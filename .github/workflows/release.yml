@@ -68,13 +68,16 @@ jobs:
           rm -f binaries/stream-client-*
 
           if [ "${{ matrix.platform }}" == "mac" ]; then
-            if [ "${{ matrix.arch }}" == "arm64" ]; then
-              ASSET="slipstream-client-darwin-arm64"
-              OUT="stream-client-mac-arm64"
-            else
-              ASSET="slipstream-client-darwin-amd64"
-              OUT="stream-client-mac-intel"
-            fi
+            # Download BOTH binaries for macOS because electron-builder config requires both to be present
+            gh release download --repo "$REPO" --pattern "slipstream-client-darwin-arm64" --dir binaries
+            mv "binaries/slipstream-client-darwin-arm64" "binaries/stream-client-mac-arm64"
+
+            gh release download --repo "$REPO" --pattern "slipstream-client-darwin-amd64" --dir binaries
+            mv "binaries/slipstream-client-darwin-amd64" "binaries/stream-client-mac-intel"
+
+            # Skip the single-asset logic below for mac
+            ASSET=""
+            OUT=""
           elif [ "${{ matrix.platform }}" == "linux" ]; then
             ASSET="slipstream-client-linux-amd64"
             OUT="stream-client-linux"
@@ -86,15 +89,15 @@ jobs:
             exit 1
           fi
 
-          echo "Downloading $ASSET from $REPO..."
-          # Note: Using '|| true' to prevent failure if the external repo or asset doesn't exist yet
-          # For production, you should ensure this repository exists or remove this step if binaries are pre-bundled
-          gh release download --repo "$REPO" --pattern "$ASSET" --dir binaries
-          
-          if [ -f "binaries/$ASSET" ]; then
-            mv "binaries/$ASSET" "binaries/$OUT"
-          else
-            echo "Warning: Binary $ASSET not found, skipping move."
+          if [ "${{ matrix.platform }}" != "mac" ]; then
+            echo "Downloading $ASSET from $REPO..."
+            gh release download --repo "$REPO" --pattern "$ASSET" --dir binaries
+
+            if [ -f "binaries/$ASSET" ]; then
+              mv "binaries/$ASSET" "binaries/$OUT"
+            else
+              echo "Warning: Binary $ASSET not found, skipping move."
+            fi
           fi
           
           ls -lh binaries/ || true
