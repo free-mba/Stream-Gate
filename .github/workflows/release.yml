@@ -313,6 +313,9 @@ jobs:
           body: |
             ## 🎉 Stream Gate v${{ steps.get_version.outputs.VERSION }}
 
+            > [!TIP]
+            > **Mirror Downloads**: If you've trouble downloading from GitHub, use our [Mirror Website](https://free-mba.github.io/Stream-Gate/).
+
             ### 📥 Downloads
 
             | Platform | File |
