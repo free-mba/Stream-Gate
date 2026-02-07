@@ -119,6 +119,15 @@ function initializeServices(): void {
     windowService?.sendToRenderer('status-update', connectionService?.getStatus());
   });
 
+  // Check for binaries immediately
+  const binaryPath = processManager.checkBinaryExists();
+  if (binaryPath) {
+    logger.info(`✅ Binary check passed: ${binaryPath}`);
+  } else {
+    logger.error('❌ CRITICAL: Stream Gate binary NOT found!');
+    logger.warn('   Run "bun run download:binaries" to fix this.');
+  }
+
   logger.info('All services initialized');
 }
 

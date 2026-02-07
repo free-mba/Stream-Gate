@@ -88,6 +88,18 @@ export default class ProcessManager {
   }
 
   /**
+   * Check if the binary exists at the expected path
+   * @returns {string|null} Path if exists, null otherwise
+   */
+  checkBinaryExists(): string | null {
+    const clientPath = this._getClientPath();
+    if (clientPath && fs.existsSync(clientPath)) {
+      return clientPath;
+    }
+    return null;
+  }
+
+  /**
    * Ensure the binary has execute permissions (Unix only)
    * @param {string} clientPath - Path to binary
    * @private
