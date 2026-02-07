@@ -24,19 +24,19 @@ function renderRelease(release) {
     const platforms = [
         {
             name: 'macOS (Universal)',
-            pattern: /Stream-Gate-macOS-(ARM64|Intel)\.dmg$/, // Just take one or both
+            pattern: /StreamGate-macOS-(ARM64|Intel)\.dmg$/, // Just take one or both
             icon: '🍎',
             label: 'Download DMG'
         },
         {
             name: 'Windows',
-            pattern: /Stream-Gate-Windows-x64\.exe$/,
+            pattern: /StreamGate-Windows-x64\.exe$/,
             icon: '🪟',
             label: 'Download EXE'
         },
         {
             name: 'Linux',
-            pattern: /Stream-Gate-Linux-x64\.(AppImage|deb)$/,
+            pattern: /StreamGate-Linux-x64\.(AppImage|deb)$/,
             icon: '🐧',
             label: 'Download AppImage/DEB'
         }

@@ -2,24 +2,20 @@
 
 ## macOS: "App is damaged and can't be opened"
 
-If you see this error message, it's because Stream Gate is not currently signed with an Apple Developer ID. macOS automatically flags unsigned apps downloaded from the internet as "damaged."
+If you see this error message, it's because StreamGate is not currently signed with an Apple Developer ID. macOS automatically flags unsigned apps downloaded from the internet as "damaged."
 
 ### The Fix
 
 To resolve this, you need to remove the "quarantine" attribute using the Terminal:
 
 1.  Open the **Terminal** app (found in Applications > Utilities).
-2.  Copy and paste the following command, then press Entry:
+2.  Copy and paste the following command, then press Enter:
     ```bash
-    cat << 'EOF' > fix-stream-gate.sh
-    #!/bin/bash
-    sudo xattr -rd com.apple.quarantine /Applications/Stream\ Gate.app
-    sudo xattr -cr /Applications/Stream\ Gate.app
-    EOF
-    chmod +x fix-stream-gate.sh
-    ./fix-stream-gate.sh
+    sudo xattr -rd com.apple.quarantine /Applications/StreamGate.app
+    sudo xattr -cr /Applications/StreamGate.app
+    sudo chmod -R 755 /Applications/StreamGate.app
     ```
-    *Note: You will be asked for your Mac password. Typing will not show characters, just press Enter when done.*
+    *Note: If you haven't moved the app to Applications yet, replace `/Applications/` with the actual path to the app.*
 
 ### Alternative Method (Right-Click)
 
