@@ -7,6 +7,9 @@
  * consistent formatting and verbosity control.
  */
 
+import fs from 'fs';
+import path from 'path';
+import { app } from 'electron';
 import EventEmitter from './EventEmitter';
 
 interface LogEntry {
@@ -22,12 +25,39 @@ export default class Logger {
   private _verboseEnabled: boolean;
   private _logs: LogEntry[];
   private readonly _MAX_LOG_AGE: number;
+  private logFilePath: string;
 
   constructor(eventEmitter: EventEmitter) {
     this.eventEmitter = eventEmitter;
     this._verboseEnabled = false;
     this._logs = []; // Store logs in memory
     this._MAX_LOG_AGE = 2 * 60 * 1000; // 2 minutes in milliseconds
+
+    // Initialize log file
+    try {
+      const userDataPath = app.getPath('userData');
+      const logsDir = path.join(userDataPath, 'logs');
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      this.logFilePath = path.join(logsDir, 'app.log');
+
+      // Rotate logs on startup (rename current to .old)
+      if (fs.existsSync(this.logFilePath)) {
+        const stats = fs.statSync(this.logFilePath);
+        // If log file is > 1MB, rotate it
+        if (stats.size > 1024 * 1024) {
+          const oldPath = path.join(logsDir, 'app.log.old');
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+          fs.renameSync(this.logFilePath, oldPath);
+        }
+      }
+
+      this._appendToFile('info', 'Logger initialized. Log file path: ' + this.logFilePath);
+    } catch (err) {
+      console.error('Failed to initialize log file:', err);
+      this.logFilePath = ''; // Disable file logging
+    }
   }
 
   /**
@@ -128,10 +158,45 @@ export default class Logger {
   }
 
   /**
+   * Append log message to file
+   * @param {string} level 
+   * @param {string} message 
+   * @param {any} meta 
+   */
+  private _appendToFile(level: string, message: string, meta?: any): void {
+    if (!this.logFilePath) return;
+
+    try {
+      const timestamp = new Date().toISOString();
+      let logLine = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+
+      if (meta) {
+        if (meta instanceof Error) {
+          logLine += `\nStack: ${meta.stack}`;
+        } else {
+          try {
+            logLine += ` ${JSON.stringify(meta)}`;
+          } catch (e) {
+            logLine += ` [Circular/Unserializable]`;
+          }
+        }
+      }
+
+      logLine += '\n';
+      fs.appendFileSync(this.logFilePath, logLine);
+    } catch (err) {
+      console.error('Failed to write to log file:', err);
+    }
+  }
+
+  /**
    * Add log to internal storage and prune old logs
    * @private
    */
   private _addLog(level: string, message: string, meta: any): void {
+    // Write to file immediately
+    this._appendToFile(level, message, meta);
+
     const timestamp = Date.now();
     const entry: LogEntry = {
       timestamp,
