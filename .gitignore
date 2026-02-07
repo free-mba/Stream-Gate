@@ -52,3 +52,6 @@ binaries/
 # Electron
 out/
 app/
+
+# Tauri (experimental - not for production)
+src-tauri/
