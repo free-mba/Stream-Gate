@@ -51,10 +51,10 @@ jobs:
           # If binaries are stored via Git LFS, ensure we fetch the real contents.
           lfs: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: '18'
+          bun-version: latest
 
       - name: Download latest Stream Gate client binary (from slipstream-rust-deploy)
         shell: bash
@@ -120,7 +120,7 @@ jobs:
           sudo apt-get install -y fakeroot dpkg-dev
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Set execute permissions for binaries
         if: matrix.platform == 'mac' || matrix.platform == 'linux'
@@ -136,7 +136,7 @@ jobs:
           fi
 
       - name: Build application
-        run: npm run ${{ matrix.build-script }}
+        run: bun run ${{ matrix.build-script }}
         continue-on-error: false
 
       - name: List build artifacts
