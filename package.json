@@ -74,7 +74,7 @@
   },
   "build": {
     "appId": "com.streamgate.gui",
-    "productName": "Stream Gate",
+    "productName": "StreamGate",
     "publish": null,
     "directories": {
       "output": "dist"
@@ -116,9 +116,9 @@
       "icon": "assets/icons/icon.icns",
       "extendInfo": {
         "NSHighResolutionCapable": true,
-        "CFBundleName": "Stream Gate",
+        "CFBundleName": "StreamGate",
         "CFBundleDisplayName": "Stream Gate",
-        "CFBundleExecutable": "Stream Gate"
+        "CFBundleExecutable": "StreamGate"
       },
       "hardenedRuntime": false,
       "gatekeeperAssess": false
