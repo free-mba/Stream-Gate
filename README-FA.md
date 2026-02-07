@@ -35,7 +35,6 @@
 | Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
 
 
-> [!CAUTION] 
 > **حل مشکل اجرا در مک (App is damaged):**  
 >
 > **روش ۱ (ساده):**  
@@ -47,8 +46,13 @@
 > **روش ۲ (ترمینال):**  
 > اگر روش بالا کار نکرد، دستور زیر را اجرا کنید:  
 > ```bash
-> sudo xattr -r -d com.apple.quarantine /Applications/Stream\ Gate.app
+> sudo xattr -rd com.apple.quarantine /Applications/StreamGate.app
+> sudo xattr -cr /Applications/StreamGate.app
+> sudo chmod -R 755 /Applications/StreamGate.app
 > ```
+
+> [!TIP]
+> **لینک کمکی**: اگر در دانلود از گیت‌هاب مشکل دارید، از [سایت جایگزین (ghadrboland.ir)](https://www.ghadrboland.ir/) استفاده کنید.
 
 اگر دانلود مستقیم کار نکرد، از صفحه [Releases](https://github.com/free-mba/Stream-Gate/releases/latest) استفاده کنید.
 

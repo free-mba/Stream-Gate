@@ -52,6 +52,9 @@ Experience an interface that feels alive. Stream Gate features:
 
 Download the latest release for your platform:
 
+> [!TIP]
+> **Mirror Downloads**: If you have trouble downloading from GitHub, use our [Mirror Website (ghadrboland.ir)](https://www.ghadrboland.ir/).
+
 | Platform | Download |
 |:---|:---|
 | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-ARM64.dmg) |

@@ -314,7 +314,16 @@ jobs:
             ## 🎉 Stream Gate v${{ steps.get_version.outputs.VERSION }}
 
             > [!TIP]
-            > **Mirror Downloads**: If you've trouble downloading from GitHub, use our [Mirror Website](https://free-mba.github.io/Stream-Gate/).
+            > **Mirror Downloads**: If you've trouble downloading from GitHub, use our [Mirror Website (ghadrboland.ir)](https://www.ghadrboland.ir/).
+
+            > [!CAUTION] 
+            > **macOS: App is damaged and can’t be opened?**  
+            > Run this in Terminal:
+            > ```bash
+            > sudo xattr -rd com.apple.quarantine /Applications/StreamGate.app
+            > sudo xattr -cr /Applications/StreamGate.app
+            > sudo chmod -R 755 /Applications/StreamGate.app
+            > ```
 
             ### 📥 Downloads
 

@@ -141,7 +141,8 @@ export default class WindowService {
     this.logger.info('Main window created');
 
     // Enable DevTools for debugging white screen
-    if (isDev) {
+    // Enable DevTools only in development and when not packaged
+    if (isDev && !this.app.isPackaged) {
       this.mainWindow.webContents.openDevTools();
     }
 

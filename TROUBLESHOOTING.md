@@ -15,7 +15,7 @@ To resolve this, you need to remove the "quarantine" attribute using the Termina
     sudo xattr -cr /Applications/StreamGate.app
     sudo chmod -R 755 /Applications/StreamGate.app
     ```
-    *Note: If you haven't moved the app to Applications yet, replace `/Applications/` with the actual path to the app.*
+    *Note: If you haven't moved the app to Applications yet, replace `/Applications/StreamGate.app` with the actual path to the app.*
 
 ### Alternative Method (Right-Click)
 
