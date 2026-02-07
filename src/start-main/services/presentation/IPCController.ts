@@ -107,6 +107,7 @@ export default class IPCController {
     ipcMain.handle('get-settings', this._handleGetSettings.bind(this));
     ipcMain.handle('set-authoritative', this._handleSetAuthoritative.bind(this));
     ipcMain.handle('set-resolver', this._handleSetResolver.bind(this));
+    ipcMain.handle('set-resolvers', this._handleSetResolvers.bind(this));
     ipcMain.handle('set-verbose', this._handleSetVerbose.bind(this));
     ipcMain.handle('set-socks5-auth', this._handleSetSocks5Auth.bind(this));
     ipcMain.handle('save-settings', this._handleSaveSettings.bind(this));
@@ -153,12 +154,14 @@ export default class IPCController {
       tunMode: payload.tunMode,
       customDnsEnabled: payload.customDnsEnabled, // Pass these through
       primaryDns: payload.primaryDns,
-      secondaryDns: payload.secondaryDns
+      secondaryDns: payload.secondaryDns,
+      resolvers: payload.resolvers || []
     };
 
     // Save "Last Used" connection settings (Persistence responsibility)
     this.settingsService.save({
       resolver: config.resolver,
+      resolvers: config.resolvers,
       domain: config.domain,
       mode: config.tunMode ? 'tun' : 'proxy'
     });
@@ -217,7 +220,8 @@ export default class IPCController {
    */
   _handleSetResolver(event: IpcMainInvokeEvent, payload: any) {
     try {
-      const parsed = this.settingsService.parseDnsServer(payload?.resolver);
+      const resolver = typeof payload === 'string' ? payload : payload?.resolver;
+      const parsed = this.settingsService.parseDnsServer(resolver);
       if (!parsed) {
         return {
           success: false,
@@ -231,6 +235,24 @@ export default class IPCController {
       return { success: true, resolver: normalized };
     } catch (err: any) {
       return { success: false, error: err?.message || String(err) };
+    }
+  }
+
+  /**
+   * Handle set-resolvers
+   * @private
+   */
+  _handleSetResolvers(event: IpcMainInvokeEvent, payload: any) {
+    try {
+      const resolvers = Array.isArray(payload) ? payload : payload?.resolvers;
+      if (!Array.isArray(resolvers)) {
+        return { success: false, error: 'Resolvers must be an array' };
+      }
+
+      this.settingsService.save({ resolvers });
+      return { success: true, resolvers };
+    } catch (err: any) {
+      return { success: false, error: err.message };
     }
   }
 

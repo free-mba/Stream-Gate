@@ -17,26 +17,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: '18'
-          cache: 'npm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Verify project structure
         shell: bash
         run: |
           echo "Checking project files..."
-          test -f main.js || exit 1
+          test -f src/start-main/main.ts || exit 1
           test -f index.html || exit 1
           test -f package.json || exit 1
           echo "✅ All required files present"
 
       - name: Check syntax
-        run: node -c main.js
+        run: bun build src/start-main/main.ts --outfile /tmp/main.mjs --target=node --external electron
 
       - name: Verify binaries exist
         shell: bash
@@ -44,26 +43,26 @@ jobs:
           echo "Running on OS: ${{ runner.os }}"
           MISSING_BINARY=0
           if [ "${{ runner.os }}" == "Linux" ]; then
-            if [ -f binaries/Stream Gate-client-linux ] || [ -f Stream Gate-client-linux ]; then
+            if [ -f binaries/stream-client-linux ] || [ -f stream-client-linux ]; then
               echo "✅ Linux binary found"
             else
-              echo "⚠️  WARNING: Linux binary (binaries/Stream Gate-client-linux) not found"
+              echo "⚠️  WARNING: Linux binary (binaries/stream-client-linux) not found"
               echo "   This binary is required for Linux builds (see BUILD.md)"
               MISSING_BINARY=1
             fi
           elif [ "${{ runner.os }}" == "macOS" ]; then
-            if [ -f binaries/Stream Gate-client-mac-arm64 ] || [ -f binaries/Stream Gate-client-mac-intel ] || [ -f Stream Gate-client-mac ]; then
+            if [ -f binaries/stream-client-mac-arm64 ] || [ -f binaries/stream-client-mac-intel ] || [ -f stream-client-mac ]; then
               echo "✅ macOS binary found"
             else
-              echo "⚠️  WARNING: macOS binaries (binaries/Stream Gate-client-mac-arm64 and/or binaries/Stream Gate-client-mac-intel) not found"
+              echo "⚠️  WARNING: macOS binaries (binaries/stream-client-mac-arm64 and/or binaries/stream-client-mac-intel) not found"
               echo "   This binary is required for macOS builds (see BUILD.md)"
               MISSING_BINARY=1
             fi
           elif [ "${{ runner.os }}" == "Windows" ]; then
-            if [ -f binaries/Stream Gate-client-win.exe ] || [ -f Stream Gate-client-win.exe ]; then
+            if [ -f binaries/stream-client-win.exe ] || [ -f stream-client-win.exe ]; then
               echo "✅ Windows binary found"
             else
-              echo "⚠️  WARNING: Windows binary (binaries/Stream Gate-client-win.exe) not found"
+              echo "⚠️  WARNING: Windows binary (binaries/stream-client-win.exe) not found"
               echo "   This binary is required for Windows builds (see BUILD.md and .gitignore)"
               echo "   The binary must be present under ./binaries/ (preferred)."
               MISSING_BINARY=1

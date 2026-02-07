@@ -13,6 +13,7 @@ export interface Config {
 
 export interface Settings {
     resolver: string;
+    resolvers: string[];
     domain: string;
     mode: 'proxy' | 'tun';
     authoritative: boolean;

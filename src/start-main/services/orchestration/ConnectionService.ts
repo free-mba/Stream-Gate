@@ -32,6 +32,7 @@ interface ConnectionServiceDependencies {
 
 interface StartOptions {
   resolver: string;
+  resolvers: string[];
   domain: string;
   tunMode?: boolean;
   keepAliveInterval?: number;
@@ -121,6 +122,7 @@ export default class ConnectionService {
     // No fallback to settingsService here.
     let {
       resolver,
+      resolvers,
       domain,
       tunMode = false,
       keepAliveInterval,
@@ -156,11 +158,13 @@ export default class ConnectionService {
       this.activeConfig = { ...options, tunMode };
 
       // Start Stream Gate client
-      // Pass finalDomain (IP) instead of original domain if resolved
-      await this.processManager.start(resolver, finalDomain, {
+      // Pass the first resolver for backward compatibility if needed, 
+      // but the process manager should ideally use the whole list.
+      await this.processManager.start(resolvers?.[0] || resolver, finalDomain, {
         authoritative: authoritative || false,
         keepAliveInterval,
-        congestionControl
+        congestionControl,
+        resolvers: resolvers || [resolver]
       });
 
       // Start HTTP proxy
@@ -372,17 +376,16 @@ export default class ConnectionService {
           // If we call `processManager.start`, we are using `domain` from `activeConfig`.
           // If `start()` resolved it, `activeConfig` still holds the original domain (because we stored `options` before modification? No, wait.
           // `this.activeConfig = { ...options, tunMode };` happens before resolution in `start()`?
-          // No, `start` has `let { ... } = options`. Then `let finalDomain = domain`. Then resolution updates `finalDomain`.
-          // `this.activeConfig` stores `options`, which has the ORIGINAL `domain`.
-          // So if we just use `domain` from `activeConfig`, we are using the hostname, not the IP.
-          // `processManager.start` expects the domain (or IP).
-          // If we want to re-resolve, we should probably do that.
-          // But for now, let's keep exact original behavior (or close to it) which seemed to just restart processManager.
+          const configToUse = this.activeConfig;
+          const resolverToUse = configToUse.resolvers?.[0] || configToUse.resolver;
+          const domainToUse = configToUse.domain;
+          const optsToUse = configToUse;
 
-          await this.processManager.start(resolver, domain, {
-            authoritative: opts.authoritative,
-            keepAliveInterval: opts.keepAliveInterval,
-            congestionControl: opts.congestionControl
+          await this.processManager.start(resolverToUse, domainToUse, {
+            authoritative: optsToUse.authoritative,
+            keepAliveInterval: optsToUse.keepAliveInterval,
+            congestionControl: optsToUse.congestionControl,
+            resolvers: configToUse.resolvers || [configToUse.resolver]
           });
           await this.proxyService.startHttpProxy();
 

@@ -24,6 +24,7 @@ interface StartOptions {
   authoritative?: boolean;
   keepAliveInterval?: number;
   congestionControl?: string;
+  resolvers?: string[];
 }
 
 export default class ProcessManager {
@@ -122,7 +123,7 @@ export default class ProcessManager {
    * @returns {Promise<void>}
    */
   async start(resolver: string, domain: string, options: StartOptions = {}): Promise<void> {
-    const { authoritative = false, keepAliveInterval, congestionControl } = options;
+    const { authoritative = false, keepAliveInterval, congestionControl, resolvers } = options;
 
     const clientPath = this._getClientPath();
     if (!clientPath) {
@@ -145,12 +146,16 @@ export default class ProcessManager {
     // Ensure execute permissions on macOS and Linux
     this._ensureExecutablePermissions(clientPath);
 
-    const args = [
-      authoritative ? '--authoritative' : '--resolver',
-      resolver,
-      '--domain',
-      domain
-    ];
+    const flag = authoritative ? '--authoritative' : '--resolver';
+    const args: string[] = [];
+
+    const finalResolvers = (resolvers && resolvers.length > 0) ? resolvers : [resolver];
+
+    finalResolvers.forEach(res => {
+      args.push(flag, res);
+    });
+
+    args.push('--domain', domain);
 
     if (keepAliveInterval) {
       args.push('--keep-alive-interval', keepAliveInterval.toString());

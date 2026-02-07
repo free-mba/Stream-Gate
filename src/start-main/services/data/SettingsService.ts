@@ -29,6 +29,7 @@ interface ConfigItem {
 
 export interface Settings {
   resolver: string;
+  resolvers: string[];
   domain: string;
   mode: 'proxy' | 'tun';
   authoritative: boolean;
@@ -75,6 +76,7 @@ export default class SettingsService {
     // Default settings
     this.defaults = {
       resolver: '8.8.8.8:53',
+      resolvers: ['8.8.8.8:53', '1.1.1.1:53'],
       domain: 's.example.com',
       mode: 'proxy',
       authoritative: false,
