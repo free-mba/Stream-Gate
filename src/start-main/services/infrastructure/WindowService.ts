@@ -77,12 +77,13 @@ export default class WindowService {
 
     const isDev = process.env.NODE_ENV === 'development';
     // Navigate from dist/main/main.mjs -> root -> src/start-renderer/dist
-    const uiDistPath = path.join(__dirname, '../../src/start-renderer/dist/index.html');
+    // Use app.getAppPath() to avoid hardcoded paths from build time (CI runner path issue)
+    const uiDistPath = path.join(this.app.getAppPath(), 'src/start-renderer/dist/index.html');
 
     // Helper to load built files
     const loadBuiltFiles = () => {
       this.logger.info(`[WindowService] resolving UI path...`);
-      this.logger.info(`[WindowService] __dirname: ${__dirname}`);
+      this.logger.info(`[WindowService] app.getAppPath(): ${this.app.getAppPath()}`);
       this.logger.info(`[WindowService] Target UI path: ${uiDistPath}`);
 
       try {
@@ -98,7 +99,7 @@ export default class WindowService {
           try {
             const distDir = path.dirname(uiDistPath);
             this.logger.info(`[WindowService] Contents of ${distDir}:`, fs.readdirSync(distDir));
-            const srcDir = path.join(__dirname, '../../src');
+            const srcDir = path.join(this.app.getAppPath(), 'src');
             if (fs.existsSync(srcDir)) {
               this.logger.info(`[WindowService] Contents of ${srcDir}:`, fs.readdirSync(srcDir));
             }
@@ -106,7 +107,8 @@ export default class WindowService {
             this.logger.warn('[WindowService] Could not list directory contents:', e);
           }
 
-          const fallbackPath = path.join(__dirname, '../../index.html');
+
+          const fallbackPath = path.join(this.app.getAppPath(), 'index.html');
           this.logger.warn(`[WindowService] Falling back to ${fallbackPath}`);
           this.mainWindow?.loadFile(fallbackPath);
         }

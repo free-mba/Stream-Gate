@@ -82,7 +82,7 @@ function initializeServices(): void {
     eventEmitter,
     logger,
     app,
-    paths: { resourcesPath: path.resolve(__dirname, '../../') }
+    paths: { resourcesPath: app.getAppPath() }
   });
   proxyService = new ProxyService(eventEmitter, logger, settingsService);
   systemProxyService = new SystemProxyService(logger, settingsService);
