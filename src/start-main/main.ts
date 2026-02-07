@@ -58,6 +58,13 @@ function initializeServices(): void {
   eventEmitter = new EventEmitter();
   logger = new Logger(eventEmitter);
 
+  // IMMEDIATE LOG: Confirm we started
+  logger.info('---------------------------------------------------------');
+  logger.info('APPLICATION STARTUP: initializeServices() called');
+  logger.info(`App Path: ${app.getAppPath()}`);
+  logger.info(`User Data: ${app.getPath('userData')}`);
+  logger.info('---------------------------------------------------------');
+
   // Infrastructure services
   windowService = new WindowService(logger, app, APP_NAME);
 

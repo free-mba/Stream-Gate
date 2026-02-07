@@ -81,15 +81,37 @@ export default class WindowService {
 
     // Helper to load built files
     const loadBuiltFiles = () => {
-      this.logger.info(`__dirname is: ${__dirname}`);
-      this.logger.info(`Checking UI dist path: ${uiDistPath}`);
-      if (fs.existsSync(uiDistPath)) {
-        this.logger.info('Loading built UI from ui/dist...');
-        this.mainWindow?.loadFile(uiDistPath);
-      } else {
-        const fallbackPath = path.join(__dirname, '../../index.html');
-        this.logger.warn(`UI build not found at ${uiDistPath}, falling back to ${fallbackPath}`);
-        this.mainWindow?.loadFile(fallbackPath);
+      this.logger.info(`[WindowService] resolving UI path...`);
+      this.logger.info(`[WindowService] __dirname: ${__dirname}`);
+      this.logger.info(`[WindowService] Target UI path: ${uiDistPath}`);
+
+      try {
+        if (fs.existsSync(uiDistPath)) {
+          this.logger.info('[WindowService] UI file exists. Loading...');
+          this.mainWindow?.loadFile(uiDistPath).catch(err => {
+            this.logger.error('[WindowService] Failed to loadFile:', err);
+          });
+        } else {
+          this.logger.error(`[WindowService] UI file NOT found at: ${uiDistPath}`);
+
+          // Debugging: List contents of parent directories to help user find where it is
+          try {
+            const distDir = path.dirname(uiDistPath);
+            this.logger.info(`[WindowService] Contents of ${distDir}:`, fs.readdirSync(distDir));
+            const srcDir = path.join(__dirname, '../../src');
+            if (fs.existsSync(srcDir)) {
+              this.logger.info(`[WindowService] Contents of ${srcDir}:`, fs.readdirSync(srcDir));
+            }
+          } catch (e) {
+            this.logger.warn('[WindowService] Could not list directory contents:', e);
+          }
+
+          const fallbackPath = path.join(__dirname, '../../index.html');
+          this.logger.warn(`[WindowService] Falling back to ${fallbackPath}`);
+          this.mainWindow?.loadFile(fallbackPath);
+        }
+      } catch (error) {
+        this.logger.error('[WindowService] Error verifying/loading UI:', error);
       }
     };
 
