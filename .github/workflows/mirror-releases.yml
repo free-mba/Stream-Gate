@@ -1,0 +1,87 @@
+name: Mirror Releases to GitHub Pages
+
+on:
+  release:
+    types: [published, prereleased]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to mirror (optional, defaults to latest)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Release Info
+        id: release_info
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          elif [ "${{ github.event_name }}" == "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          else
+            TAG=$(gh release view --json tagName --template '{{.tagName}}')
+          fi
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+          echo "Mirroring release: $TAG"
+
+      - name: Download all release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p mirror-tmp
+          gh release download "${{ steps.release_info.outputs.TAG }}" --dir mirror-tmp --pattern "*"
+
+      - name: Prepare gh-pages branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Switch to gh-pages or create it
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git checkout gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf .
+            echo "Stream Gate Landing Page" > index.html
+          fi
+
+      - name: Sync mirrored assets
+        shell: bash
+        run: |
+          TAG="${{ steps.release_info.outputs.TAG }}"
+          
+          # Create directories
+          mkdir -p "downloads/$TAG"
+          mkdir -p "downloads/latest"
+          
+          # Copy assets to versioned directory
+          cp mirror-tmp/* "downloads/$TAG/"
+          
+          # Sync latest directory (overwrite)
+          rm -rf downloads/latest/*
+          cp mirror-tmp/* "downloads/latest/"
+          
+          # Ensure index.html and docs content exist on gh-pages if not there
+          # We need to copy the content of 'docs/' from the main branch/commit
+          git checkout ${{ github.sha }} -- docs/
+          mv docs/* .
+          rmdir docs
+          
+          # Add and commit
+          git add .
+          git commit -m "chore: mirror release $TAG to GitHub Pages" || echo "No changes to commit"
+          git push origin gh-pages

@@ -54,14 +54,18 @@ function renderRelease(release) {
                 <div class="feature-icon">${p.icon}</div>
                 <h4>${p.name}</h4>
                 <p class="card-meta">Version ${release.tag_name}</p>
-                ${p.assets.map(a => `
-                    <a href="${a.browser_download_url}" class="btn-download" style="margin-top: 10px;">
-                        ${a.name.endsWith('.dmg') ? 'macOS DMG' :
-                a.name.endsWith('.exe') ? 'Windows Installer' :
-                    a.name.endsWith('.AppImage') ? 'Linux AppImage' : 'Linux DEB'} 
-                        (${(a.size / 1024 / 1024).toFixed(1)} MB)
-                    </a>
-                `).join('')}
+                ${p.assets.map(a => {
+            // Use mirrored path instead of direct GitHub Release URL
+            const mirroredUrl = `./downloads/latest/${a.name}`;
+            return `
+                        <a href="${mirroredUrl}" class="btn-download" style="margin-top: 10px;">
+                            ${a.name.endsWith('.dmg') ? 'macOS DMG' :
+                    a.name.endsWith('.exe') ? 'Windows Installer' :
+                        a.name.endsWith('.AppImage') ? 'Linux AppImage' : 'Linux DEB'} 
+                            (${(a.size / 1024 / 1024).toFixed(1)} MB)
+                        </a>
+                    `;
+        }).join('')}
             </div>
         `;
     }).join('');
