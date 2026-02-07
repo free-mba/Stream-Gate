@@ -81,12 +81,15 @@ export default class WindowService {
 
     // Helper to load built files
     const loadBuiltFiles = () => {
+      this.logger.info(`__dirname is: ${__dirname}`);
+      this.logger.info(`Checking UI dist path: ${uiDistPath}`);
       if (fs.existsSync(uiDistPath)) {
         this.logger.info('Loading built UI from ui/dist...');
         this.mainWindow?.loadFile(uiDistPath);
       } else {
-        this.logger.warn('UI build not found, falling back to legacy index.html');
-        this.mainWindow?.loadFile(path.join(__dirname, '../../index.html'));
+        const fallbackPath = path.join(__dirname, '../../index.html');
+        this.logger.warn(`UI build not found at ${uiDistPath}, falling back to ${fallbackPath}`);
+        this.mainWindow?.loadFile(fallbackPath);
       }
     };
 
@@ -113,8 +116,8 @@ export default class WindowService {
 
     this.logger.info('Main window created');
 
-    // Unemployment for debugging
-    // this.mainWindow.webContents.openDevTools();
+    // Enable DevTools for debugging white screen
+    this.mainWindow.webContents.openDevTools();
 
     return this.mainWindow;
   }
