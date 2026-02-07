@@ -9,6 +9,7 @@
 
 import { app } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const APP_NAME = 'Stream Gate';
 
@@ -86,7 +87,16 @@ function initializeServices(): void {
   });
   proxyService = new ProxyService(eventEmitter, logger, settingsService);
   systemProxyService = new SystemProxyService(logger, settingsService);
-  dnsService = new DNSService(logger);
+  // Check for DNS Worker script
+  const workerPath = path.join(app.getAppPath(), 'scripts', 'dns-scanner-worker.js');
+  if (fs.existsSync(workerPath)) {
+    logger.info(`✅ DNS Worker script found: ${workerPath}`);
+  } else {
+    logger.error(`❌ DNS Worker script NOT found at: ${workerPath}`);
+    logger.warn('   Ensure "scripts/dns-scanner-worker.js" is in "files" in package.json');
+  }
+
+  dnsService = new DNSService(logger, workerPath);
   dnsResolutionService = new DnsResolutionService(logger);
 
   // Orchestration service (depends on business services)
