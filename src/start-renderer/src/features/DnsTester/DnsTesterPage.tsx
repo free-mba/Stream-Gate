@@ -2,14 +2,13 @@ import { useAtom, useAtomValue } from "jotai";
 import {
     isDnsScanningAtom,
     dnsProgressAtom,
-    dnsScanStatsAtom
+    dnsScanStatsAtom,
+    settingsAtom
 } from "@/store";
 
 import { dnsScanner } from "./DnsScannerService";
 import { DnsControls } from "./components/DnsControls";
 import { DnsTable } from "./components/DnsTable";
-import { ipc } from "@/services/IpcService";
-import type { Settings } from "@/types";
 import { useTranslation } from "@/lib/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -63,11 +62,28 @@ export default function DnsTesterPage() {
         await dnsScanner.stopScan();
     }, []);
 
+    const [settings, setSettings] = useAtom(settingsAtom); // Imported from store
+
     const handleUse = useCallback(async (server: string) => {
         const normalized = server.includes(':') ? server : `${server}:${DEFAULT_DNS_PORT}`;
-        const currentSettings = await ipc.invoke<Settings>('get-settings');
-        await ipc.invoke('save-settings', { ...currentSettings, resolver: normalized });
-    }, []);
+
+        // 1. Add to savedDns so it appears in the list
+        const currentSaved = settings?.savedDns || [];
+        const newSaved = Array.from(new Set([...currentSaved, normalized]));
+
+        // 2. Add to resolvers (multi-select)
+        const currentResolvers = settings?.resolvers || [];
+        const newResolvers = Array.from(new Set([...currentResolvers, normalized]));
+
+        // 3. Update settings (local atom + backend)
+        await setSettings({
+            savedDns: newSaved,
+            resolvers: newResolvers,
+            resolver: normalized // Set as primary/active for legacy support
+        });
+
+        // Optional: Notify user or show toast
+    }, [settings, setSettings]);
 
     return (
         <div className="h-full flex flex-col p-4 animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
