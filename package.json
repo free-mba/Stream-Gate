@@ -24,6 +24,7 @@
     "prebuild:win": "bun run scripts/verify-binaries.js --platform win",
     "build:win": "bun run build:main && bun run build:ui && electron-builder --win --publish never",
     "prebuild:win:x64": "bun run scripts/verify-binaries.js --platform win",
+    "build:win:x64": "bun run build:main && bun run build:ui && electron-builder --win --x64 --publish never",
     "prebuild:win:ia32": "bun run scripts/verify-binaries.js --platform win",
     "build:win:ia32": "bun run build:main && bun run build:ui && electron-builder --win --ia32 --publish never",
     "prebuild:linux": "bun run scripts/verify-binaries.js --platform linux",
