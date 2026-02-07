@@ -127,6 +127,23 @@ export default class ProcessManager {
   }
 
   /**
+   * Helper to force kill any process on a specific port
+   * @param {number} port
+   * @private
+   */
+  private _killPort(port: number): Promise<void> {
+    return new Promise((resolve) => {
+      exec(`lsof -ti:${port} | xargs kill -9 2>/dev/null`, (err) => {
+        if (!err) {
+          this.logger.verbose(`Force cleaned port ${port}`);
+        }
+        // Always resolve, we tried our best
+        resolve();
+      });
+    });
+  }
+
+  /**
    * Start the Stream Gate client process
    * @param {string} resolver - DNS resolver (e.g., "8.8.8.8:53")
    * @param {string} domain - Stream Gate server domain
@@ -136,6 +153,9 @@ export default class ProcessManager {
    */
   async start(resolver: string, domain: string, options: StartOptions = {}): Promise<void> {
     const { authoritative = false, keepAliveInterval, congestionControl, resolvers } = options;
+
+    // Pre-flight check: Clean up port 5201 before we even try to start
+    await this._killPort(5201);
 
     const clientPath = this._getClientPath();
     if (!clientPath) {
@@ -202,11 +222,9 @@ export default class ProcessManager {
       // Check for port already in use error
       if (errorStr.includes('Address already in use') || errorStr.includes('EADDRINUSE')) {
         this.logger.warn('Port 5201 is already in use. Trying to kill existing process...');
-        exec('lsof -ti:5201 | xargs kill -9 2>/dev/null', (err) => {
-          if (!err) {
-            this.logger.info('Killed process using port 5201. Please restart the VPN.');
-            this.eventEmitter.emit('process:error', 'Port 5201 was in use. Killed existing process. Please restart the VPN.');
-          }
+        this._killPort(5201).then(() => {
+          this.logger.info('Killed process using port 5201. Please restart the VPN.');
+          this.eventEmitter.emit('process:error', 'Port 5201 was in use. Killed existing process. Please restart the VPN.');
         });
       }
 
@@ -259,12 +277,30 @@ export default class ProcessManager {
   /**
    * Stop the Stream Gate client process
    */
-  stop(): void {
+  async stop(): Promise<void> {
     if (this.process) {
-      this.logger.info('Stopping Stream Gate client');
-      this.process.kill();
+      this.logger.info('Stopping Stream Gate client...');
+
+      // 1. Try graceful SIGTERM
+      this.process.kill('SIGTERM');
+
+      // 2. Wait up to 2 seconds for it to exit
+      for (let i = 0; i < 20; i++) {
+        if (!this.process || this.process.killed) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      // 3. Force SIGKILL if still running
+      if (this.process && !this.process.killed) {
+        this.logger.warn('Stream Gate did not exit, forcing SIGKILL...');
+        this.process.kill('SIGKILL');
+      }
+
       this.process = null;
     }
+
+    // 4. Double tap: Ensure port 5201 is free
+    await this._killPort(5201);
   }
 
   /**

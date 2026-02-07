@@ -33,6 +33,7 @@ export interface Settings {
     customDnsEnabled?: boolean;
     primaryDns?: string;
     secondaryDns?: string;
+    dnsTestResults?: any[];
 }
 
 export interface Status {

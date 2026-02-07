@@ -627,15 +627,21 @@ export default class IPCController {
    * @private
    */
   async _handleDNSScanStart(event: IpcMainInvokeEvent, payload: any) {
+    // Reset results for new scan
+    const currentScanResults: any[] = [];
+
     this.dnsService.startScan(
       payload,
       (completed: any, total: any) => {
         this.windowService.sendToRenderer('dns-scan-progress', { completed, total });
       },
       (result: any) => {
+        currentScanResults.push(result);
         this.windowService.sendToRenderer('dns-scan-result', result);
       },
       () => {
+        // Save results to settings on completion
+        this.settingsService.save({ dnsTestResults: currentScanResults });
         this.windowService.sendToRenderer('dns-scan-complete', undefined);
       }
     );
@@ -648,6 +654,12 @@ export default class IPCController {
    */
   async _handleDNSScanStop() {
     await this.dnsService.stopScan();
+
+    // Note: We don't save partial results here because we don't have easy access 
+    // to the local 'currentScanResults' variable from startScan scope.
+    // If saving partial results is required, we'd need to promote currentScanResults 
+    // to a class property. For now, only completed scans are saved.
+
     return { success: true };
   }
 }

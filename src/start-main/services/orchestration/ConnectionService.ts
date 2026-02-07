@@ -215,7 +215,7 @@ export default class ConnectionService {
 
     // Stop all services
     this.proxyService.stopAll();
-    this.processManager.stop();
+    await this.processManager.stop();
 
     const result = {
       success: true,
@@ -339,7 +339,7 @@ export default class ConnectionService {
 
         // Stop existing services cleanly
         this.proxyService.stopAll();
-        this.processManager.stop();
+        await this.processManager.stop();
 
         // Wait a moment for cleanup
         await new Promise(resolve => setTimeout(resolve, 1000));

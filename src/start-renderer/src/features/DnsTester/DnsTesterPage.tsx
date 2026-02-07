@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Activity } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { IP_REGEX, COMMENT_PREFIX, DEFAULT_DNS_PORT, type ScanConfig } from "./DnsTesterConstants";
 import { dnsConfigAtom } from "./DnsTesterState";
 
@@ -63,6 +63,13 @@ export default function DnsTesterPage() {
     }, []);
 
     const [settings, setSettings] = useAtom(settingsAtom); // Imported from store
+
+    // Load saved results if available
+    useEffect(() => {
+        if (!isRunning && stats.total === 0 && settings?.dnsTestResults && Array.isArray(settings.dnsTestResults) && settings.dnsTestResults.length > 0) {
+            dnsScanner.loadFromRawResults(settings.dnsTestResults);
+        }
+    }, [settings?.dnsTestResults, isRunning, stats.total]);
 
     const handleUse = useCallback(async (server: string) => {
         const normalized = server.includes(':') ? server : `${server}:${DEFAULT_DNS_PORT}`;

@@ -131,6 +131,29 @@ class DnsScannerService {
         store.set(isDnsScanningAtom, false);
         this.stopListeners();
     }
+
+    public loadFromRawResults(rawResults: any[]) {
+        if (!Array.isArray(rawResults) || rawResults.length === 0) return;
+
+        try {
+            const normalized = rawResults.map(r => this.normalizeResult(r));
+            store.set(dnsResultsAtom, normalized);
+
+            // Calculate stats
+            const completed = normalized.filter(r => r.stage === 'done' || r.stage === 'failed').length;
+            store.set(dnsScanStatsAtom, {
+                completed,
+                total: normalized.length
+            });
+
+            // If we loaded results, we can assume progress is 100% if all are done
+            if (completed === normalized.length && normalized.length > 0) {
+                store.set(dnsProgressAtom, 100);
+            }
+        } catch (err) {
+            console.error("Failed to load saved DNS results:", err);
+        }
+    }
 }
 
 export const dnsScanner = new DnsScannerService();

@@ -15,6 +15,7 @@ import http from 'http';
 import https from 'https';
 import net from 'net';
 import url from 'url';
+import { exec } from 'child_process';
 import { SocksClient, SocksProxy } from 'socks';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import EventEmitter from '../core/EventEmitter';
@@ -57,6 +58,23 @@ export default class ProxyService {
     this.prevUplink = 0;
     this.prevDownlink = 0;
     this.trafficInterval = null;
+  }
+
+  /**
+   * Helper to force kill any process on a specific port
+   * @param {number} port
+   * @private
+   */
+  private _killPort(port: number): Promise<void> {
+    return new Promise((resolve) => {
+      exec(`lsof -ti:${port} | xargs kill -9 2>/dev/null`, (err) => {
+        if (!err) {
+          this.logger.verbose(`Force cleaned port ${port}`);
+        }
+        // Always resolve, we tried our best
+        resolve();
+      });
+    });
   }
 
   /**
@@ -174,6 +192,9 @@ export default class ProxyService {
    * @returns {Promise<void>}
    */
   async startHttpProxy(): Promise<void> {
+    // 1. Ensure port is free
+    await this._killPort(HTTP_PROXY_PORT);
+
     return new Promise((resolve, reject) => {
       try {
         const socksUrl = this._buildSocks5Url();
@@ -494,6 +515,9 @@ export default class ProxyService {
    * @returns {Promise<void>}
    */
   async startSocksForwardProxy(): Promise<void> {
+    // 1. Ensure port is free
+    await this._killPort(SOCKS5_FORWARD_PORT);
+
     return new Promise((resolve, reject) => {
       try {
         if (this.socksForwardServer) {
@@ -699,6 +723,9 @@ export default class ProxyService {
   stopAll(): void {
     this.stopHttpProxy();
     this.stopSocksForwardProxy();
+    // Fire and forget cleanup
+    this._killPort(HTTP_PROXY_PORT);
+    this._killPort(SOCKS5_FORWARD_PORT);
   }
 
   /**

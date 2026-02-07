@@ -16,7 +16,7 @@ export const DnsTable = memo(({ handleUse }: DnsTableProps) => {
     const { showWorkingOnly } = useAtomValue(dnsConfigAtom);
 
     return (
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto min-h-0 h-full">
             <table className="w-full caption-bottom text-sm">
                 <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-md z-10">
                     <TableRow className="border-border hover:bg-transparent text-[10px] uppercase tracking-widest text-muted-foreground">

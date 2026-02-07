@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Check, Plus } from "lucide-react";
 import { Button } from "./button";
-import { ScrollArea } from "./scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
+import useOnClickOutside from "../../hooks/useOnClickOutside";
 
 interface GlassMultiSelectProps {
     values: string[];
@@ -65,20 +65,17 @@ export const GlassMultiSelect = ({
         ? `${values.length} Selected`
         : placeholder;
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
+    const sortedOptions = useMemo(() => {
+        return [...options].sort((a, b) => {
+            const aSelected = selectedSet.has(a);
+            const bSelected = selectedSet.has(b);
+            if (aSelected && !bSelected) return -1;
+            if (!aSelected && bSelected) return 1;
+            return a.localeCompare(b);
+        });
+    }, [options, values]);
 
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen]);
+    useOnClickOutside(containerRef, () => setIsOpen(false));
 
     return (
         <div className="relative w-fit" ref={containerRef}>
@@ -107,7 +104,7 @@ export const GlassMultiSelect = ({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute top-full mt-2 right-0 border border-border/60 text-foreground rounded-xl overflow-hidden w-full min-w-[max-content] bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/80 z-[100] p-1"
+                        className="absolute top-full mt-2 right-0 border border-border/60 text-foreground rounded-xl w-full min-w-[max-content] bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/80 z-[100] p-1"
                     >
                         <div className="pb-1 px-2 mb-1 border-b border-border/20">
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
@@ -115,9 +112,12 @@ export const GlassMultiSelect = ({
                             </span>
                         </div>
 
-                        <ScrollArea className="max-h-[280px]">
+                        <div
+                            className="overflow-y-auto overflow-x-hidden"
+                            style={{ maxHeight: '30vh', pointerEvents: 'auto' }}
+                        >
                             <div className="space-y-0.5">
-                                {options.map((option) => (
+                                {sortedOptions.map((option) => (
                                     <MultiSelectItem
                                         key={option}
                                         option={option}
@@ -126,7 +126,7 @@ export const GlassMultiSelect = ({
                                     />
                                 ))}
                             </div>
-                        </ScrollArea>
+                        </div>
 
                         {onAddCustom && (
                             <div className="pt-2 mt-2 border-t border-border">

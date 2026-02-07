@@ -45,6 +45,7 @@ export interface Settings {
   customDnsEnabled: boolean;
   primaryDns: string;
   secondaryDns: string;
+  dnsTestResults: any[];
 }
 
 interface DnsServerParseResult {
@@ -92,7 +93,8 @@ export default class SettingsService {
       // Custom DNS Configuration (Remote/Outbound Resolve)
       customDnsEnabled: false,
       primaryDns: '8.8.8.8',
-      secondaryDns: '1.1.1.1'
+      secondaryDns: '1.1.1.1',
+      dnsTestResults: []
     };
 
     // Current in-memory settings
