@@ -1,4 +1,5 @@
 import type { IpcRendererEvent } from 'electron';
+import { createTauriIpc } from './TauriIpcService';
 
 export interface IpcRenderer {
     invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<T>;
@@ -8,16 +9,24 @@ export interface IpcRenderer {
 }
 
 const createIpc = (): IpcRenderer => {
+    // 1. Check for Tauri
+    if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
+        console.log('Tauri environment detected');
+        return createTauriIpc();
+    }
+
+    // 2. Check for Electron
     if (typeof window !== 'undefined' && window.require) {
         try {
             const { ipcRenderer } = window.require('electron');
+            console.log('Electron environment detected');
             return ipcRenderer as IpcRenderer;
         } catch (e) {
             console.error('Failed to require electron', e);
         }
     }
 
-    // Mock IPC for browser development
+    // 3. Mock IPC for browser development
     console.warn('IPC not available, using mock');
     return {
         invoke: async <T = unknown>(channel: string, ...args: unknown[]): Promise<T> => {

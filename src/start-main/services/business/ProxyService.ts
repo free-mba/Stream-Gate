@@ -42,6 +42,8 @@ export default class ProxyService {
   private prevUplink: number;
   private prevDownlink: number;
   private trafficInterval: NodeJS.Timeout | null;
+  private smoothedUp: number;
+  private smoothedDown: number;
 
   constructor(eventEmitter: EventEmitter, logger: Logger, settingsService: SettingsService) {
     this.eventEmitter = eventEmitter;
@@ -57,6 +59,8 @@ export default class ProxyService {
     this.prevUplink = 0;
     this.prevDownlink = 0;
     this.trafficInterval = null;
+    this.smoothedUp = 0;
+    this.smoothedDown = 0;
   }
 
   /**
@@ -123,6 +127,12 @@ export default class ProxyService {
 
     this.prevUplink = this.bytesUplink;
     this.prevDownlink = this.bytesDownlink;
+    this.smoothedUp = 0;
+    this.smoothedDown = 0;
+
+    // Exponential smoothing factor (0.3 = 30% new value, 70% old value)
+    // Lower values = more smoothing, higher values = less smoothing
+    const alpha = 0.3;
 
     this.trafficInterval = setInterval(() => {
       const nowUp = this.bytesUplink;
@@ -134,10 +144,15 @@ export default class ProxyService {
       this.prevUplink = nowUp;
       this.prevDownlink = nowDown;
 
-      // Emit even if zero, so UI clears
+      // Apply exponential moving average (EMA) for smooth values
+      // Formula: smoothed = alpha * newValue + (1 - alpha) * previousSmoothed
+      this.smoothedUp = alpha * speedUp + (1 - alpha) * this.smoothedUp;
+      this.smoothedDown = alpha * speedDown + (1 - alpha) * this.smoothedDown;
+
+      // Emit smoothed values (never negative)
       this.eventEmitter.emit('traffic-update', {
-        up: speedUp < 0 ? 0 : speedUp,
-        down: speedDown < 0 ? 0 : speedDown
+        up: Math.max(0, this.smoothedUp),
+        down: Math.max(0, this.smoothedDown)
       });
     }, 1000);
   }

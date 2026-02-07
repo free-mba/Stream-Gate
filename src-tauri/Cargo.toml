@@ -1,0 +1,82 @@
+[package]
+name = "stream-gate"
+version = "1.0.0"
+description = "Stream Gate - VPN Client with HTTP Proxy"
+authors = ["Stream Gate Contributors"]
+license = "MIT"
+repository = "https://github.com/free-mba/Stream-Gate"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "stream_gate_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri core
+tauri = { version = "2", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-shell = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full", "process", "io-util", "sync"] }
+
+# HTTP client for update checks and proxy testing
+reqwest = { version = "0.12", features = ["json"] }
+
+# HTTP proxy server
+hyper = { version = "1", features = ["full", "http1", "http2", "server", "client"] }
+hyper-util = { version = "0.1", features = ["full", "tokio"] }
+http-body-util = "0.1"
+tokio-util = { version = "0.7", features = ["io"] }
+bytes = "1"
+
+# SOCKS5 client
+socks = "0.3"
+
+# Logging
+log = "0.4"
+
+# File system and paths
+dirs = "6"
+
+# DNS resolution
+trust-dns-resolver = "0.23"
+
+# UUID for unique identifiers
+uuid = { version = "1", features = ["v4"] }
+
+# Base64 for config import/export
+base64 = "0.22"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Lazy initialization
+once_cell = "1"
+
+# Open URLs in default browser
+open = "5"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS specific
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Windows specific (registry access)
+winreg = "0.55"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Linux specific
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
