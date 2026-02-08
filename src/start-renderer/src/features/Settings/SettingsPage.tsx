@@ -62,7 +62,14 @@ export default function SettingsPage() {
                 <Troubleshooting />
 
                 <div className="flex flex-col items-center justify-center pt-8 opacity-50">
-                    <span className="text-sm font-medium tracking-widest text-muted-foreground">{APP_NAME} <span className="text-primary">{APP_VERSION}</span></span>
+                    <a
+                        href="https://github.com/free-mba/Stream-Gate"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group text-sm font-medium tracking-widest text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    >
+                        {APP_NAME} <span className="text-primary transition-all duration-300 group-hover:brightness-125 group-hover:drop-shadow-[0_0_8px_rgba(37,99,235,0.5)]">{APP_VERSION}</span>
+                    </a>
                 </div>
             </div>
         </div>
