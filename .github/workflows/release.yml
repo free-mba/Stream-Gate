@@ -158,11 +158,11 @@ jobs:
           
           # Find and move primary artifact
           # Using find because version number might be in filename
-          find ${{ matrix.artifact_pattern }} -exec mv {} release_artifacts/${{ matrix.output_name }} \;
+          find ${{ matrix.artifact_pattern }} -maxdepth 1 -name "*.dmg" -o -name "*.AppImage" -o -name "*.exe" | head -n 1 | xargs -I {} mv {} release_artifacts/${{ matrix.output_name }}
           
           # Handle extra artifact (Linux DEB)
           if [ -n "${{ matrix.extra_artifact }}" ]; then
-            find ${{ matrix.extra_artifact }} -exec mv {} release_artifacts/${{ matrix.extra_output }} \;
+            find ${{ matrix.extra_artifact }} -maxdepth 1 -name "*.deb" | head -n 1 | xargs -I {} mv {} release_artifacts/${{ matrix.extra_output }}
           fi
           
           echo "=== Artifacts to Upload ==="
@@ -221,5 +221,5 @@ jobs:
 
           files: |
             release_artifacts/*
-          draft: true
+          draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'true' || contains(github.ref, '-') }}
