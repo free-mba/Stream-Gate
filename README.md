@@ -63,7 +63,7 @@ Download the latest release for your platform:
 | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x86.exe) |
 | Linux (x86_64) AppImage | [Stream-Gate-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.AppImage) |
 | Linux (x86_64) DEB | [Stream-Gate-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.deb) |
-| Android | [SlipNet](https://github.com/anonvector/SlipNet) (Recommended v1.5) |
+| Android | [SlipNet](https://github.com/anonvector/SlipNet) (Recommended Client) |
 
 ### 🪞 Mirrors (v1.0.13)
 
@@ -76,7 +76,6 @@ Download the latest release for your platform:
 | Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Windows-x86.exe) |
 | Linux (AppImage) | [Stream-Gate-Linux-x64.AppImage](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Linux-x64.AppImage) |
 | Linux (DEB) | [Stream-Gate-Linux-x64.deb](https://github-mirrors.margrop.net/github.com/free-mba/Stream-Gate/releases/download/v1.0.13/Stream-Gate-Linux-x64.deb) |
-
 | Android | [SlipNet](https://github.com/anonvector/SlipNet) (Recommended Client) |
 
 ---

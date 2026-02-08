@@ -58,14 +58,14 @@ Examples:
 ### What Gets Built
 
 - **macOS**: DMG installers
-  - `Stream Gate-GUI-macOS-ARM64.dmg`
-  - `Stream Gate-GUI-macOS-Intel.dmg`
+  - `Stream-Gate-macOS-ARM64.dmg`
+  - `Stream-Gate-macOS-Intel.dmg`
 - **Windows**: NSIS installers
-  - `Stream Gate-GUI-Windows-x64.exe`
-  - `Stream Gate-GUI-Windows-x86.exe`
+  - `Stream-Gate-Windows-x64.exe`
+  - `Stream-Gate-Windows-x86.exe`
 - **Linux**: AppImage and DEB packages
-  - `Stream Gate-GUI-Linux-x64.AppImage`
-  - `Stream Gate-GUI-Linux-x64.deb`
+  - `Stream-Gate-Linux-x64.AppImage`
+  - `Stream-Gate-Linux-x64.deb`
 
 ### Release Notes
 
