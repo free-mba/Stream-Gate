@@ -1,109 +1,56 @@
 # Project Structure
 
-This document describes the structure of the Stream Gate project.
+This document describes the structure of the Stream Gate project (Tauri + React + Rust).
 
 ## Directory Layout
 
 ```
-Stream Gate-GUI/
+Stream-Gate/
 ├── .github/                    # GitHub templates and workflows
 │   ├── ISSUE_TEMPLATE/        # Issue templates
-│   │   ├── bug_report.md
-│   │   └── feature_request.md
-│   └── pull_request_template.md
-├── assets/                     # Static assets
-│   └── icon.png               # Application icon (1024x1024 PNG)
-├── main.js                     # Electron main process
-├── index.html                  # UI and renderer process
-├── check-system-proxy.js       # System proxy status checker
-├── tun-manager.js              # TUN interface manager (legacy, not used)
-├── package.json                # Dependencies and build configuration
-├── .gitignore                  # Git ignore rules
-├── .npmrc                      # npm configuration
-├── LICENSE                     # MIT License
+│   └── workflows/              # CI/CD workflows (release.yml, etc.)
+├── assets/                     # Static assets (icons)
+├── binaries/                   # Sidecar binaries (downloaded via script)
+│   ├── stream-client-mac-arm64
+│   ├── stream-client-mac-intel
+│   ├── stream-client-linux
+│   └── stream-client-win.exe
+├── dist/                       # Build output directory
+├── public/                     # Public static files
+├── scripts/                    # Utility scripts (download/verify binaries)
+├── src-tauri/                  # Rust Backend (Tauri Core)
+│   ├── src/
+│   │   ├── commands/           # IPC command handlers
+│   │   ├── main.rs             # Application entry point
+│   │   └── lib.rs              # Shared library code
+│   ├── Cargo.toml              # Rust dependencies
+│   ├── tauri.conf.json         # Tauri configuration
+│   └── capabilities/           # Security capabilities
+├── src/                        # Frontend Source (React/TypeScript)
+│   └── start-renderer/         # Main renderer code
+│       ├── src/
+│       │   ├── features/       # Feature-based modules (Settings, Logs)
+│       │   ├── services/       # Frontend services (IPC, etc.)
+│       │   ├── store/          # State management
+│       │   └── Main.tsx        # App entry point
+├── index.html                  # HTML entry point
+├── package.json                # NPM dependencies
 ├── README.md                   # Main documentation
-├── BUILD.md                    # Detailed build instructions
-├── CONTRIBUTING.md             # Contribution guidelines
-├── PROJECT_STRUCTURE.md         # This file
-├── intro.png                   # Intro modal image
-├── binaries/                   # Native Stream Gate client binaries (required for build)
-│   ├── stream-client-mac-arm64   # macOS (Apple Silicon)
-│   ├── stream-client-mac-intel   # macOS (Intel)
-│   ├── stream-client-linux       # Linux
-│   └── stream-client-win.exe     # Windows
-└── (other files)
+├── BUILD.md                    # Build instructions
+└── PROJECT_STRUCTURE.md        # This file
 ```
 
-## Key Files
+## Key Components
 
-### Core Application
+### Backend (`src-tauri`)
+- **`main.rs`**: Entry point, initializes the Tauri runtime.
+- **`commands/`**: Contains Rust functions exposed to the frontend via `#[tauri::command]`.
+- **`tauri.conf.json`**: Configures windows, permissions, bundle settings, and sidecars.
 
-- **main.js**: Electron main process
-  - Window management
-  - IPC handlers
-  - Stream Gate client process management
-  - HTTP proxy server
-  - System proxy configuration
-
-- **index.html**: Renderer process
-  - UI layout and styling
-  - User interactions
-  - Status display
-  - Logs panel
-  - Settings management
-
-### Configuration
-
-- **package.json**: Project metadata, dependencies, and build configuration
-- **.gitignore**: Files to exclude from version control
-- **.npmrc**: npm configuration
-
-### Documentation
-
-- **README.md**: Main project documentation
-- **BUILD.md**: Detailed build instructions
-- **CONTRIBUTING.md**: Guidelines for contributors
-- **LICENSE**: MIT License
-
-### Assets
-
-- **assets/icon.png**: Application icon (1024x1024 PNG)
-- **intro.png**: Introduction modal image
+### Frontend (`src/start-renderer`)
+- **`Main.tsx`**: The root React component.
+- **`features/`**: Contains UI components organized by feature (e.g., `Config`, `Settings`).
+- **`services/IpcService.ts`**: Handles communication with the Rust backend.
 
 ### Binaries
-
-- **binaries/stream-client-mac-arm64**: macOS Stream Gate client (Apple Silicon)
-- **binaries/stream-client-mac-intel**: macOS Stream Gate client (Intel)
-- **binaries/stream-client-linux**: Linux Stream Gate client
-- **binaries/stream-client-win.exe**: Windows Stream Gate client
-
-**Note**: These binaries are required for the build process and should be committed to the repository.
-
-## Build Output
-
-When building, the following directories are created:
-
-- **dist/**: Contains built installers (DMG for macOS, EXE for Windows)
-- **node_modules/**: npm dependencies (excluded from git)
-
-## Development vs Production
-
-### Development (`npm start`)
-- Reads binaries from project root
-- Uses `__dirname` for file paths
-- Hot reloading available
-
-### Production (Built App)
-- Binaries are in `Resources/` folder (via `extraResources`)
-- Uses `process.resourcesPath` for file paths
-- All dependencies bundled in app package
-
-## Important Notes
-
-1. **Binaries**: The Stream Gate client binaries must be in `binaries/` for the build to work.
-
-2. **Settings**: User settings are stored in `settings.json` (excluded from git via .gitignore).
-
-3. **Build Artifacts**: The `dist/` folder contains build outputs and should not be committed.
-
-4. **Dependencies**: All npm packages are in `node_modules/` (excluded from git).
+External binaries (Sidecars) are stored in `binaries/` and bundled with the app. They are not committed to Git but are downloaded/verified via scripts in `scripts/`.

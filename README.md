@@ -26,7 +26,7 @@
 
 ## ✨ Experience Precision Performance
 
-**Stream Gate** isn't just another VPN client. It's a meticulously designed tool that bridges the gap between the complex Slipstream Plus protocol and a user-friendly experience. Built with Vite and powered by a high-efficiency Rust backend (via Bun), it offers system-wide tunneling with zero-configuration ease.
+**Stream Gate** isn't just another VPN client. It's a meticulously designed tool that bridges the gap between the complex Slipstream Plus protocol and a user-friendly experience. Built with **Tauri** and powered by a high-efficiency **Rust** backend, it offers system-wide tunneling with zero-configuration ease.
 
 ### 🎯 Featured: Advanced DNS Tester
 Our proprietary DNS Tester is the crown jewel of Stream Gate. Specially optimized for this protocol, it accurately identifies compatible DNS overrides with an **85% detection success rate**.
@@ -41,7 +41,7 @@ Experience an interface that feels alive. Stream Gate features:
 - **Bilingual Mastery**: Full support for English (LTR) and Persian (RTL) with localized interfaces and optimized typography.
 
 ### ⚡ Power Features for Power Users
-- **Bulk Import/Export**: Manage hundreds of configurations effortlessly. Supports bulk `ssgate` link processing.
+- **Bulk Import/Export**: Manage hundreds of configurations. Supports bulk `ssgate` link processing.
 - **System-Wide Tunneling**: Routes all traffic through our secure HTTP/SOCKS5 hybrid proxy.
 - **Real-Time Traffic Analytics**: Monitor your bandwidth with precise download/upload telemetry.
 - **Cross-Platform Parity**: Identical feature set and performance across all desktop operating systems.
@@ -57,10 +57,9 @@ Download the latest release for your platform:
 | macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-ARM64.dmg) |
 | macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-Intel.dmg) |
 | Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x64.exe) |
-| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x86.exe) |
 | Linux (x86_64) AppImage | [Stream-Gate-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.AppImage) |
 | Linux (x86_64) DEB | [Stream-Gate-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.deb) |
-| Android | [SlipNet](https://github.com/obscuraio/SlipNet) (Recommended Client) |
+| Android | [SlipNet](https://github.com/anonvector/SlipNet) (Recommended Client) |
 
 ---
 <br>
@@ -103,12 +102,12 @@ graph TD
     HP -->|SOCKS5| SC[Stream Gate Client: 5201]
     SC -->|Encrypted Tunnel| Remote[Remote VPN Server]
     
-    UI[Electron GUI] -.->|IPC| HP
+    UI[Tauri GUI] -.->|IPC| HP
     UI -.->|IPC| SC
 ```
 
-- **Electron & React**: Modern, responsive frontend.
-- **Node.js**: Service-based architecture for low-latency IPC.
+- **Tauri & React**: Modern, responsive frontend.
+- **Rust Backend**: High-performance system integration.
 - **Microservices Pattern**: Decoupled modules for Process Management, Proxying, and DNS Testing.
 
 ---
