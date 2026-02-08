@@ -74,6 +74,7 @@ The GitHub Actions workflow automatically generates release notes including:
 - Download links
 - Quick start instructions
 - Link to changelog
+- Recommended Android Client: [SlipNet](https://github.com/anonvector/SlipNet)
 
 You can edit the release notes on GitHub after the release is created.
 
