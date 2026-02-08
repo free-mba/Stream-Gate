@@ -28,12 +28,12 @@
 
 | Platform | Download |
 |----------|----------|
-| macOS (Apple Silicon) | [Stream Gate-GUI-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-ARM64.dmg) |
-| macOS (Intel) | [Stream Gate-GUI-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-macOS-Intel.dmg) |
-| Windows (64-bit) | [Stream Gate-GUI-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x64.exe) |
-| Windows (32-bit) | [Stream Gate-GUI-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Windows-x86.exe) |
-| Linux (x86_64) AppImage | [Stream Gate-GUI-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.AppImage) |
-| Linux (x86_64) DEB | [Stream Gate-GUI-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream Gate-GUI-Linux-x64.deb) |
+| macOS (Apple Silicon) | [Stream-Gate-macOS-ARM64.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-ARM64.dmg) |
+| macOS (Intel) | [Stream-Gate-macOS-Intel.dmg](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-macOS-Intel.dmg) |
+| Windows (64-bit) | [Stream-Gate-Windows-x64.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x64.exe) |
+| Windows (32-bit) | [Stream-Gate-Windows-x86.exe](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [Stream-Gate-Linux-x64.AppImage](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [Stream-Gate-Linux-x64.deb](https://github.com/free-mba/Stream-Gate/releases/latest/download/Stream-Gate-Linux-x64.deb) |
 | Android | [SlipNet](https://github.com/anonvector/SlipNet) (Recommended v1.5) |
 
 If a direct download fails, use the [Releases page](https://github.com/free-mba/Stream-Gate/releases/latest).
