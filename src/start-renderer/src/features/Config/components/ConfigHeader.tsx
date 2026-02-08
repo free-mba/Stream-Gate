@@ -25,7 +25,12 @@ export const ConfigHeader = ({ onImport, onAdd }: ConfigHeaderProps) => {
     const handleExport = async () => {
         const result = await ipc?.invoke<ImportError>('export-configs');
         if (result?.success && result.data) {
-            navigator.clipboard.writeText(result.data);
+            try {
+                await ipc.invoke('copy-to-clipboard', result.data);
+            } catch (e) {
+                console.warn("IPC copy failed, trying navigator", e);
+                await navigator.clipboard.writeText(result.data);
+            }
             setIsExported(true);
             setTimeout(() => setIsExported(false), 2000);
         }

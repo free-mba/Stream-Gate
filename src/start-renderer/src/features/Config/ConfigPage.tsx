@@ -90,12 +90,21 @@ export default function ConfigPage() {
 
     const handleImport = async (importText: string) => {
         if (!importText.trim()) return;
-        const result = await ipc?.invoke<ImportError>('import-configs', importText);
-        if (result?.success) {
-            setIsImportDialogOpen(false);
-            fetchSettings();
-        } else {
-            alert("Failed to import: " + (result?.error || "Unknown error"));
+        console.log("Starting import with text:", importText.substring(0, 20) + "...");
+        try {
+            const result = await ipc?.invoke<ImportError>('import-configs', importText);
+            console.log("Import result:", result);
+            if (result?.success) {
+                console.log("Import success, refreshing settings");
+                setIsImportDialogOpen(false);
+                fetchSettings();
+            } else {
+                console.error("Import failed:", result?.error);
+                alert("Failed to import: " + (result?.error || "Unknown error"));
+            }
+        } catch (e) {
+            console.error("Import exception:", e);
+            alert("Import error: " + String(e));
         }
     };
 

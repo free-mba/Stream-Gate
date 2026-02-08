@@ -10,7 +10,8 @@ export interface IpcRenderer {
 
 const createIpc = (): IpcRenderer => {
     // 1. Check for Tauri
-    if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
+    // Check for __TAURI_IPC__ (v2) or __TAURI_INTERNALS__ (v1/legacy)
+    if (typeof window !== 'undefined' && ((window as any).__TAURI_IPC__ || (window as any).__TAURI_INTERNALS__)) {
         console.log('Tauri environment detected');
         return createTauriIpc();
     }

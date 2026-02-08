@@ -491,7 +491,13 @@ impl SettingsService {
                 
                 let remark_prefix = prefix.strip_prefix("ssgate:").unwrap_or("Imported");
                 
-                match general_purpose::STANDARD.decode(base64_str) {
+                // Try robust decoding: Standard, URL Safe, No Pad
+                let decoded = general_purpose::STANDARD.decode(base64_str)
+                    .or_else(|_| general_purpose::URL_SAFE.decode(base64_str))
+                    .or_else(|_| general_purpose::STANDARD_NO_PAD.decode(base64_str))
+                    .or_else(|_| general_purpose::URL_SAFE_NO_PAD.decode(base64_str));
+
+                match decoded {
                     Ok(decoded_bytes) => {
                          if let Ok(json_str) = String::from_utf8(decoded_bytes) {
                              if let Ok(val) = serde_json::from_str::<serde_json::Value>(&json_str) {
@@ -516,16 +522,20 @@ impl SettingsService {
                                           socks,
                                       });
                                   } else {
+                                      error!("Import failed: missing domain in JSON");
                                       error_count += 1;
                                   }
                              } else {
+                                 error!("Import failed: invalid JSON");
                                  error_count += 1;
                              }
                          } else {
+                             error!("Import failed: invalid UTF-8");
                              error_count += 1;
                          }
                     },
-                    Err(_) => {
+                    Err(e) => {
+                        error!("Import failed: base64 decode error: {}", e);
                         error_count += 1;
                     }
                 }
@@ -569,3 +579,4 @@ pub struct ImportResult {
     pub success: bool,
     pub imported_count: usize,
 }
+

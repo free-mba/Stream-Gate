@@ -21,7 +21,8 @@ export const createTauriIpc = (): IpcRenderer => {
                         payload = { settings: arg0 };
                         break;
                     case 'import-configs':
-                        payload = { import_data: arg0 };
+                        // Tauri requires camelCase for argument names (import_data -> importData)
+                        payload = { importData: arg0 };
                         break;
                     case 'set-resolvers':
                         payload = { payload: arg0 };
