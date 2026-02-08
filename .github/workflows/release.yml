@@ -16,7 +16,33 @@ on:
         default: false
 
 jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        
+      - name: Install Dependencies
+        run: bun install
+        
+      - name: Build Frontend
+        run: bun run build:ui
+        
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/start-renderer/dist
+          retention-days: 1
   release:
+    needs: build-ui
     permissions:
       contents: write
     strategy:
@@ -69,8 +95,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libssl-dev
 
-      - name: Install Frontend Dependencies
-        run: bun install
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/start-renderer/dist
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+           workspaces: 'src-tauri -> target'
+
+      # Patch tauri.conf.json to disable beforeBuildCommand since we already have the artifacts
+      - name: Disable beforeBuildCommand
+        shell: bash
+        run: |
+          sed 's/"beforeBuildCommand": ".*"/"beforeBuildCommand": ""/' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
 
       - name: Download Sidecar Binaries
         shell: bash
@@ -83,8 +123,7 @@ jobs:
              bun run scripts/download-binaries.js --platform linux
           fi
 
-      - name: Build Frontend
-        run: bun run build:ui
+
 
       - name: Build Tauri App
         env:
