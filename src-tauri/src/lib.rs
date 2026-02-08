@@ -70,6 +70,8 @@ pub fn run() {
             commands::utility::test_proxy,
             commands::utility::open_external,
             commands::utility::get_logs,
+            commands::utility::get_log_path,
+            commands::utility::copy_to_clipboard,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Stream Gate")

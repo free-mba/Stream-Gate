@@ -68,6 +68,19 @@ impl AppState {
         self.process.set_app_handle(app_handle.clone());
         self.dns.set_app_handle(app_handle.clone());
 
+        // Initialize logs with log file path
+        use tauri::Manager;
+        match app_handle.path().app_log_dir() {
+            Ok(log_dir) => {
+                let log_file_path: std::path::PathBuf = log_dir.join("Stream Gate.log");
+                info!("Detected log directory: {:?}, using file: {:?}", log_dir, log_file_path);
+                self.logs.set_log_file(log_file_path);
+            }
+            Err(e) => {
+                error!("Failed to get app log directory: {}", e);
+            }
+        }
+
         // Clear critical ports on startup
         self.process.kill_ports(&[5201, 8080, 10809]);
 

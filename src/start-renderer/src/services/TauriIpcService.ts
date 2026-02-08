@@ -61,6 +61,10 @@ export const createTauriIpc = (): IpcRenderer => {
                         // Rust expects: url: String
                         payload = { url: arg0 };
                         break;
+                    case 'copy-to-clipboard':
+                        // Rust expects: text: String
+                        payload = { text: arg0 };
+                        break;
                     case 'test-proxy':
                         // Rust expects no args
                         payload = {};
@@ -70,6 +74,8 @@ export const createTauriIpc = (): IpcRenderer => {
                     case 'get-settings':
                     case 'get-status':
                     case 'get-version':
+                    case 'get-logs':
+                    case 'get-log-path':
                     case 'export-configs':
                     case 'check-system-proxy': // Added check-system-proxy
                     case 'dns-scan-stop':      // Added dns-scan-stop

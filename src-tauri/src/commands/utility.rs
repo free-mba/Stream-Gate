@@ -105,3 +105,16 @@ pub fn get_logs(state: State<'_, AppState>) -> Vec<serde_json::Value> {
         })
         .collect()
 }
+
+#[tauri::command]
+pub fn get_log_path(state: State<'_, AppState>) -> String {
+    state.logs.get_log_path()
+}
+
+#[tauri::command]
+pub fn copy_to_clipboard(text: String) -> Result<(), String> {
+    info!("Copying text to clipboard ({} chars)", text.len());
+    let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
+    clipboard.set_text(text).map_err(|e| e.to_string())?;
+    Ok(())
+}
