@@ -11,7 +11,7 @@ export interface DnsTesterSettings {
 }
 
 const defaultSettings: DnsTesterSettings = {
-    mode: 'stream',
+    mode: 'slipstream',
     domain: 'google.com',
     workers: 5,
     timeout: 3,
