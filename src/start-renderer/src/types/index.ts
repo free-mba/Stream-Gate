@@ -20,7 +20,7 @@ export interface Settings {
     socks5AuthEnabled: boolean;
     socks5AuthUsername: string;
     socks5AuthPassword: string;
-    systemProxyEnabledByApp: boolean;
+    systemProxy: boolean;
     systemProxyServiceName: string;
     configs: Config[];
     selectedConfigId: string | null;

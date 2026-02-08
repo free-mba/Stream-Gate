@@ -28,7 +28,7 @@ impl SystemProxyService {
     pub async fn is_configured(&self) -> bool {
         self.settings
             .get_all()
-            .map(|s| s.system_proxy_enabled_by_app)
+            .map(|s| s.system_proxy)
             .unwrap_or(false)
     }
 
@@ -49,7 +49,7 @@ impl SystemProxyService {
 
         if result.success {
             let _ = self.settings.save(serde_json::json!({
-                "systemProxyEnabledByApp": true,
+                "systemProxy": true,
                 "systemProxyServiceName": result.service_name.clone().unwrap_or_default()
             }));
             info!("System proxy configured and enabled successfully");
@@ -61,7 +61,7 @@ impl SystemProxyService {
     pub async fn unconfigure(&self) -> AppResult<ProxyConfigResult> {
         let settings = self.settings.get_all()?;
         
-        if !settings.system_proxy_enabled_by_app {
+        if !settings.system_proxy {
             info!("System proxy was not configured by this app, skipping");
             return Ok(ProxyConfigResult {
                 success: false,
@@ -84,7 +84,7 @@ impl SystemProxyService {
 
         if result.success {
             let _ = self.settings.save(serde_json::json!({
-                "systemProxyEnabledByApp": false,
+                "systemProxy": false,
                 "systemProxyServiceName": ""
             }));
         }

@@ -90,7 +90,7 @@ impl AppState {
         self.process.kill_ports(&[5201, 8080, 10809]);
 
         // Startup recovery: if system proxy was enabled by app and it died, restore
-        if self.settings.get_all().map(|s| s.system_proxy_enabled_by_app).unwrap_or(false) {
+        if self.settings.get_all().map(|s| s.system_proxy).unwrap_or(false) {
             info!("System proxy was enabled by app previously (crash recovery). Restoring...");
             let service_clone = self.connection.clone();
             tauri::async_runtime::spawn(async move {

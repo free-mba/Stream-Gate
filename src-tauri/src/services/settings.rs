@@ -34,7 +34,7 @@ pub struct Settings {
     #[serde(default = "default_domain", deserialize_with = "deserialize_null_as_string")]
     pub domain: String,
 
-    /// Connection mode: "proxy" or "tun"
+    /// Connection mode: "proxy" or "system" (legacy "tun")
     #[serde(default = "default_mode", deserialize_with = "deserialize_null_as_string")]
     pub mode: String,
 
@@ -60,7 +60,7 @@ pub struct Settings {
 
     /// System proxy enabled by app (for crash recovery)
     #[serde(default)]
-    pub system_proxy_enabled_by_app: bool,
+    pub system_proxy: bool,
 
     /// System proxy service name
     #[serde(default, deserialize_with = "deserialize_null_as_string")]
@@ -168,7 +168,7 @@ impl Default for Settings {
             socks5_auth_enabled: false,
             socks5_auth_username: String::new(),
             socks5_auth_password: String::new(),
-            system_proxy_enabled_by_app: false,
+            system_proxy: false,
             system_proxy_service_name: String::new(),
             keep_alive_interval: default_keep_alive_interval(),
             configs: vec![],
@@ -334,9 +334,9 @@ impl SettingsService {
                                 settings.socks5_auth_password = s.to_string();
                             }
                         }
-                        "systemProxyEnabledByApp" => {
+                        "systemProxy" => {
                             if let Some(b) = value.as_bool() {
-                                settings.system_proxy_enabled_by_app = b;
+                                settings.system_proxy = b;
                             }
                         }
                         "systemProxyServiceName" => {

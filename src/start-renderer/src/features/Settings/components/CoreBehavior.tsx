@@ -23,16 +23,16 @@ export const CoreBehavior = memo(({ mode, authoritative, verbose, updateSetting 
             <SectionHeader icon={Zap} title={t('Core Behavior')} />
             <div className="space-y-4">
                 <SettingRow
-                    label={t('Operation Mode')}
-                    description={t('Choose between system-wide TUN integration or local Proxy mode.')}
+                    label={t('System Integration')}
+                    description={t('Choose between automatic system configuration or manual local proxy mode.')}
                 >
                     <Select value={mode} onValueChange={(v) => updateSetting('mode', v)}>
                         <SelectTrigger className="w-[140px] bg-background/50">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="proxy">{t('Proxy')}</SelectItem>
-                            <SelectItem value="tun">{t('TUN')}</SelectItem>
+                            <SelectItem value="proxy">{t('Manual (Local Proxy)')}</SelectItem>
+                            <SelectItem value="tun">{t('Automatic (System Proxy)')}</SelectItem>
                         </SelectContent>
                     </Select>
                 </SettingRow>

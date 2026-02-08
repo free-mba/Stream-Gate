@@ -45,7 +45,7 @@ export default function ConnectionPage() {
     const [theme] = useAtom(themeAtom);
 
     const isLight = theme === 'light';
-    const systemProxy = !!settings?.systemProxyEnabledByApp;
+    const systemProxy = !!settings?.systemProxy;
 
     const toggleConnection = () => {
         if (status.isRunning) {
@@ -54,7 +54,7 @@ export default function ConnectionPage() {
             const payload = {
                 resolvers: settings.resolvers || [],
                 domain: settings.domain,
-                tunMode: settings.mode === 'tun',
+                systemProxy: settings.mode === 'tun',
                 keepAliveInterval: settings.keepAliveInterval,
                 congestionControl: settings.congestionControl,
                 customDnsEnabled: settings.customDnsEnabled,

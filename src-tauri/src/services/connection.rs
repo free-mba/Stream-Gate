@@ -224,8 +224,8 @@ impl ConnectionService {
         }
 
         // 4. Configure system proxy if requested
-        if config.tun_mode {
-            // In original UI this might be labeled differently, but system proxy is what we want
+        if config.system_proxy {
+            // Configure system-wide proxy settings
             let _ = system_proxy.configure().await;
         }
 
@@ -236,7 +236,7 @@ impl ConnectionService {
             state.proxy_port = Some(8080);
             state.socks_port = Some(5201);
             state.message = Some("Connected".to_string());
-            state.system_proxy_enabled = config.tun_mode;
+            state.system_proxy_enabled = config.system_proxy;
         }
 
         self.emit_status_update();
@@ -358,8 +358,8 @@ pub struct ConnectionConfig {
     pub domain: String,
     #[serde(default)]
     pub authoritative: bool,
-    #[serde(default)]
-    pub tun_mode: bool,
+    #[serde(rename = "systemProxy", default)]
+    pub system_proxy: bool,
     #[serde(default)]
     pub keep_alive_interval: Option<u32>,
     #[serde(default)]
