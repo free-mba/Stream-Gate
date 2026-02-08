@@ -64,6 +64,11 @@ impl AppState {
         // Initialize settings after app is ready
         self.settings.initialize(&app_handle)?;
         
+        // Sync verbose logging setting
+        if let Ok(settings) = self.settings.get_all() {
+            self.logs.set_verbose(settings.verbose);
+        }
+        
         // Pass app handle to services that need it
         self.process.set_app_handle(app_handle.clone());
         self.dns.set_app_handle(app_handle.clone());

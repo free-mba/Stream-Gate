@@ -23,14 +23,24 @@ use tauri::Manager;
 /// Initialize and run the Tauri application
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let app_state = AppState::new();
+    let logs = app_state.logs.clone();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_log::Builder::default()
-                .level(log::LevelFilter::Info)
+                .level(log::LevelFilter::Debug)
+                .filter(move |metadata| {
+                    if metadata.level() == log::Level::Debug || metadata.level() == log::Level::Trace {
+                        logs.is_verbose()
+                    } else {
+                        true
+                    }
+                })
                 .build(),
         )
-        .manage(AppState::new())
+        .manage(app_state)
         .setup(|app| {
             info!("Stream Gate Tauri backend starting...");
 
