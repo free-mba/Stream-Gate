@@ -18,8 +18,8 @@ export const DnsGeneralSettings = memo(() => {
                 <Select value={config.mode} onValueChange={(mode: DnsMode) => setConfig({ ...config, mode })}>
                     <SelectTrigger className="h-8 text-xs bg-background/50 border-input text-foreground"><SelectValue /></SelectTrigger>
                     <SelectContent className="glass-panel border-border text-foreground">
-                        <SelectItem value="stream">Stream Gate</SelectItem>
-                        <SelectItem value="dnstt">Custom Protocol</SelectItem>
+                        <SelectItem value="slipstream">{t("Slipstream")}</SelectItem>
+                        <SelectItem value="dnstt">{t("DNSTT")}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

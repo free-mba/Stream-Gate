@@ -16,14 +16,14 @@ function generateRandomSubdomain() {
 }
 
 /**
- * Generate random base32-encoded payload for Stream Gate testing
+ * Generate random base32-encoded payload for Slipstream testing
  * @param {number} length 
  */
 function generateBase32Payload(length) {
     const randomBytes = crypto.randomBytes(length);
     let base32Encoded = base32Encode(randomBytes, 'RFC4648', { padding: false });
 
-    // Add inline dots every 57 characters (Stream Gate format)
+    // Add inline dots every 57 characters (Slipstream format)
     const result = [];
     for (let i = 0; i < base32Encoded.length; i += 57) {
         result.push(base32Encoded.slice(i, i + 57));
@@ -146,9 +146,9 @@ async function testDnstt(resolver, server, domain, timeoutMs) {
 }
 
 /**
- * Test Stream Gate Compatibility
+ * Test Slipstream Compatibility
  */
-async function testStreamGate(resolver, server, domain, timeoutMs) {
+async function testSlipstream(resolver, server, domain, timeoutMs) {
     let successful = 0;
     const responseTimes = [];
     const totalQueries = 15;
@@ -275,7 +275,7 @@ parentPort.on('message', async (task) => {
         if (mode === 'dnstt') {
             resultData = await testDnstt(resolver, server, domain, timeoutMs);
         } else {
-            resultData = await testStreamGate(resolver, server, domain, timeoutMs);
+            resultData = await testSlipstream(resolver, server, domain, timeoutMs);
         }
 
         const diff = process.hrtime(start);

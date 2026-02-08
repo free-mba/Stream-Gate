@@ -18,7 +18,7 @@ export const IP_REGEX = /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/;
 export const COMMENT_PREFIX = '#';
 export const DEFAULT_DNS_PORT = '53';
 
-export type DnsMode = 'dnstt' | 'stream';
+export type DnsMode = 'dnstt' | 'slipstream';
 
 export interface ScanConfig {
     mode: DnsMode;

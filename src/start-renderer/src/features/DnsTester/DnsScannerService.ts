@@ -18,6 +18,15 @@ interface RawDnsCheckResult {
     answers: string[];
     status: string;
     error: string | null;
+    isCompatible: boolean;
+    score: number;
+    maxScore: number;
+    details: string;
+    stats?: {
+        avg_time: number;
+        max_time: number;
+        std_dev: number;
+    };
 }
 
 class DnsScannerService {
@@ -44,11 +53,11 @@ class DnsScannerService {
             server: raw.server,
             stage: isOk ? 'done' : 'failed',
             status: raw.status,
-            latency: raw.dns_time_ms || raw.ping_time_ms || 0,
-            score: isOk ? 100 : 0, // Mock score for now based on success
-            maxScore: 100,
-            details: raw.answers.join(', ') || raw.error || '',
-            isCompatible: isOk,
+            latency: raw.stats ? Math.round(raw.stats.avg_time) : (raw.dns_time_ms || raw.ping_time_ms || 0),
+            score: raw.score,
+            maxScore: raw.maxScore,
+            details: raw.details || raw.answers.join(', ') || raw.error || '',
+            isCompatible: raw.isCompatible,
             error: raw.error || undefined
         };
     }

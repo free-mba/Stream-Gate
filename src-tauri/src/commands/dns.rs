@@ -38,6 +38,10 @@ pub struct DnsScanPayload {
     pub servers: Vec<String>,
     #[serde(default)]
     pub domain: Option<String>,
+    #[serde(default)]
+    pub mode: Option<String>,
+    #[serde(default)]
+    pub timeout: Option<u64>,
 }
 
 /// Start DNS scan
@@ -47,10 +51,13 @@ pub async fn dns_scan_start(
     payload: DnsScanPayload,
 ) -> Result<serde_json::Value, String> {
     let domain = payload.domain.unwrap_or_else(|| "google.com".to_string());
-    info!("Starting DNS scan with {} servers and domain: {}", payload.servers.len(), domain);
+    let mode = payload.mode.unwrap_or_else(|| "slipstream".to_string());
+    let timeout = payload.timeout.unwrap_or(3);
+
+    info!("Starting DNS scan with {} servers and domain: {}, mode: {}, timeout: {}", payload.servers.len(), domain, mode, timeout);
 
     state.dns
-        .start_scan(payload.servers, domain)
+        .start_scan(payload.servers, domain, mode, timeout)
         .await
         .map_err(|e| e.to_string())?;
     
