@@ -4,7 +4,10 @@
 
 use crate::error::{AppError, AppResult};
 use crate::services::SettingsService;
-use log::{info, warn};
+use log::info;
+#[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+use log::warn;
+
 use std::process::Command;
 use std::sync::Arc;
 
@@ -33,13 +36,17 @@ impl SystemProxyService {
     }
 
     pub async fn configure(&self) -> AppResult<ProxyConfigResult> {
-        let result = if cfg!(target_os = "macos") {
-            self.configure_macos().await?
-        } else if cfg!(target_os = "windows") {
-            self.configure_windows().await?
-        } else if cfg!(target_os = "linux") {
-            self.configure_linux().await?
-        } else {
+        #[cfg(target_os = "macos")]
+        let result = self.configure_macos().await?;
+
+        #[cfg(target_os = "windows")]
+        let result = self.configure_windows().await?;
+
+        #[cfg(target_os = "linux")]
+        let result = self.configure_linux().await?;
+
+        #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+        let result = {
             warn!("System proxy not supported on this platform");
             ProxyConfigResult {
                 success: false,
@@ -69,17 +76,19 @@ impl SystemProxyService {
             });
         }
 
-        let result = if cfg!(target_os = "macos") {
-            self.unconfigure_macos(Some(settings.system_proxy_service_name)).await?
-        } else if cfg!(target_os = "windows") {
-            self.unconfigure_windows().await?
-        } else if cfg!(target_os = "linux") {
-            self.unconfigure_linux().await?
-        } else {
-            ProxyConfigResult {
-                success: false,
-                service_name: None,
-            }
+        #[cfg(target_os = "macos")]
+        let result = self.unconfigure_macos(Some(settings.system_proxy_service_name)).await?;
+
+        #[cfg(target_os = "windows")]
+        let result = self.unconfigure_windows().await?;
+
+        #[cfg(target_os = "linux")]
+        let result = self.unconfigure_linux().await?;
+
+        #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+        let result = ProxyConfigResult {
+            success: false,
+            service_name: None,
         };
 
         if result.success {
@@ -94,6 +103,7 @@ impl SystemProxyService {
 
     // --- macOS Implementation ---
 
+    #[cfg(target_os = "macos")]
     async fn configure_macos(&self) -> AppResult<ProxyConfigResult> {
         let output = Command::new("networksetup")
             .arg("-listallnetworkservices")
@@ -134,6 +144,7 @@ impl SystemProxyService {
         })
     }
 
+    #[cfg(target_os = "macos")]
     fn sm_set_proxy(&self, service: &str) -> AppResult<()> {
         let commands = [
             format!("networksetup -setwebproxy \"{}\" 127.0.0.1 {}", service, HTTP_PROXY_PORT),
@@ -156,6 +167,7 @@ impl SystemProxyService {
         Ok(())
     }
 
+    #[cfg(target_os = "macos")]
     async fn unconfigure_macos(&self, service_name: Option<String>) -> AppResult<ProxyConfigResult> {
         // Just disable on all services for safety, but prioritize the one we know
         if let Some(name) = service_name {
@@ -178,6 +190,7 @@ impl SystemProxyService {
         })
     }
 
+    #[cfg(target_os = "macos")]
     fn sm_disable_proxy(&self, service: &str) -> AppResult<()> {
         let commands = [
             format!("networksetup -setwebproxystate \"{}\" off", service),
@@ -192,6 +205,7 @@ impl SystemProxyService {
 
     // --- Windows Implementation ---
 
+    #[cfg(target_os = "windows")]
     async fn configure_windows(&self) -> AppResult<ProxyConfigResult> {
         let cmd = format!("netsh winhttp set proxy proxy-server=\"127.0.0.1:{}\"", HTTP_PROXY_PORT);
         let status = Command::new("cmd")
@@ -206,6 +220,7 @@ impl SystemProxyService {
         })
     }
 
+    #[cfg(target_os = "windows")]
     async fn unconfigure_windows(&self) -> AppResult<ProxyConfigResult> {
         let status = Command::new("cmd")
             .arg("/c")
@@ -221,6 +236,7 @@ impl SystemProxyService {
 
     // --- Linux Implementation ---
 
+    #[cfg(target_os = "linux")]
     async fn configure_linux(&self) -> AppResult<ProxyConfigResult> {
         // Porting gsettings calls
         let commands = [
@@ -246,6 +262,7 @@ impl SystemProxyService {
         })
     }
 
+    #[cfg(target_os = "linux")]
     async fn unconfigure_linux(&self) -> AppResult<ProxyConfigResult> {
         let status = Command::new("sh")
             .arg("-c")

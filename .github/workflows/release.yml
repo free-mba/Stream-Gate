@@ -28,7 +28,15 @@ jobs:
           
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
-        
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Install Dependencies
         run: bun install
         
@@ -84,6 +92,17 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install Dependencies
+        run: bun install
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -105,6 +124,7 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
            workspaces: 'src-tauri -> target'
+           shared-key: "tauri-build"
 
       # Patch tauri.conf.json to disable beforeBuildCommand since we already have the artifacts
       - name: Disable beforeBuildCommand

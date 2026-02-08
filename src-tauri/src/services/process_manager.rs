@@ -3,7 +3,9 @@
 //! Ported from ProcessManager.ts
 
 use crate::error::{AppError, AppResult};
-use log::{debug, error, info, warn};
+use log::{error, info, warn};
+#[cfg(unix)]
+use log::debug;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::{Arc, RwLock};
@@ -11,6 +13,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::broadcast;
+use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ProcessOutput {
@@ -294,4 +297,3 @@ impl ProcessManager {
     }
 }
 
-use serde::Serialize;
