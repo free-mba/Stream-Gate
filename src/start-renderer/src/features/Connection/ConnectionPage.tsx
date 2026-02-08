@@ -42,6 +42,8 @@ export default function ConnectionPage() {
 
     const [addDnsOpen, setAddDnsOpen] = useState(false);
     const [newDns, setNewDns] = useState("");
+    const [dnsError, setDnsError] = useState(false);
+    const [configError, setConfigError] = useState(false);
     const [theme] = useAtom(themeAtom);
 
     const isLight = theme === 'light';
@@ -51,6 +53,15 @@ export default function ConnectionPage() {
         if (status.isRunning) {
             ipc.invoke('stop-service');
         } else if (settings) {
+            const hasResolvers = settings.resolvers && settings.resolvers.length > 0;
+            const hasConfig = !!settings.selectedConfigId;
+
+            if (!hasResolvers || !hasConfig) {
+                setDnsError(!hasResolvers);
+                setConfigError(!hasConfig);
+                return;
+            }
+
             const payload = {
                 resolvers: settings.resolvers || [],
                 domain: settings.domain,
@@ -71,6 +82,7 @@ export default function ConnectionPage() {
     };
 
     const handleConfigChange = async (configId: string) => {
+        setConfigError(false);
         const config = settings?.configs?.find((c: Config) => c.id === configId);
         if (config) {
             await setSettings({
@@ -88,6 +100,8 @@ export default function ConnectionPage() {
         const newResolvers = currentResolvers.includes(val)
             ? currentResolvers.filter(r => r !== val)
             : [...currentResolvers, val];
+
+        if (newResolvers.length > 0) setDnsError(false);
 
         await setSettings({ resolvers: newResolvers });
         // Optional: backward compatibility or primary resolver setting
@@ -153,7 +167,14 @@ export default function ConnectionPage() {
                 animate={{ y: 0, opacity: 1 }}
                 className="absolute top-6 w-full max-w-2xl flex justify-between gap-4 z-20 px-4"
             >
-                <GlassSelect value={settings?.selectedConfigId || ""} onValueChange={handleConfigChange} placeholder={t("Config")} icon={MapPin}>
+
+                <GlassSelect
+                    value={settings?.selectedConfigId || ""}
+                    onValueChange={handleConfigChange}
+                    placeholder={t("Config")}
+                    icon={MapPin}
+                    triggerClassName={cn(configError && "ring-2 ring-red-500/50 border-red-500/50")}
+                >
                     {configs.map((c: Config) => (
                         <SelectItem key={c.id} value={c.id}>
                             <span className="flex items-center gap-2">
@@ -172,6 +193,7 @@ export default function ConnectionPage() {
                     options={dnsOptions}
                     onAddCustom={() => setAddDnsOpen(true)}
                     addCustomLabel={t("Add Custom")}
+                    className={cn(dnsError && "ring-2 ring-red-500/50 border-red-500/50")}
                 />
             </motion.div>
 
