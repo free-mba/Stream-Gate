@@ -26,7 +26,7 @@ function DnsResultCellComponent<T>({
     const [value] = useAtom(valueAtom);
 
     return (
-        <TableCell className={cn("font-mono text-xs", className)} onClick={onClick}>
+        <TableCell className={cn("text-xs", className)} onClick={onClick}>
             {render(value, {} as DnsCheckResult)}
         </TableCell>
     );

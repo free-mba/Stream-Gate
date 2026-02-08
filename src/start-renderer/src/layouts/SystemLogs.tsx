@@ -10,6 +10,16 @@ import { logsOpenAtom } from "@/store";
 
 const MAX_LOGS = 500;
 
+/**
+ * Strips ANSI escape codes and common emojis from a string.
+ */
+const stripUnsupported = (s: string): string => {
+    return s
+        // eslint-disable-next-line no-control-regex
+        .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '') // Strip ANSI escape codes
+        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu, ''); // Strip common emojis
+};
+
 export const SystemLogs = React.memo(() => {
     const [show, setShow] = useAtom(logsOpenAtom);
     const [logs, setLogs] = useState<string[]>([]);
@@ -18,8 +28,13 @@ export const SystemLogs = React.memo(() => {
 
     useEffect(() => {
         const handleLog = (_: IpcRendererEvent, msg: unknown) => {
+            const rawMsg = String(msg || '');
+            const filteredMsg = stripUnsupported(rawMsg);
+
+            if (!filteredMsg.trim()) return; // Skip empty messages after filtering
+
             setLogs(prev => {
-                const newLogs = [...prev, String(msg)];
+                const newLogs = [...prev, filteredMsg];
                 if (newLogs.length > MAX_LOGS) {
                     return newLogs.slice(newLogs.length - MAX_LOGS);
                 }
@@ -71,12 +86,24 @@ export const SystemLogs = React.memo(() => {
             </div>
             <div dir="ltr" className="flex-1 overflow-auto p-4 font-mono text-[10px] space-y-1 text-left bg-background/90">
                 {logs.length === 0 && <div className="text-muted-foreground/30 italic">System ready. Waiting for events...</div>}
-                {logs.map((log, i) => (
-                    <div key={i} className={cn("break-all border-l-2 pl-2", log.toLowerCase().includes('error') ? "border-red-500 text-red-500" : "border-transparent text-foreground/80")}>
-                        <span className="text-muted-foreground mr-2">[{new Date().toLocaleTimeString()}]</span>
-                        {log}
-                    </div>
-                ))}
+                {logs.map((log, i) => {
+                    const l = log.toLowerCase();
+                    const isError = l.includes('error') || l.includes('failed');
+                    const isWarn = l.includes('warn');
+                    const isInfo = l.includes('info');
+
+                    let colorClass = "border-transparent text-foreground/80";
+                    if (isError) colorClass = "border-red-500/50 text-red-500";
+                    else if (isWarn) colorClass = "border-amber-500/50 text-amber-500";
+                    else if (isInfo) colorClass = "border-blue-500/50 text-blue-400";
+
+                    return (
+                        <div key={i} className={cn("break-all border-l-2 pl-2 py-0.5 transition-colors", colorClass)}>
+                            <span className="text-muted-foreground/50 mr-2 tabular-nums">[{new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+                            <span className="font-medium">{log}</span>
+                        </div>
+                    );
+                })}
                 <div ref={logsEndRef} />
             </div>
         </div>

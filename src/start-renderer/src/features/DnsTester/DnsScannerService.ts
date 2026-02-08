@@ -6,23 +6,18 @@ import type { DnsCheckResult } from "@/types";
 
 const store = getDefaultStore();
 
-// Internal raw type mirroring the IPC payload structure
+// Internal raw type mirroring the Rust DnsCheckResult struct
 interface RawDnsCheckResult {
+    ok: boolean;
     server: string;
-    stage?: 'checking' | 'done' | 'failed' | 'queued';
+    ip: string;
+    port: number;
+    domain: string;
+    ping_time_ms: number;
+    dns_time_ms: number;
+    answers: string[];
     status: string;
-    ping?: { ok: boolean; timeMs: number; error?: string };
-    dns?: { ok: boolean; timeMs: number; answers: string[]; error?: string };
-    success?: boolean;
-    elapsed?: number;
-    message?: string;
-    data?: {
-        score: number;
-        maxScore: number;
-        isCompatible: boolean;
-        details: string;
-    };
-    error?: string;
+    error: string | null;
 }
 
 class DnsScannerService {
@@ -34,37 +29,27 @@ class DnsScannerService {
         store.set(dnsScanStatsAtom, d);
     };
 
-    private normalizeResult(raw: RawDnsCheckResult): DnsCheckResult {
-        // Default values
-        let latency = 0;
-        let score = 0;
-        let maxScore = 0;
-        let details = '';
-        let isCompatible = false;
+    private onItemStart = (_: unknown, server: unknown) => {
+        const s = server as string;
+        store.set(dnsResultsAtom, (prev) => {
+            return prev.map(item => item.server === s ? { ...item, stage: 'checking', status: 'Checking...' } : item);
+        });
+    };
 
-        // Extract from worker data if present
-        if (raw.data) {
-            score = raw.data.score || 0;
-            maxScore = raw.data.maxScore || 0;
-            details = raw.data.details || '';
-            isCompatible = !!raw.data.isCompatible;
-            latency = raw.elapsed || 0;
-        } else {
-            // Fallback for legacy/ping-only modes if they still exist or occur
-            if (raw.ping?.ok) latency = raw.ping.timeMs;
-            if (raw.dns?.ok) latency = raw.dns.timeMs; // prefer DNS time if available? usually elapsed is better if worker
-        }
+    private normalizeResult(raw: RawDnsCheckResult): DnsCheckResult {
+        // Rust side provides status "OK", "Ping Only", "Unreachable" etc.
+        const isOk = raw.ok || raw.status === "OK";
 
         return {
             server: raw.server,
-            stage: raw.stage || 'done',
+            stage: isOk ? 'done' : 'failed',
             status: raw.status,
-            latency,
-            score,
-            maxScore,
-            details,
-            isCompatible,
-            error: raw.error
+            latency: raw.dns_time_ms || raw.ping_time_ms || 0,
+            score: isOk ? 100 : 0, // Mock score for now based on success
+            maxScore: 100,
+            details: raw.answers.join(', ') || raw.error || '',
+            isCompatible: isOk,
+            error: raw.error || undefined
         };
     }
 
@@ -85,6 +70,7 @@ class DnsScannerService {
         if (this.isListening) return;
         ipc.on('dns-scan-progress', this.onProgress);
         ipc.on('dns-scan-result', this.onResult);
+        ipc.on('dns-scan-item-start', this.onItemStart);
         ipc.on('dns-scan-complete', this.onComplete);
         this.isListening = true;
     }
@@ -93,6 +79,7 @@ class DnsScannerService {
         if (!this.isListening) return;
         ipc.removeListener('dns-scan-progress', this.onProgress);
         ipc.removeListener('dns-scan-result', this.onResult);
+        ipc.removeListener('dns-scan-item-start', this.onItemStart);
         ipc.removeListener('dns-scan-complete', this.onComplete);
         this.isListening = false;
     }
@@ -100,8 +87,14 @@ class DnsScannerService {
     public async startScan(config: ScanConfig) {
         this.startListeners();
 
+        // 0. Normalize servers to include port if missing (default :53)
+        // This ensures the IDs match what the backend returns
+        const normalizedServers = config.servers.map(s =>
+            s.includes(':') ? s : `${s}:53`
+        );
+
         // 1. Prepare initial state with default empty values
-        const initialResults: DnsCheckResult[] = config.servers.map(s => ({
+        const initialResults: DnsCheckResult[] = normalizedServers.map(s => ({
             server: s,
             stage: 'queued',
             status: 'Queued',
@@ -119,7 +112,7 @@ class DnsScannerService {
 
         // 2. Invoke Main Process
         try {
-            await ipc.invoke('dns-scan-start', config);
+            await ipc.invoke('dns-scan-start', { ...config, servers: normalizedServers });
         } catch (error) {
             console.error("Failed to start scan:", error);
             store.set(isDnsScanningAtom, false);

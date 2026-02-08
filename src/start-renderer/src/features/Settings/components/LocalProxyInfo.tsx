@@ -14,14 +14,14 @@ export const LocalProxyInfo = memo(function LocalProxyInfo() {
                 <div className="p-4 rounded-lg bg-background/50 border border-border flex items-center justify-between">
                     <div className="space-y-1">
                         <div className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">{t('HTTP Proxy')}</div>
-                        <div className="text-xl font-mono text-primary">127.0.0.1:8080</div>
+                        <div className="text-xl text-primary">127.0.0.1:8080</div>
                     </div>
                     <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                 </div>
                 <div className="p-4 rounded-xl bg-background/50 border border-border flex items-center justify-between">
                     <div className="space-y-1">
                         <div className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">{t('SOCKS5 Proxy')}</div>
-                        <div className="text-xl font-mono text-primary">0.0.0.0:10809</div>
+                        <div className="text-xl text-primary">0.0.0.0:10809</div>
                     </div>
                     <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                 </div>

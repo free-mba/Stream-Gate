@@ -11,11 +11,35 @@ interface CellProps {
     resultAtom: PrimitiveAtom<DnsCheckResult>;
 }
 
+const serverSelector = (res: DnsCheckResult) => res.server;
+const scoreSelector = (result: DnsCheckResult) => ({
+    score: result.score,
+    max: result.maxScore,
+    status: getDnsStatus(result),
+    stage: result.stage
+});
+const latencySelector = (result: DnsCheckResult) => ({
+    latency: result.latency,
+    stage: result.stage
+});
+const detailsSelector = (result: DnsCheckResult) => ({
+    details: result.details,
+    status: result.status,
+    resStatus: getDnsStatus(result)
+});
+const actionSelector = (res: DnsCheckResult) => ({
+    server: res.server,
+    isSuccess: getDnsStatus(res) === "success"
+});
+
 export const DnsServerCell = memo(({ resultAtom }: CellProps) => (
     <DnsResultCell
         resultAtom={resultAtom}
-        selector={(res) => res.server}
-        render={(server) => <span className="font-medium px-4">{server}</span>}
+        selector={serverSelector}
+        render={(server) => {
+            const displayServer = server.endsWith(':53') ? server.slice(0, -3) : server;
+            return <span className="font-medium px-4">{displayServer}</span>;
+        }}
         className="w-[200px]"
     />
 ));
@@ -23,14 +47,10 @@ export const DnsServerCell = memo(({ resultAtom }: CellProps) => (
 export const DnsScoreCell = memo(({ resultAtom }: CellProps) => (
     <DnsResultCell
         resultAtom={resultAtom}
-        selector={(result) => ({
-            score: result.score,
-            max: result.maxScore,
-            status: getDnsStatus(result)
-        })}
+        selector={scoreSelector}
         render={(val) => (
             <span className={statusVariants({ status: val.status })}>
-                {val.score}/{val.max}
+                {(val.stage === 'queued' || val.stage === 'checking') ? "..." : `${val.score}/${val.max}`}
             </span>
         )}
         className="w-[100px]"
@@ -40,10 +60,10 @@ export const DnsScoreCell = memo(({ resultAtom }: CellProps) => (
 export const DnsLatencyCell = memo(({ resultAtom }: CellProps) => (
     <DnsResultCell
         resultAtom={resultAtom}
-        selector={(result) => result.latency}
-        render={(latency) => (
-            <span className={latency && latency < 1000 ? "text-green-400" : "text-muted-foreground"}>
-                {latency ? Math.round(latency) : '-'}ms
+        selector={latencySelector}
+        render={(val) => (
+            <span className={val.latency && val.latency < 1000 ? "text-green-400" : "text-muted-foreground"}>
+                {(val.stage === 'queued' || val.stage === 'checking') ? "..." : (val.latency ? `${Math.round(val.latency)}ms` : '-')}
             </span>
         )}
         className="w-[120px]"
@@ -53,15 +73,11 @@ export const DnsLatencyCell = memo(({ resultAtom }: CellProps) => (
 export const DnsDetailsCell = memo(({ resultAtom }: CellProps) => (
     <DnsResultCell
         resultAtom={resultAtom}
-        selector={(result) => ({
-            details: result.details,
-            status: result.status,
-            resStatus: getDnsStatus(result)
-        })}
+        selector={detailsSelector}
         render={(val) => (
             <span
                 className={cn(
-                    "text-[10px] font-mono truncate max-w-[300px] block text-start",
+                    "text-[10px] truncate max-w-[300px] block text-start",
                     statusVariants({ status: val.resStatus })
                 )}
                 title={val.details}
@@ -82,10 +98,7 @@ export const DnsActionCell = memo(({ resultAtom, handleUse }: ActionCellProps) =
     return (
         <DnsResultCell
             resultAtom={resultAtom}
-            selector={(res) => ({
-                server: res.server,
-                isSuccess: getDnsStatus(res) === "success"
-            })}
+            selector={actionSelector}
             render={(val) => (
                 val.isSuccess ? (
                     <Button

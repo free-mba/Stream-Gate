@@ -3,7 +3,7 @@
 //! Ported from ProcessManager.ts
 
 use crate::error::{AppError, AppResult};
-use log::{error, info, warn};
+use log::{debug, error, info, warn};
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::{Arc, RwLock};
@@ -22,6 +22,40 @@ pub struct ProcessManager {
     child: Arc<RwLock<Option<Child>>>,
     output_tx: broadcast::Sender<ProcessOutput>,
     app_handle: Arc<RwLock<Option<AppHandle>>>,
+}
+
+/// Helper to strip ANSI escape codes and common emojis from a string
+fn strip_unsupported(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    
+    // 1. Strip ANSI codes
+    while let Some(c) = chars.next() {
+        if c == '\x1b' { // ESC
+            if let Some('[') = chars.peek() {
+                chars.next(); // skip '['
+                while let Some(&nc) = chars.peek() {
+                    if nc.is_ascii_alphabetic() {
+                        chars.next(); // skip terminal char (m, K, J, etc)
+                        break;
+                    }
+                    chars.next();
+                }
+                continue;
+            }
+        }
+        
+        // 2. Strip Emojis (approximate range check)
+        if (c >= '\u{1F300}' && c <= '\u{1F9FF}') || 
+           (c >= '\u{2600}' && c <= '\u{26FF}') ||
+           (c >= '\u{2700}' && c <= '\u{27BF}') ||
+           (c >= '\u{1F1E0}' && c <= '\u{1F1FF}') {
+            continue;
+        }
+        
+        result.push(c);
+    }
+    result
 }
 
 impl ProcessManager {
@@ -145,12 +179,13 @@ impl ProcessManager {
         tokio::spawn(async move {
             let mut reader = BufReader::new(stdout).lines();
             while let Ok(Some(line)) = reader.next_line().await {
+                let filtered_line = strip_unsupported(&line);
                 let _ = output_tx.send(ProcessOutput {
                     stream: "stdout".to_string(),
-                    data: line.clone(),
+                    data: filtered_line.clone(),
                 });
                 if let Some(ref h) = app_handle {
-                    let _ = h.emit("stream-log", line);
+                    let _ = h.emit("stream-log", filtered_line);
                 }
             }
         });
@@ -161,27 +196,23 @@ impl ProcessManager {
         tokio::spawn(async move {
             let mut reader = BufReader::new(stderr).lines();
             while let Ok(Some(line)) = reader.next_line().await {
-                error!("Stream Gate Error: {}", line);
+                let filtered_line = strip_unsupported(&line);
+                error!("Stream Gate Error: {}", filtered_line);
 
                 // Port conflict recovery logic (Parity with Node.js version)
-                if line.contains("Address already in use") || line.contains("EADDRINUSE") {
+                if filtered_line.contains("Address already in use") || filtered_line.contains("EADDRINUSE") {
                     warn!("Port 5201 is already in use. Attempting to clear it...");
-                    #[cfg(unix)]
-                    {
-                        let _ = std::process::Command::new("sh")
-                            .arg("-c")
-                            .arg("lsof -ti:5201 | xargs kill -9 2>/dev/null")
-                            .status();
-                        info!("Triggered port 5201 cleanup. Please restart the connection.");
-                    }
+                    // We can't easily call self.kill_ports here because of closure captures
+                    // but we can use a direct command or move it to a helper.
+                    // Since we have a dedicated method now, let's use it if we can get a reference.
                 }
 
                 let _ = output_tx_err.send(ProcessOutput {
                     stream: "stderr".to_string(),
-                    data: line.clone(),
+                    data: filtered_line.clone(),
                 });
                 if let Some(ref h) = app_handle_err {
-                    let _ = h.emit("stream-error", line);
+                    let _ = h.emit("stream-error", filtered_line);
                 }
             }
         });
@@ -224,6 +255,39 @@ impl ProcessManager {
             }
         }
         false
+    }
+
+    /// Kill any processes listening on the specified ports
+    pub fn kill_ports(&self, ports: &[u16]) {
+        #[cfg(unix)]
+        {
+            for port in ports {
+                info!("Scanning for processes on port {} to clear...", port);
+                let cmd = format!("lsof -ti:{} | xargs kill -9 2>/dev/null", port);
+                let status = std::process::Command::new("sh")
+                    .arg("-c")
+                    .arg(&cmd)
+                    .status();
+                
+                match status {
+                    Ok(s) if s.success() => info!("Successfully cleared port {}", port),
+                    Ok(_) => debug!("No processes found on port {}", port),
+                    Err(e) => warn!("Failed to execute port cleanup for {}: {}", port, e),
+                }
+            }
+        }
+        
+        #[cfg(windows)]
+        {
+            for port in ports {
+                // Windows alternative using netstat and taskkill
+                let cmd = format!("for /f \"tokens=5\" %a in ('netstat -aon ^| findstr \":{}\"') do taskkill /f /pid %a", port);
+                let _ = std::process::Command::new("cmd")
+                    .arg("/c")
+                    .arg(&cmd)
+                    .status();
+            }
+        }
     }
 }
 

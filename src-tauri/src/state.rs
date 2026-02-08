@@ -68,6 +68,9 @@ impl AppState {
         self.process.set_app_handle(app_handle.clone());
         self.dns.set_app_handle(app_handle.clone());
 
+        // Clear critical ports on startup
+        self.process.kill_ports(&[5201, 8080, 10809]);
+
         // Startup recovery: if system proxy was enabled by app and it died, restore
         if self.settings.get_all().map(|s| s.system_proxy_enabled_by_app).unwrap_or(false) {
             info!("System proxy was enabled by app previously (crash recovery). Restoring...");
@@ -106,6 +109,8 @@ impl AppState {
         self.connection.cleanup().await?;
         // Also explicitly stop process manager just in case connection didn't
         self.process.stop();
+        // Clear critical ports on exit
+        self.process.kill_ports(&[5201, 8080, 10809]);
         Ok(())
     }
 }

@@ -27,7 +27,7 @@ export const DnsConfiguration = memo(({ customDnsEnabled, primaryDns, secondaryD
                 <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">{t('Primary DNS')}</Label>
                     <Input
-                        className="bg-background/50 border-input font-mono text-foreground"
+                        className="bg-background/50 border-input text-foreground"
                         value={primaryDns || ''}
                         onChange={(e) => updateSetting('primaryDns', e.target.value)}
                         placeholder="8.8.8.8"
@@ -36,7 +36,7 @@ export const DnsConfiguration = memo(({ customDnsEnabled, primaryDns, secondaryD
                 <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">{t('Secondary DNS')}</Label>
                     <Input
-                        className="bg-background/50 border-input font-mono text-foreground"
+                        className="bg-background/50 border-input text-foreground"
                         value={secondaryDns || ''}
                         onChange={(e) => updateSetting('secondaryDns', e.target.value)}
                         placeholder="1.1.1.1"

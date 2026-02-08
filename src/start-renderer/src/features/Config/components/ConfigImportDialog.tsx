@@ -34,7 +34,7 @@ export const ConfigImportDialog = ({
             <textarea
                 value={importText}
                 onChange={e => setImportText(e.target.value)}
-                className="w-full h-32 bg-background/50 border border-input rounded-lg p-3 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-32 bg-background/50 border border-input rounded-lg p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="ssgate:..."
             />
         </ConfigDialogFrame>

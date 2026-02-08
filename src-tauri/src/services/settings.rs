@@ -437,6 +437,7 @@ impl SettingsService {
     /// Export configs as ssgate strings
     pub fn export_configs(&self) -> AppResult<String> {
         let settings = self.settings.read().map_err(|_| "Lock error")?;
+        info!("Exporting {} configurations", settings.configs.len());
         
         let mut lines = Vec::new();
         for config in &settings.configs {
@@ -465,7 +466,9 @@ impl SettingsService {
     /// Import configs from ssgate strings
     pub fn import_configs(&self, data: &str) -> AppResult<ImportResult> {
         // Check if data is valid
+        info!("Importing configurations from data: {} chars", data.len());
         if data.trim().is_empty() {
+             error!("Import failed: empty data");
              return Err(AppError::new("Invalid import data"));
         }
 
@@ -527,11 +530,13 @@ impl SettingsService {
                     }
                 }
             } else {
+                error!("Invalid line format: {}", line);
                 error_count += 1;
             }
         }
 
         let imported_count = imported_configs.len();
+        info!("Imported {} configs, {} errors", imported_count, error_count);
 
         if imported_count > 0 {
             let mut settings = self.settings.write().map_err(|_| "Lock error")?;

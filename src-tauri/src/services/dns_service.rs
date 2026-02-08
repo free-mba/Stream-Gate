@@ -6,13 +6,15 @@ use crate::error::{AppError, AppResult};
 
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
-use std::process::Command;
 use std::str::FromStr;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter};
-use trust_dns_resolver::config::{ResolverConfig, ResolverOpts};
-use trust_dns_resolver::Resolver;
+
+use trust_dns_resolver::TokioAsyncResolver;
+use trust_dns_resolver::config::{ResolverConfig, ResolverOpts, NameServerConfigGroup};
+use tokio::sync::Semaphore;
+use tokio::process::Command as AsyncCommand;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DnsCheckResult {
@@ -69,11 +71,11 @@ impl DnsService {
         }
     }
 
-    /// Ping a host using platform-specific ping command
+    /// Ping a host using platform-specific ping command (Async)
     pub async fn ping_host(ip: &str, timeout_ms: u64) -> AppResult<u64> {
         let start = Instant::now();
         
-        let mut cmd = Command::new("ping");
+        let mut cmd = AsyncCommand::new("ping");
         if cfg!(target_os = "windows") {
             cmd.args(["-n", "1", "-w", &timeout_ms.to_string(), ip]);
         } else if cfg!(target_os = "macos") {
@@ -84,7 +86,7 @@ impl DnsService {
             cmd.args(["-c", "1", "-W", &seconds.to_string(), ip]);
         }
 
-        let status = cmd.status().map_err(|e| AppError::new(format!("Ping failed: {}", e)))?;
+        let status = cmd.status().await.map_err(|e| AppError::new(format!("Ping failed: {}", e)))?;
         
         if status.success() {
             Ok(start.elapsed().as_millis() as u64)
@@ -93,7 +95,7 @@ impl DnsService {
         }
     }
 
-    /// Resolve a domain using a specific DNS server
+    /// Resolve a domain using a specific DNS server (Async)
     pub async fn resolve_with_server(
         &self,
         server_ip: &str,
@@ -108,16 +110,16 @@ impl DnsService {
         let config = ResolverConfig::from_parts(
             None,
             vec![], 
-            trust_dns_resolver::config::NameServerConfigGroup::from_ips_clear(&[ip], server_port, true),
+            NameServerConfigGroup::from_ips_clear(&[ip], server_port, true),
         );
         
         let mut opts = ResolverOpts::default();
         opts.timeout = Duration::from_millis(timeout_ms);
         opts.attempts = 1;
 
-        let resolver = Resolver::new(config, opts).map_err(|e| AppError::new(format!("Resolver error: {}", e)))?;
+        let resolver = TokioAsyncResolver::tokio(config, opts);
         
-        let response = resolver.lookup_ip(domain).map_err(|e| AppError::new(format!("DNS Resolve error: {}", e)))?;
+        let response = resolver.lookup_ip(domain).await.map_err(|e| AppError::new(format!("DNS Resolve error: {}", e)))?;
         
         let answers: Vec<String> = response.iter().map(|ip| ip.to_string()).collect();
         let duration = start.elapsed().as_millis() as u64;
@@ -182,11 +184,14 @@ impl DnsService {
 
         let app_handle = self.app_handle.read().map_err(|_| "Lock error")?.clone();
         let is_scanning = self.is_scanning.clone();
-        let dns_service = Arc::new(Self::new()); // Need a static-ish ref for workers
+        let dns_service = Arc::new(Self::new());
         
         tokio::spawn(async move {
             let total = servers.len();
-            let mut completed = 0;
+            let completed = Arc::new(tokio::sync::Mutex::new(0));
+            let semaphore = Arc::new(Semaphore::new(50)); // Concurrency limit
+
+            let mut tasks = Vec::new();
 
             for server in servers {
                 // Check if scan was cancelled
@@ -194,23 +199,66 @@ impl DnsService {
                     if !*scanning { break; }
                 }
 
-                // Actually we should use a worker pool/semaphore here for concurrency
-                // For simplicity first, we'll do them in small batches or sequentially
-                // TODO: Add semaphore for concurrency limit (parity: 50)
-                
-                let result = dns_service.check_single_server(&server, &domain).await;
-                
-                completed += 1;
-                
-                if let Some(ref h) = app_handle {
-                    if let Ok(res) = result {
-                        let _ = h.emit("dns-scan-result", res);
+                let app_handle = app_handle.clone();
+                let dns_service = dns_service.clone();
+                let domain = domain.clone();
+                let completed = completed.clone();
+                let semaphore = semaphore.clone();
+                let is_scanning = is_scanning.clone();
+
+                let task = tokio::spawn(async move {
+                    let _permit = semaphore.acquire().await;
+                    
+                    // Check again inside task in case it was stopped while waiting for permit
+                    if let Ok(scanning) = is_scanning.read() {
+                        if !*scanning { return; }
                     }
-                    let _ = h.emit("dns-scan-progress", serde_json::json!({
-                        "completed": completed,
-                        "total": total
-                    }));
-                }
+
+                    if let Some(ref h) = app_handle {
+                        let _ = h.emit("dns-scan-item-start", &server);
+                    }
+
+                    let result = dns_service.check_single_server(&server, &domain).await;
+                    
+                    let mut comp = completed.lock().await;
+                    *comp += 1;
+                    let current_completed = *comp;
+                    drop(comp);
+                    
+                    if let Some(ref h) = app_handle {
+                        match result {
+                            Ok(res) => {
+                                let _ = h.emit("dns-scan-result", res);
+                            }
+                            Err(e) => {
+                                // Emit a failed result so the UI can clear "Checking..."
+                                let _ = h.emit("dns-scan-result", DnsCheckResult {
+                                    ok: false,
+                                    server: server.clone(),
+                                    ip: "".to_string(),
+                                    port: 0,
+                                    domain: domain.clone(),
+                                    ping_time_ms: 0,
+                                    dns_time_ms: 0,
+                                    answers: vec![],
+                                    status: "Error".to_string(),
+                                    error: Some(e.to_string()),
+                                });
+                            }
+                        }
+                        
+                        let _ = h.emit("dns-scan-progress", serde_json::json!({
+                            "completed": current_completed,
+                            "total": total
+                        }));
+                    }
+                });
+                tasks.push(task);
+            }
+
+            // Wait for all tasks to complete or scan to be stopped
+            for task in tasks {
+                let _ = task.await;
             }
 
             if let Ok(mut scanning) = is_scanning.write() {

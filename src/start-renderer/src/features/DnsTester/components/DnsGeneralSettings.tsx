@@ -25,7 +25,7 @@ export const DnsGeneralSettings = memo(() => {
             </div>
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase">{t("Domain")}</Label>
-                <Input value={config.domain} onChange={e => setConfig({ ...config, domain: e.target.value })} className="h-8 text-xs bg-background/50 border-input font-mono text-foreground" />
+                <Input value={config.domain} onChange={e => setConfig({ ...config, domain: e.target.value })} className="h-8 text-xs bg-background/50 border-input text-foreground" />
             </div>
         </div>
     );

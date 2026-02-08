@@ -86,8 +86,10 @@ export const createTauriIpc = (): IpcRenderer => {
                         break;
                 }
 
-                console.log(`[TauriIpc] Invoke: ${commandName}`, payload);
-                return await invoke<T>(commandName, payload);
+                console.info(`[TauriIpc] Invoke: ${commandName}`, payload);
+                const response = await invoke<T>(commandName, payload);
+                console.info(`[TauriIpc] Response [${commandName}]:`, response);
+                return response;
             } catch (error) {
                 console.error(`Tauri invoke error [${commandName}]:`, error);
                 throw error;

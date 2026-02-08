@@ -161,12 +161,6 @@ impl ConnectionService {
             .ok()
             .and_then(|g| g.clone())
             .ok_or("Process manager not initialized")?;
-        let dns_resolution = self
-            .dns_resolution
-            .read()
-            .ok()
-            .and_then(|g| g.clone())
-            .ok_or("DNS resolution not initialized")?;
         let proxy_service = self
             .proxy_service
             .read()
@@ -180,21 +174,8 @@ impl ConnectionService {
             .and_then(|g| g.clone())
             .ok_or("System proxy not initialized")?;
 
-        // 1. Resolve domain if custom DNS is enabled
-        let target_domain = if config.custom_dns_enabled && !config.resolvers.is_empty() {
-            match dns_resolution
-                .resolve(&config.domain, config.resolvers.clone())
-                .await
-            {
-                Ok(ip) => ip,
-                Err(e) => {
-                    error!("DNS Resolution failed: {}", e);
-                    return self.fail_connection(format!("DNS Resolve failed: {}", e)).await;
-                }
-            }
-        } else {
-            config.domain.clone()
-        };
+        // 1. Target domain is passed directly to binary
+        let target_domain = config.domain.clone();
 
         // 2. Start native process
         let mut args = vec![];
@@ -384,7 +365,7 @@ pub struct ConnectionConfig {
     #[serde(default)]
     pub congestion_control: Option<String>,
     #[serde(default)]
-    pub custom_dns_enabled: bool,
+    pub _custom_dns_enabled: bool,
     #[serde(default)]
     pub _primary_dns: Option<String>,
     #[serde(default)]

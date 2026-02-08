@@ -69,7 +69,7 @@ export const ConfigCard = ({
                         )}>
                             {config.remark}
                         </h3>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono mt-1">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
                             <Globe className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate max-w-[150px]">{config.domain}</span>
                         </div>

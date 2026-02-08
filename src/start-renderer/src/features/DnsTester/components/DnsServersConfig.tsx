@@ -15,7 +15,7 @@ export const DnsServersConfig = memo(() => {
             <Textarea
                 value={config.serversText}
                 onChange={e => setConfig({ ...config, serversText: e.target.value })}
-                className="h-[150px] text-[10px] font-mono bg-background/50 border-input resize-none rounded-lg text-foreground focus:ring-1 focus:ring-primary"
+                className="h-[150px] text-[10px] bg-background/50 border-input resize-none rounded-lg text-foreground focus:ring-1 focus:ring-primary"
             />
         </div>
     );

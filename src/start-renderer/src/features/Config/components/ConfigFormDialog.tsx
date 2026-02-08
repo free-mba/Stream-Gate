@@ -123,8 +123,8 @@ export const ConfigFormDialog = ({
                                 <Input
                                     value={formData.domain || ""}
                                     onChange={e => updateField("domain", e.target.value)}
-                                    placeholder={t("Domain / IP Address")}
-                                    className={cn(inputClass, "font-mono text-sm")}
+                                    placeholder={t("Domain")}
+                                    className={cn(inputClass, "text-sm")}
                                 />
                             </div>
                         </div>
@@ -139,7 +139,7 @@ export const ConfigFormDialog = ({
                                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className={inputWrapperClass}>
                                     <Input
                                         value={formData.socks?.username || ""}

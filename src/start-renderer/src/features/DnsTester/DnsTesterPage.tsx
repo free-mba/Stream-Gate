@@ -66,7 +66,26 @@ export default function DnsTesterPage() {
     const handleUse = useCallback(async (server: string) => {
         const normalized = server.includes(':') ? server : `${server}:${DEFAULT_DNS_PORT}`;
         const currentSettings = await ipc.invoke<Settings>('get-settings');
-        await ipc.invoke('save-settings', { ...currentSettings, resolver: normalized });
+
+        // 1. Add to savedDns if not present
+        const savedDns = [...(currentSettings.savedDns || [])];
+        if (!savedDns.includes(normalized)) {
+            savedDns.push(normalized);
+        }
+
+        // 2. Append to resolvers if not present
+        const resolvers = [...(currentSettings.resolvers || [])];
+        if (!resolvers.includes(normalized)) {
+            resolvers.push(normalized);
+        }
+
+        // 3. Save settings and enable custom DNS
+        await ipc.invoke('save-settings', {
+            ...currentSettings,
+            resolvers,
+            savedDns,
+            customDnsEnabled: true
+        });
     }, []);
 
     return (
@@ -92,7 +111,7 @@ export default function DnsTesterPage() {
             <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-lg overflow-hidden relative">
                 <div className="flex items-center justify-between p-3 border-b border-border bg-background/40 backdrop-blur-md z-10">
                     <div className="flex items-center gap-4">
-                        <div className="text-xs font-mono font-medium text-primary tracking-wider animate-pulse">
+                        <div className="text-xs font-medium text-primary tracking-wider animate-pulse">
                             {isRunning ? t('SCANNING_NETWORK...') : t('READY')}
                         </div>
                         <div className="flex items-center gap-2">
@@ -105,7 +124,7 @@ export default function DnsTesterPage() {
                             <Label htmlFor="showWorking" className="text-[10px] uppercase font-bold text-muted-foreground cursor-pointer">{t("Show working only")}</Label>
                         </div>
                     </div>
-                    <div className="text-xs font-mono opacity-50 text-foreground">
+                    <div className="text-xs opacity-50 text-foreground">
                         {stats.completed}/{stats.total}
                     </div>
                 </div>
