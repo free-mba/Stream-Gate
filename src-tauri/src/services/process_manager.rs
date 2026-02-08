@@ -3,7 +3,7 @@
 //! Ported from ProcessManager.ts
 
 use crate::error::{AppError, AppResult};
-use log::{debug, error, info, warn};
+use log::{error, info, warn};
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::{Arc, RwLock};
@@ -138,7 +138,7 @@ impl ProcessManager {
     }
 
     /// Ensure the binary has execute permissions (Unix only)
-    fn ensure_executable(&self, path: &PathBuf) {
+    fn ensure_executable(&self, _path: &PathBuf) {
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
